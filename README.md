@@ -42,16 +42,21 @@ Install kivy:
 	python3 -m pip install "kivy[base] @ https://github.com/kivy/kivy/archive/master.zip"
 ----------------------------------------------------------------------------------------------------------------------------
 Pip installs:
-```
-pip3 install pandas
-pip3 install scipy
-pip3 install scikit-image
-pip3 install mrcfile
-pip3 install starfile
-pip3 install matplotlib
-```
+
+	pip3 install pandas
+
+	pip3 install scipy
+
+	pip3 install scikit-image
+
+	pip3 install mrcfile
+
+	pip3 install starfile
+
+	pip3 install matplotlib
+
 ----------------------------------------------------------------------------------------------------------------------------
-then 'cd' to the pycrest directory, run:
+then 'cd' to the pycresta directory, run:
 
 	cc -fPIC -shared -o rot3d.so rot3d.c 
 
