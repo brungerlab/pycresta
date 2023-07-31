@@ -1,0 +1,2570 @@
+#:kivy 2.1.0
+#:import Factory kivy.factory.Factory
+<StarFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.stardsave(filechooser.path, text_input.text)
+
+<StarFiltFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.stardfiltsave(filechooser.path, text_input.text)
+
+<SubtomoFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 0
+            multiline: False
+			size_hint_y: 0
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.subtomodsave(filechooser.path, text_input.text)
+
+<MrcFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 0
+            multiline: False
+			size_hint_y: 0
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.mrcdsave(filechooser.path, text_input.text)
+
+<TomoFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.tomodsave(filechooser.path, text_input.text)
+
+<TomoCoordsFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.tomocoordsdsave(filechooser.path, text_input.text)
+
+# <ParStarFinder>:
+#     text_input: text_input
+#     BoxLayout:
+#         size: root.size
+#         pos: root.pos
+#         orientation: "vertical"
+#         FileChooserListView:
+#             id: filechooser 
+#             on_selection: text_input.text = self.selection and self.selection[0] or self.path
+# 			size_hint_y: .9
+
+#         TextInput:
+#             id: text_input
+#             size_hint_y: None
+#             height: 30
+#             multiline: False
+# 			size_hint_y: .05
+
+#         BoxLayout:
+#             size_hint_y: None
+#             height: 30
+# 			size_hint_y: .1
+#             Button:
+#                 text: "Cancel"
+#                 on_release: root.cancel()
+
+#             Button:
+#                 text: "Save"
+#                 on_release: root.parstardsave(filechooser.path, text_input.text)
+
+<MaskFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.maskdsave(filechooser.path, text_input.text)
+
+<ExtractionInfo@Popup>
+	size_hint: .75, .45
+	title: 'Extract Subtomograms'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'subtomogram' folder.\nA star file is generated."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<FilterInfo@Popup>
+	size_hint: .75, .55
+	title: 'Filtering'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Filtering either by a subtomogram directory or by a star file.\nPx size (A) must be entered on 'Master Key.'\n\nFor filtering by a subtomogram directory, choose the path of the folder\ncontaining the mrc files on 'master key.' (mrc directory)\n\nFor filtering by a star file, choose the 'unfiltered star file path' and the \nsubtomogram directory path (folder that points to mrc file paths in star file)\nin the master key.\n\nResults are stored in the 'filtered' folder.\nA new star file is created if filtering is done by star file."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<PickInfo@Popup>
+	size_hint: .7, .4
+	title: 'Coordinate Picker'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Requires 'Filtered Star File', subtomogram directory,\nChimeraX path, and Px size (A) to be chosen/entered on 'Master Key.'\n\nFollow the provided directions while using ChimeraX to ensure a smooth process."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<MaskingInfo@Popup>
+	size_hint: .75, .4
+	title: '3D Signal Subtraction'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Subtomogram information is taken from 'unfiltered star file' and subtomogram\ndirectory paths, both specified in the Master Key.\n\nThe path of a mask.mrc file must be chosen below.\n\nResults are stored in the 'masked' folder\nin each subtomogram directory."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<RandomInfo@Popup>
+	size_hint: .75, .5
+	title: 'Random 180 Degree Flip Star File'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Applies a 180 degree flip around the specified axis\nto a random subset of subtomograms in master key unfiltered star file.\n\nA new star file with an additional column is produced:\n1 if the particular subtomogram has been flipped,\nor 0 if kept in the original orientation.\n\nAs an example, if a contacting vesicle pair is oriented such that\nthe axis between the centers of the vesicles points in the z direction,\na flip around the x or the y axis will change the orientation\nof the vesicle pair by 180 degrees."
+		Button:
+			size_hint: .5, .22
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<CCCInfo@Popup>
+	size_hint: .75, .35
+	title: 'Calculate CCC - Two Volumes'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Calculates the cross-correlation coefficient between the specified volumes,\n and using the specified missing wedge file.\n\nUnfiltered Star file containing Volume 2 must be entered on master key.\n\nThe cross-correlation coefficient is displayed in the log file\nand printed in the terminal."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<VolumeStar@Popup>
+	size_hint: .75, .4
+	title: 'Volume & Star File'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Calculates cross-correlation coefficients between\nthe subtomograms specified in the unfiltered star file (from Master Key)\nwith the specified volume1 and using the specified missing wedge file.\n\nThe cross-correlation coefficients are displayed in the log file.\n\nIt also produces two new star files containing the subtomograms\nwith cross-correlation coefficients > and <= the threshold, respectively."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<RotateStarInfo@Popup>
+	size_hint: .75, .4
+	title: 'Rotate Subtomograms using Star File'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Apply rotations and translations (optional) to the subtomograms\nas specified in the unfiltered star file path from the Master Key.\n\nRotated/translated subtomograms are stored in\nthe “rottrans” folder in each subtomogram directory.\n\nThis method is useful to visually inspect the rotated subtomograms."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<RotateManualInfo@Popup>
+	size_hint: .75, .4
+	title: 'Rotate Subtomograms Manually'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Apply specified rotation to subtomograms in an\nunfiltered star file (specified on master key). Subtomogram directory must also\nbe specified on the master key.\n\nTranslation values are taken from the unfiltered star file, while rotations are not.\n\nResults are stored in 'rottrans' folder in each subtomogram directory."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<VisualizeInfo@Popup>
+	size_hint: .75, .55
+	title: 'Display and Select Subtomograms'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Choose Filtered Star File, Subtomogram Directory, and ChimeraX\npaths on 'master key'.\n\nPress view to open the first subtomogram.\nAfter viewing, close Chimera, and press either 'accept' or 'reject'.\n\nSaved files will be copied into an 'accepted' folder,\nand added to an _accepted.star star file.\n\nRejected files will be added to a _rejected.star star file.\n\nUse the arrows to move between subtomograms."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<PlotBackInfo@Popup>
+	size_hint: .75, .45
+	title: 'Plot Back Tomograms'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Generates a number of reconstruction volumes.\n\nStar file must be specified on master key.\nResults stored in 'plotted' folder.\n\nRef Path: path of the folder containing the masks\nof the classes you'd like to put in.\n\nRef Basename: if the mask name is run_it50_class001.mrc, then the basename is 'run_it50'.\n\n"
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+
+<Tabs>:
+	size_hint: 1, 1
+	pos_hint: {'center_x': .5, 'center_y': .5}
+	do_default_tab: False
+
+	TabbedPanelItem:
+		text: 'Master Key'
+		BoxLayout:
+			spacing: 10
+			orientation: 'vertical'
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			GridLayout:
+				cols:3
+				rows:2
+				size_hint: .5, .1
+				pos_hint: {'center_x': .5, 'center_y': .5}
+				spacing: 20, 0
+				Label:
+					text: 'Box size (px)'
+				Label:
+					text: 'Px size (A)'
+				Label:
+					text: 'Threads/CPU Count'
+				TextInput:
+					id: px1
+					text: '256'
+					multiline: False
+				TextInput:
+					id: A1
+					text: '2.62'
+					multiline: False
+				TextInput:
+					id: CPU
+					text: '10'
+					multiline: False
+			BoxLayout:
+				orientation: 'vertical'
+				size_hint: .9, .12
+				pos_hint: {'center_x': .5, 'center_y': .6}
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				Label:
+					halign: 'center'
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					color: (0,0,0,1)
+					text: 'Press the "Choose" buttons to open a file selector. For .star files, select the unfiltered and filtered\n.star file and press "Save." For directories, press into your folder and then press save.\nUse "Save Project" to write all parameters to a .txt file, and "Load" to fill them in when you restart Cresta.'
+			BoxLayout:
+				orientation: 'horizontal'
+				spacing: 15
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_x: 1.8
+					spacing: 10
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_y: 1
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Star File Paths'
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+							size_hint: .6, .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Unfiltered Star File Path'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: mainstar
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Unfiltered Star File'
+							on_release: root.show_star()
+							size_hint: .4, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Filtered Star File Path'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: mainstarfilt
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Filtered Star File'
+							on_release: root.show_starfilt()
+							size_hint: .4, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_y: .6
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Subtomogram directory'
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+							size_hint: .6, .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Subtomogram Directory'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: mainsubtomo
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Subtomogram Path'
+							on_release: root.show_subtomo()
+							size_hint: .45, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_y: .6
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'mrc directory'
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+							size_hint: .6, .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Mrc Directory'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: mainmrc
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Mrc Path'
+							on_release: root.show_mrc()
+							size_hint: .3, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_y: .35
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label: 
+							text: 'ChimeraX path (default is SBgrid location)'
+							size_hint_y: .2
+							bold: True
+							color: (0,0,0,1)
+						TextInput:
+							text: '/opt/sbgrid/i386-mac/chimerax/1.6.1/ChimeraX.app/Contents/bin'
+							multiline: False
+							font_size: 25
+							size_hint: .8, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: chimera_path
+						Label:
+							size_hint_y: .1
+				BoxLayout:
+					orientation: 'vertical'
+					spacing: 10
+					BoxLayout:
+						orientation: 'vertical'
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Save project to directory:'
+							size_hint_y: .3
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+						TextInput:
+							id: save
+							hint_text: '/.../...'
+							multiline: False
+							size_hint: .7, .35
+							font_size: 22.5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label: 
+							text: 'Project name:'
+							size_hint_y: .3
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+						TextInput:
+							id: savename
+							hint_text: 'project'
+							multiline: False
+							size_hint: .7, .35
+							font_size: 25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .1
+						Button:
+							text: 'Save'
+							on_release: root.savedata()
+							size_hint: .4, .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							background_color: 0.2, 0.6, 0.2, .55
+						Label:
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Load project path:'
+							size_hint_y: .3
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+						TextInput:
+							id: pullpath
+							multiline: False
+							hint_text: '/.../.../project.txt'
+							size_hint: .8, .35
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .1
+						Button:
+							text: 'Load'
+							on_release: root.pulldata()
+							size_hint: .4, .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							background_color: 0.2, 0.6, 0.2, .55
+						Label:
+							size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Extraction'
+		BoxLayout:
+			spacing: 10
+			orientation: 'vertical'
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			GridLayout:
+				rows: 1
+				spacing: 20
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_y: 1.5
+					Label:
+						size_hint_y: .2
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .75
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Extraction'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .15}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.ExtractionInfo().open()
+							size_hint: .15, .45
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						Label:
+							size_hint_y: .2
+						Label:
+							text: 'Tomogram File Path'
+							bold: True
+							color: (0,0,0,1)
+							font: 30
+							size_hint_y: .6
+						TextInput:
+							text: 'Choose Tomogram Path'
+							size_hint: .9, .4
+							font_size: 30
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: tomo
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Tomogram'
+							on_release: root.show_tomo()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .1
+						Label:
+							text: 'Coordinates File Path'
+							bold: True
+							color: (0,0,0,1)
+							font: 30
+							size_hint_y: .6
+						TextInput:
+							text: 'Choose Coords Path'
+							size_hint: .9, .4
+							font_size: 30
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: tomocoords
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Coords'
+							on_release: root.show_tomocoords()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .2, .6
+							pos_hint: {'center_x': .475, 'center_y': .5}
+							CheckBox:
+								state: 'down'
+								id: extractInvert
+							Label:
+								text: 'Invert Contrast'
+								bold: True
+								color: (0,0,0,1)
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Extract Subtomograms'
+							on_release: root.extract()
+							size_hint_x: .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .3
+					Label:
+						size_hint_y: .2
+
+	TabbedPanelItem:
+		text: 'Filtering'
+		BoxLayout:
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .6
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			orientation: 'vertical'
+			Label:
+				size_hint_y: .05
+			BoxLayout:
+				orientation: 'vertical'
+				size_hint_y: .15
+				pos_hint: {'center_x': .5, 'center_y': .5}
+				Label: 
+					text: 'Filter Subtomograms'
+					color: (0,0,0,1)
+					font_size: 35
+					size_hint_y: .6
+					bold: True
+				Button:
+					text: 'information'
+					background_color: 0, 1.2, 2, .5
+					on_release: Factory.FilterInfo().open()
+					size_hint: .15, .5
+					pos_hint: {'center_x': .5, 'center_y': .5}
+			BoxLayout:
+				orientation: 'horizontal'
+				size_hint: .5, .2
+				pos_hint: {'center_x': .5, 'center_y': .5}
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .55, .2
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					CheckBox:
+						group: 'g6'
+						id: starfilter
+						state: 'down'
+					Label:
+						text: 'Star File'
+						bold: True
+					Label:
+						size_hint_x: .3
+					CheckBox: 
+						group: 'g6'
+						id: mrcfilter
+					Label:
+						text: 'Subtomogram Directory'
+						bold: True
+			BoxLayout:
+				canvas:
+					Color:
+						rgba: .5, .5, .5, 0.4
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				orientation: 'vertical'
+				size_hint: .95, .9
+				pos_hint: {'center_x': .5, 'center_y': .5}
+				id: gray_box
+				Label:
+					size_hint_y: .2
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .5, .1
+					pos_hint: {'center_x': .5}
+					CheckBox:
+						group: 'g2'
+						id: wienerbutton
+						on_active: root.show_screen()
+						state: 'down'
+					Label:
+						text: 'Wiener'
+						bold: True
+					Label:
+						size_hint_x: .2
+					CheckBox: 
+						group: 'g2'
+						id: gaussianbutton
+						on_active: root.show_screen()
+					Label:
+						text: 'Gaussian'
+						bold: True
+				Label:
+					size_hint_y: .2
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint_y: .45
+					id: first_row_wiener
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxone
+						Label:
+							text: 'Defocus (microM)'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '3'
+							multiline: False
+							id: defoc
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: 'specifies a negative defocus value'
+							color: (.6,0,.6,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxtwo
+						Label:
+							text: 'SNR falloff'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '1.2'
+							multiline: False
+							id: snrval
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: 'recommended range: 0.9 to 1.2'
+							color: (.6,0,.6,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxthree
+						Label:
+							text: 'Highpassnyquist'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '0.01'
+							multiline: False
+							id: highpass
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: ' '
+							color: (.6,0,0,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxfour
+						Label:
+							text: 'Input Tomogram\nPhase-Flipped?'
+						CheckBox:
+							state: 'normal'
+							id: phaseflip
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: ' '
+							color: (.6,0,0,1)
+							font_size: 22
+							size_hint_y: .1
+				BoxLayout:
+					orientation: 'vertical'
+					id: gaussian_row
+					size_hint_y: .25
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint_y: .45
+					id: second_row_wiener
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxfive
+						Label:
+							text: 'Voltage (eV)'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '300e3'
+							multiline: False
+							id: voltage
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: 'for Titan Krios'
+							color: (.6,0,.6,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxsix
+						Label:
+							text: 'CS'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '2.7e-3'
+							multiline: False
+							id: cs
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: 'for Titan Krios'
+							color: (.6,0,.6,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxseven
+						Label:
+							text: 'Envelope'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '0.07'
+							multiline: False
+							id: envelope
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: 'for Titan Krios'
+							color: (.6,0,.6,1)
+							font_size: 22
+							size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						id: boxeight
+						Label:
+							text: 'B-Factor'
+						TextInput:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: '0'
+							multiline: False
+							id: bfactor
+						Label:
+							text: ' '
+							size_hint_y: .3
+						Label:
+							text: ' '
+							color: (.6,0,0,1)
+							font_size: 22
+							size_hint_y: .1
+				Label:
+					size_hint_y: .4
+				Button:
+					background_color: 0.2, 0.6, 0.2, .55
+					text: 'Filter Volumes'
+					on_release: root.filter_vol()
+					size_hint: .4, .3
+					pos_hint: {'center_x': .5, 'center_y': .5}
+				Label:
+					size_hint_y: .4
+
+
+			Label:
+				size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Coord. Picker'
+		BoxLayout:
+			spacing: 10
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			orientation: 'vertical'
+			BoxLayout:
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				orientation: 'vertical'
+				spacing: 15
+				Label:
+					text: ' '
+					size_hint_y: .05
+				Label: 
+					text: 'Coord re-picker'
+					color: (0,0,0,1)
+					font_size: 35
+					pos_hint: {'center_x': .15}
+					bold: True
+					size_hint_y: .08
+				
+				BoxLayout:
+					canvas:
+						Color:
+							rgba: .5, .5, .5, 0.4
+						Rectangle:
+							pos: self.pos
+							size: self.size
+					orientation: 'horizontal'
+					size_hint: .85, 1.2
+					pos_hint: {'center_x': .5}
+					BoxLayout:
+						orientation: 'vertical'
+						Label:
+							size_hint_y: .25
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.PickInfo().open()
+							size_hint: .3, .15
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .6
+							pos_hint: {'center_x': .5}
+							BoxLayout:
+								orientation: 'vertical'
+								size_hint: .4, .8
+								pos_hint: {'center_y': .5}
+								Label:
+									text: 'Surface level'
+									size_hint: 1, .8
+									pos_hint: {'center_x': .5, 'center_y': .5}
+								TextInput:
+									text: '0.5'
+									multiline: False
+									size_hint: .7, .8
+									pos_hint: {'center_x': .5, 'center_y': .5}
+									id: surface_level
+							Label:
+								text: 'Index'
+								size_hint_x: .2
+								pos_hint: {'center_x': .3, 'center_y': .5}
+							Label:
+								text: '1'
+								multiline: False
+								color: (1,1,1,1)
+								bold: True
+								size_hint: .2, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: index
+							Label:
+								text: 'of'
+								size_hint_x: .2
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								text: '0'
+								multiline: False
+								color: (1,1,1,1)
+								bold: True
+								size_hint: .2, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: index2
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .85, .5
+							pos_hint: {'center_x': .5}
+							spacing: 30
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '<<='
+								on_release: root.fastleft_pick()
+								size_hint: .18, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '<='
+								on_release: root.left_pick()
+								size_hint: .15, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: 'Pick\nCoordinates'
+								halign: 'center'
+								on_release: root.pick_coord()
+								size_hint: .6, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '=>'
+								on_release: root.right_pick()
+								size_hint: .15, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '=>>'
+								on_release: root.fastright_pick()
+								size_hint: .18, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: 'Click above to begin.'
+							size_hint_y: .25
+							color: (250, 250, 31, 1)
+							id: pickcoordtext
+						Label:
+							size_hint_y: .25
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint: .95, .9
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							halign: 'center'
+							color: (0,0,0,1)
+							text: 'Click “Pick Coordinates” to open ChimeraX.\nNavigate to the “Markers” menu, select a mode\nin the Place markers submenu (for example, Surface),\nand then Right Click to place a coordinate.\nSelect “Move” to adjust the location of the coordinate.\nKeep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using\ncommand "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save\ninformation after exiting each subtomogram.\n\nPress the right arrow to progress; choose\n"Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks,\npress the "Re-extraction" button\nto create new coordinate files.'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+					Label:
+						text: ' '
+						size_hint_x: .03
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .9, .05
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					Label:
+						size_hint_y: .2
+						id: filenameget
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						text: ''
+						color: (0, 0, 1, 1)
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .85, .3
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint: .13, 1
+						pos_hint: {'center_x': .5, 'center_y': .2}
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Add Note'
+							on_release: root.note()
+							size_hint_y: 1.6
+						Label:
+							text: ' '
+							color: (250, 250, 31, 1)
+							id: notesave
+					Label:
+						text: ' '
+						size_hint_x: .05
+					TextInput:
+						multiline: True
+						size_hint: .65, .8
+						id: notecoord
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .2, .15
+					pos_hint: {'center_x': .475, 'center_y': .5}
+					CheckBox:
+						state: 'down'
+						id: reextractInvert
+					Label:
+						text: 'Invert Contrast'
+						bold: True
+						color: (0,0,0,1)
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .23, .18
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					Button:
+						background_color: 0, 0, 1, .7
+						text: 'Re-extraction'
+						on_release: root.reextraction()
+				Label:
+					text: ' '
+					size_hint_y: .07
+
+	TabbedPanelItem:
+		text: 'Masking'
+		BoxLayout:
+			spacing: 10
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			orientation: 'vertical'
+			GridLayout:
+				rows:2
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				spacing: 0, 18
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						size_hint_y: .05
+					BoxLayout:
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						orientation: 'horizontal'
+						spacing: 15
+						size_hint_x: .9
+						pos_hint: {'center_x': .5}
+						BoxLayout:
+							orientation: 'vertical'
+							Label:
+								text: 'Create Mask'
+								color: (0,0,0,1)
+								font_size: 35
+								pos_hint: {'center_x': .2, 'center_y': .01}
+								bold: True
+							Spinner:
+								background_color: 0, 0, 1, .7
+								text: 'Cylinder'
+								values: 'Sphere', 'Cylinder'
+								size_hint_x: .5
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: spinner
+							GridLayout:
+								cols:2
+								rows:2
+								size_hint: .9, 1.2
+								spacing: 15
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								Label:
+									text: 'Mask radius (px)'
+									size_hint: .9, .7
+									pos_hint: {'center_x': .5, 'center_y': .5}
+								Label:
+									text: 'Cyl height (px)'
+									size_hint: .9, .7
+									pos_hint: {'center_x': .5, 'center_y': .5}
+								TextInput:
+									text: '35'
+									size_hint: .3, .5
+									pos_hint: {'center_x': .5, 'center_y': .5}
+									multiline: False
+									id: radius
+								TextInput:
+									text: '65'
+									size_hint: .3, .5
+									pos_hint: {'center_x': .5, 'center_y': .5}
+									multiline: False
+									id: height
+							Label:
+								size_hint_y: .35
+						BoxLayout:
+							orientation: 'vertical'
+							Label:
+								size_hint_y: .2
+							Label:
+								text: 'Vertical Translation (px)'
+								size_hint: .5, .3
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: '-8'
+								size_hint: .2, .3
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								multiline: False
+								id: vertical
+							Label:
+								size_hint_y: .1
+							Label:
+								text: 'Save mask as'
+								size_hint: .8, .5
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'mask.mrc'
+								size_hint: .4, .3
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								multiline: False
+								id: maskname
+							Label:
+								size_hint_y: .2
+								text: ''
+								color: (.6,0,0,1)
+								font: 25
+								id: maskwarning
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: 'Make Mask'
+								on_release: root.mask()
+								size_hint: .4, .6
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								text: ' '
+								size_hint_y: .3
+					Label:
+						size_hint_y: .05
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint_y: 1.4
+					BoxLayout:
+						orientation: 'vertical'
+						spacing: 10
+						size_hint_x: 1.4
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: '3D Signal Subtraction'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .2}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.MaskingInfo().open()
+							size_hint: .22, .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .8
+						Label:
+							text: 'Mask path'
+							bold: True
+							color: (0,0,0,1)
+							font: 30
+							size_hint_y: .6
+						TextInput:
+							text: 'Choose Mask Path (mask.mrc)'
+							size_hint: .9, .9
+							font_size: 30
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: maskpath
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Mask File'
+							on_release: root.show_mask()
+							size_hint: .35, .65
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: 1
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Apply Masking'
+							on_release: root.subtraction()
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .3
+					BoxLayout:
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						orientation: 'vertical'
+						BoxLayout:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5}
+							orientation: 'horizontal'
+							CheckBox:
+								state: 'down'
+								id: filterbackground
+							Label:
+								text: 'Filter background'
+						BoxLayout:
+							pos_hint: {'center_x': .5}
+							size_hint: .7, .8
+							orientation: 'horizontal'
+							BoxLayout:
+								size_hint_x: .5
+								pos_hint: {'center_x': .5}
+								orientation: 'horizontal'
+								CheckBox:
+									state: 'down'
+									group: 'g3'
+									id: shiftbysd
+								Label: 
+									text: 'Shift by SD'
+							BoxLayout:
+								size_hint_x: .5
+								pos_hint: {'center_x': .5}
+								orientation: 'horizontal'
+								CheckBox:
+									group: 'g3'
+									id: randnoise
+								Label: 
+									text: 'Rand Noise'
+						BoxLayout:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5}
+							orientation: 'horizontal'
+							CheckBox:
+								state: 'down'
+								id: blackdust
+							Label:
+								text: 'Black dust removal'
+						BoxLayout:
+							size_hint_x: .5
+							pos_hint: {'center_x': .5}
+							orientation: 'horizontal'
+							CheckBox:
+								state: 'down'
+								id: whitedust
+							Label:
+								text: 'White dust removal'
+						GridLayout:
+							rows: 2
+							cols: 2
+							size_hint: .7, 1.2
+							pos_hint: {'center_x': .5}
+							spacing: 0, 5
+							Label:
+								text: 'S.D thresh to filter'
+							TextInput:
+								text: '2.0'
+								size_hint_x: .4
+								pos_hint: {'center_x': .5}
+								multiline: False
+								id: sdrange
+							Label:
+								text: 'S.D shift'
+							TextInput:
+								text: '1.0'
+								size_hint_x: .4
+								pos_hint: {'center_x': .5}
+								multiline: False
+								id: sdshift
+						BoxLayout:
+							size_hint_x: .55
+							pos_hint: {'center_x': .5}
+							orientation: 'horizontal'
+							CheckBox:
+								state: 'down'
+								id: permutebg
+							Label:
+								text: 'Permute Background'
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .5, .8
+							pos_hint: {'center_x': .5}
+							Label:
+								text: 'Mask blur rate'
+								pos_hint: {'center_x': .2}
+							TextInput:
+								text: '1.1'
+								size_hint: .4, .8
+								pos_hint: {'center_x': .8, 'center_y': .5}
+								multiline: False
+								id: blurrate
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint_x: .55
+							pos_hint: {'center_x': .5}
+							CheckBox:
+								id: normalized
+							Label:
+								text: 'Normalize after filtering'
+						Label:
+							text: ' '
+							size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Visualize'
+		BoxLayout:
+			spacing: 10
+			orientation: 'vertical'
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			GridLayout:
+				rows: 2
+				spacing: 20
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				BoxLayout:
+					orientation: 'vertical'
+					pos_hint: {'center_x': .5}
+					Label:
+						size_hint_y: .05
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint: .65, .4
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Display and Select Subtomograms'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .25}
+							bold: True
+							size_hint_y: .55
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.VisualizeInfo().open()
+							size_hint: .24, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .2
+							id: visualizestep
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							text: 'Press "view" to begin'
+							color: (250, 250, 31, 1)
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .3, .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								text: 'Index'
+								size_hint_x: .2
+								pos_hint: {'center_x': .3, 'center_y': .5}
+							Label:
+								text: '1'
+								multiline: False
+								color: (1,1,1,1)
+								bold: True
+								size_hint: .2, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: visind1
+							Label:
+								text: 'of'
+								size_hint_x: .2
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								text: '0'
+								multiline: False
+								color: (1,1,1,1)
+								bold: True
+								size_hint: .2, .35
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: visind2
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .5, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							spacing: 30
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '<<='
+								on_release: root.fastleft_visualize()
+								size_hint: .2, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '<='
+								on_release: root.left_visualize()
+								size_hint: .15, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: 'View'
+								on_release: root.visualize()
+								size_hint: .9, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '=>'
+								on_release: root.right_visualize()
+								size_hint: .15, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_color: 0.2, 0.6, 0.2, .55
+								text: '=>>'
+								on_release: root.fastright_visualize()
+								size_hint: .2, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .2
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: visualizefeedback
+							text: 'View subtomogram'
+							color: (0,0,.6,1)
+							font_size: 30
+						BoxLayout:
+							orientation: 'horizontal'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							size_hint: .4, .8
+							Button:
+								background_color: 0, 0, 1, .7
+								text: 'accept'
+								on_release: root.saveVisual()
+								size_hint: .6, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								size_hint_x: .1
+							Button:
+								background_color: 0, 0, 1, .7
+								text: "reject"
+								on_release: root.noSaveVisual()
+								size_hint: .6, .7
+								pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .2
+					Label:
+						size_hint_y: .05
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_y: 1.5
+					Label:
+						size_hint_y: .05
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .75
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Tomogram Plot Back'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .15}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.PlotBackInfo().open()
+							size_hint: .2, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						
+						Label: 
+							text: 'Ref Path'
+						TextInput:
+							text: '.mrc'
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: refPath
+						Label:
+							text: 'Ref Basename'
+						TextInput:
+							text: ''
+							size_hint_x: .45
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: refBasename
+						Label:
+							text: 'Minimum Particle Number'
+							size_hint_y: .8
+						TextInput:
+							text: '1'
+							size_hint_x: .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: minParticleNum
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Plot Back'
+							on_release: root.plottedBack()
+							size_hint_x: .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .04
+					Label:
+						size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Validation'
+		GridLayout:
+			rows: 1
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .6
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			BoxLayout:
+				spacing: 10
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .2
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				orientation: 'vertical'
+				Label:
+					size_hint_y: .07
+				BoxLayout:
+					orientation: 'horizontal'
+					Label:
+						size_hint_x: .05
+					BoxLayout:
+						orientation: 'vertical'
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Random 180 Degree Flip Star File'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .37}
+							bold: True
+							size_hint_y: .6
+						Label:
+							size_hint_y: .2
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.RandomInfo().open()
+							size_hint: .3, .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .4
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint_y: 1.2
+							BoxLayout:
+								orientation: 'vertical'
+								size_hint_x: .9
+								Label:
+									text: '% of Subtomos Flipped:'
+									pos_hint: {'center_x': .5}
+								TextInput:
+									text: '50'
+									multine: False
+									id: percentflip
+									pos_hint: {'center_x': .5}
+									size_hint_x: .2
+							BoxLayout:
+								orientation: 'vertical'
+								pos_hint: {'center_x': .5}
+								canvas:
+									Color:
+										rgba: .5, .5, .5, 0.7
+									Rectangle:
+										pos: self.pos
+										size: self.size
+								Label:
+									text: 'Axis of Rotation'
+									size_hint_y: .8
+								BoxLayout:
+									pos_hint: {'center_x': .5, 'center_y': .5}
+									size_hint: .6, .7
+									orientation: 'horizontal'
+									BoxLayout:
+										size_hint_x: .5
+										pos_hint: {'center_x': .5}
+										orientation: 'horizontal'
+										CheckBox:
+											group: 'g5'
+											id: xflip
+										Label: 
+											text: 'X'
+									BoxLayout:
+										size_hint_x: .5
+										pos_hint: {'center_x': .5}
+										orientation: 'horizontal'
+										CheckBox:
+											group: 'g5'
+											id: yflip
+										Label: 
+											text: 'Y'
+									BoxLayout:
+										size_hint_x: .5
+										pos_hint: {'center_x': .5}
+										orientation: 'horizontal'
+										CheckBox:
+											group: 'g5'
+											id: zflip
+										Label: 
+											text: 'Z'
+						Label:
+							size_hint_y: .5
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Random Flip'
+							on_release: root.randFlip()
+							size_hint: .5, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .35
+							text: ''
+							id: randaxis
+							color: (.6,0,0,1)
+							fontsize: 25
+
+					Label:
+						size_hint_x: .05
+
+					BoxLayout:
+						orientation: 'vertical'
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Calculate CCC - Two Volumes'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .34}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.CCCInfo().open()
+							size_hint: .27, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						
+						Label: 
+							text: 'Volume 1'
+						TextInput:
+							text: '.mrc'
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: cccvolone
+						Label:
+							text: 'Volume 2'
+						TextInput:
+							text: '.mrc'
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: cccvoltwo
+						Label:
+							text: 'Missing wedge file'
+						TextInput:
+							text: '.mrc'
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: cccwedge
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Calculate CCC'
+							on_release: root.calculate_ccc()
+							size_hint_x: .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .04
+					Label:
+						size_hint_x: .05
+
+				Label:
+					size_hint_y: .07
+
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint: .75, 1.2
+					pos_hint: {'center_x': .5}
+					canvas:
+						Color:
+							rgba: .5, .5, .5, 0.4
+						Rectangle:
+							pos: self.pos
+							size: self.size
+					Label:
+						text: 'Volume & Star File'
+						color: (0,0,0,1)
+						font_size: 35
+						pos_hint: {'center_x': .15}
+						bold: True
+					Button:
+						text: 'information'
+						background_color: 0, 1.2, 2, .5
+						on_release: Factory.VolumeStar().open()
+						size_hint_x: .3
+						pos_hint: {'center_x': .5, 'center_y': .5}
+					Label:
+						text: 'Volume 1'
+					TextInput:
+						text: '.mrc'
+						size_hint_x: .9
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						multiline: False
+						id: volvol
+					Label:
+						text: 'Missing wedge file'
+					TextInput:
+						text: '.mrc'
+						size_hint_x: .9
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						multiline: False
+						id: volwedge
+					BoxLayout:
+						orientation: 'horizontal'
+						Label:
+							text: 'CCC Threshold'
+						AnchorLayout:
+							anchor_x: 'left'
+							TextInput: 
+								text: '0'
+								size_hint: .3, .7
+								pos_hint: {'center_x': .5}
+								multiline: False
+								id: cccthresh
+					BoxLayout:
+						orientation: 'horizontal'
+						Label:
+							text: 'Zoom range (px)'
+						AnchorLayout:
+							anchor_x: 'left'
+							TextInput: 
+								text: '40'
+								size_hint: .3, .7
+								pos_hint: {'center_x': .5}
+								multiline: False
+								id: zoomrange
+					Button:
+						background_color: 0.2, 0.6, 0.2, .55
+						text: 'Filter by CCC'
+						on_release: root.filter_ccc()
+						size_hint_x: .35
+						pos_hint: {'center_x': .5, 'center_y': .5}
+					Label:
+						text: ' '
+						size_hint_y: .2
+				Label:
+					size_hint_y: .07
+
+	TabbedPanelItem:
+		text: 'Modify'
+		BoxLayout:
+			spacing: 10
+			orientation: 'vertical'
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			GridLayout:
+				rows: 2
+				spacing: 20
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .8
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Rotate Subtomograms using Star File'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .25}
+							bold: True
+							size_hint_y: .8
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.RotateStarInfo().open()
+							size_hint: .22, .4
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .3, .8
+							pos_hint: {'center_x': .45}
+							CheckBox:
+								state: 'down'
+								id: applyTranslations
+							Label:
+								text: 'Apply translations'
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Rotate'
+							on_release: root.rotate()
+							size_hint: .3, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label: 
+							text: ' '
+							size_hint_y: .1
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_y: 1.4
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .8
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Rotate Subtomograms Manually'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .22}
+							bold: True
+							size_hint_y: .8
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.RotateManualInfo().open()
+							size_hint: .22, .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .1
+						BoxLayout:
+							orientation: 'vertical'
+							pos_hint: {'center_x': .5}
+							canvas:
+								Color:
+									rgba: .5, .5, .5, 0.7
+								Rectangle:
+									pos: self.pos
+									size: self.size
+							Label:
+								text: 'Axis of Rotation'
+								size_hint_y: .8
+							BoxLayout:
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								size_hint: .6, .7
+								orientation: 'horizontal'
+								BoxLayout:
+									size_hint_x: .5
+									pos_hint: {'center_x': .5}
+									orientation: 'horizontal'
+									CheckBox:
+										group: 'g4'
+										id: xaxis
+									Label: 
+										text: 'X-Axis'
+								BoxLayout:
+									size_hint_x: .5
+									pos_hint: {'center_x': .5}
+									orientation: 'horizontal'
+									CheckBox:
+										group: 'g4'
+										id: yaxis
+									Label: 
+										text: 'Y-Axis'
+								BoxLayout:
+									size_hint_x: .5
+									pos_hint: {'center_x': .5}
+									orientation: 'horizontal'
+									CheckBox:
+										group: 'g4'
+										id: zaxis
+									Label: 
+										text: 'Z-Axis'
+						Label:
+							size_hint_y: .2
+						BoxLayout:
+							size_hint_x: .55
+							orientation: 'vertical'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							Label:
+								size_hint_y: .1
+							Label: 
+								text: 'Manual Rotation Angle'
+								size_hint_y: .3
+							Label:
+								size_hint_y: .1
+							TextInput:
+								text: '90'
+								size_hint: .15, .5
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								multiline: False
+								id: anglerotation
+							Label:
+								size_hint_y: .2
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Manually Rotate'
+							on_release: root.manualrotate()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+
+						Label: 
+							size_hint_y: .2
+							text: ''
+							font_size: 25
+							pos_hint: {'center_y': .5}
+							color: (.6,0,0,1)
+							id: noaxis
+					Label:
+						size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Calc. Angles'
+		BoxLayout:
+			spacing: 10
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .2
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			
+			orientation: 'vertical'
+			TextInput:
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				multiline: True
+				readonly: True
+				size_hint_y: .12
+				size_hint_x: .9
+				pos_hint: {'center_x': .5, 'center_y': .6}
+				text: 'Enter the path of the folder containing .cmm files. Then enter the folder path which contains .coords files for that tomogram. Specify which file you want using the suffix and ensure proper binning.'
+			GridLayout:
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				rows:1
+				cols:2
+				size_hint_y: .2
+				spacing: 15
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_x: .75
+					Label: 
+						text: 'Cmm file path'
+					BoxLayout:
+						orientation: 'horizontal'
+						size_hint_x: .7
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'vertical'
+							size_hint: .3, .5
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						TextInput:
+							text: '/'
+							size_hint: 1.5, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: cmmf
+				Button:
+					background_color: 0.2, 0.6, 0.2, .55
+					size_hint_x: .25
+					text: 'Get path from Coord Picker'
+					on_release: root.path_1()
+			BoxLayout:
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .6
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				orientation: 'vertical'
+				spacing: 15
+				Label:
+					text: 'Calculate Rotations'
+					color: (0,0,0,1)
+					font_size: 35
+					pos_hint: {'center_x': .2}
+					size_hint_y: .7
+					bold: True
+				Label:
+					text: 'Coordinate Files Folder Path'
+					size_hint_y: .7
+				TextInput:
+					text: '/'
+					size_hint: .7, .7
+					pos_hint: {'center_x': .5}
+					multiline: False
+					id: coordf
+				Label:
+					text: 'Note: must contain all of the .coord files'
+					color: (250, 250, 31, 1)
+					size_hint_y: .5
+				BoxLayout:
+					size_hint: .8, 1.5
+					pos_hint: {'center_x': .445, 'center_y': .5}
+					orientation: 'horizontal'
+					canvas:
+						Color:
+							rgba: .3, .3, .3, 0.4
+						Rectangle:
+							pos: self.pos
+							size: self.size
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint: .3, .5
+						pos_hint: {'center_x': .7, 'center_y': .5}
+						CheckBox:
+							id: otherdir
+						Label:
+							text: 'Activate row'
+					BoxLayout:
+						orientation: 'vertical'
+						Label:
+							text: 'First .coord file suffix'
+						TextInput:
+							text: 'I'
+							size_hint_x: .3
+							pos_hint: {'center_x': .5}
+							multiline: False
+							id: suffixt
+						Label:
+							text: ''
+							color: (250, 250, 31, 1)
+							size_hint_y: .5
+					BoxLayout:
+						orientation: 'vertical'
+						Label:
+							text: 'First .coord file Bin'
+						TextInput:
+							text: '1'
+							size_hint_x: .3
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: binnt
+						Label:
+							text: ' '
+							size_hint_y: .5
+				BoxLayout:
+					size_hint: .7, 1.5
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					orientation: 'horizontal'
+					BoxLayout:
+						orientation: 'vertical'
+						Label:
+							text: 'Second .coord file suffix'
+						TextInput:
+							text: 'C'
+							size_hint_x: .3
+							pos_hint: {'center_x': .5}
+							multiline: False
+							id: suffixf
+						Label:
+							text: ''
+							color: (250, 250, 31, 1)
+							size_hint_y: .5
+					BoxLayout:
+						orientation: 'vertical'
+						Label:
+							text: 'Second .coord file Bin'
+						TextInput:
+							text: '4'
+							size_hint_x: .3
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: binnf
+						Label:
+							text: ' '
+							size_hint_y: .5
+				Button:
+					background_color: 0.2, 0.6, 0.2, .55
+					text: 'Calculate Angles'
+					on_release: root.calculate_ang()
+					size_hint: .28, .8
+					pos_hint: {'center_x': .5}
+				Label:
+					text: 'Output Path'
+					size_hint_y: .5
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .8, .9
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					TextInput:
+						text: '/cmm_files/Out'
+						size_hint: 1.5, .55
+						multiline: False
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						id: outputp
+				Label:
+					text: ' '
+					size_hint_y: .3
+	
+	# TabbedPanelItem:
+	# 	text: 'Parser'
+	# 	BoxLayout:
+	# 		spacing: 10
+	# 		orientation: 'vertical'
+	# 		canvas:
+	# 			Color:
+	# 				rgba: 1, 1, 1, .2
+	# 			Rectangle:
+	# 				pos: self.pos
+	# 				size: self.size
+	# 		BoxLayout:
+	# 			canvas:
+	# 				Color:
+	# 					rgba: 1, 1, 1, .6
+	# 				Rectangle:
+	# 					pos: self.pos
+	# 					size: self.size
+	# 			orientation: 'vertical'
+	# 			spacing: 15
+	# 			Label:
+	# 				size_hint_y: .05
+	# 			BoxLayout:
+	# 				orientation: 'vertical'
+	# 				size_hint: .7, .25
+	# 				pos_hint: {'center_x': .5, 'center_y': .5}
+	# 				canvas:
+	# 					Color:
+	# 						rgba: 1, 1, 1, .7
+	# 					Rectangle:
+	# 						pos: self.pos
+	# 						size: self.size
+	# 				Label:
+	# 					halign: 'center'
+	# 					color: (0,0,0,1)
+	# 					pos_hint: {'center_x': .5, 'center_y': .5}
+	# 					text: 'Choose a Star File to parse. Select which output data you would like returned\nusing coordinate checkbox and column input.\nThe star file chosen on this tab is unique from the star file on the Master Key tab.\nResults are organized by tomogram and stored within the /newcoord directory,\nin the same folder containing the star file.'
+	# 			Label:
+	# 				text: 'Parsing'
+	# 				color: (0,0,0,1)
+	# 				font_size: 35
+	# 				pos_hint: {'center_x': .15}
+	# 				bold: True
+	# 				size_hint_y: .2
+	# 			BoxLayout:
+	# 				canvas:
+	# 					Color:
+	# 						rgba: .5, .5, .5, 0.4
+	# 					Rectangle:
+	# 						pos: self.pos
+	# 						size: self.size
+	# 				orientation: 'vertical'
+	# 				size_hint_x: .8
+	# 				pos_hint: {'center_x': .5}
+	# 				BoxLayout:
+	# 					orientation: 'horizontal'
+	# 					pos_hint: {'center_x': .5}
+	# 					size_hint: 1, .3
+	# 					canvas:
+	# 						Color:
+	# 							rgba: .3, .3, .3, 0.4
+	# 						Rectangle:
+	# 							pos: self.pos
+	# 							size: self.size
+	# 					BoxLayout:
+	# 						orientation: 'vertical'
+	# 						size_hint: .3, .5
+	# 						pos_hint: {'center_x': .5, 'center_y': .5}
+	# 						CheckBox:
+	# 							state: 'down'
+	# 							id: cooc
+	# 						Label:
+	# 							text: 'Coordinates'
+	# 					BoxLayout:
+	# 						orientation: 'vertical'
+	# 						size_hint_y: .7
+	# 						pos_hint: {'center_x': .5, 'center_y': .5}
+	# 						Label:
+	# 							text: 'Other Columns (comma delimited):'
+	# 							size_hint_y: .4
+	# 						TextInput:
+	# 							multiline: False
+	# 							hint_text: '1,2,3'
+	# 							id: othercols
+	# 							size_hint: .7, .5
+	# 							pos_hint: {'center_x': .5, 'center_y': .5}
+	# 					Label:
+	# 						size_hint_x: .075
+	# 				Label:
+	# 					text: 'Star file path:'
+	# 					size_hint_y: .15
+	# 					color: (0,0,0,1)
+	# 					bold: True
+	# 				BoxLayout:
+	# 					orientation: 'horizontal'
+	# 					size_hint: .85, .2
+	# 					pos_hint: {'center_x': .5, 'center_y': .5}
+	# 					TextInput:
+	# 						text: 'Choose Star File Path'
+	# 						size_hint: 1.5, .55
+	# 						font_size: 28
+	# 						halign: 'center'
+	# 						pos_hint: {'center_x': .5, 'center_y': .5}
+	# 						id: restar
+	# 						multiline: True
+	# 						readonly: True
+	# 						cursor_blink: False
+	# 						foreground_color: (0,0,.6,1)
+	# 						background_color: (1,1,1,0)
+	# 						cursor_color: (1,1,1,0)
+	# 						selection_color: (1,1,1,0)
+	# 				Button:
+	# 					background_color: 0, 1.2, 2, .5
+	# 					text: 'Choose Star File'
+	# 					on_release: root.show_parstar()
+	# 					size_hint: .2, .12
+	# 					pos_hint: {'center_x': .5, 'center_y': .5}
+	# 				BoxLayout:
+	# 					orientation: 'horizontal'
+	# 					size_hint: .7, .15
+	# 					pos_hint: {'center_x': .5, 'center_y': .5}
+	# 				Button:
+	# 					background_color: 0.2, 0.6, 0.2, .55
+	# 					text: 'Parse star file'
+	# 					on_release: root.parse()
+	# 					size_hint: .25, .2
+	# 					pos_hint: {'center_x': .5}
+	# 				Label:
+	# 					size_hint_y: .1
+	# 			Label:
+	# 				size_hint_y: .2
