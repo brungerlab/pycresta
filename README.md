@@ -44,15 +44,15 @@ Install kivy:
 Pip installs:
 
 	pip3 install pandas
- 
+
 	pip3 install scipy
- 
+
 	pip3 install scikit-image
- 
+
 	pip3 install mrcfile
- 
+
 	pip3 install starfile
- 
+
 	pip3 install matplotlib
 
 ----------------------------------------------------------------------------------------------------------------------------

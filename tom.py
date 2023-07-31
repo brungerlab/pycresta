@@ -730,7 +730,7 @@ def processParticler(filename, tmpAng, boxsize, shifts, shifton):
     else:
         outH1 = rotate(volTmp, tmpAng, boxsize)
     
-    outH1 = cut_out(outH1, [0, 0, 0], boxsize)
+    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
     return outH1
 
 # CCC Calculations
