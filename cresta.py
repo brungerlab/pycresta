@@ -280,11 +280,6 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
 			file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
 			file_opt.writelines('Filename:' + '\t' + self.ids.filenameget.text + '\n')
-			file_opt.writelines('CoordFile:' + '\t' + self.ids.coordf.text + '\n')
-			file_opt.writelines('FirstSuf:' + '\t' + self.ids.suffixt.text + '\n')
-			file_opt.writelines('FirstBin:' + '\t' + self.ids.binnt.text + '\n')
-			file_opt.writelines('SecondSuf:' + '\t' + self.ids.suffixf.text + '\n')
-			file_opt.writelines('SecondBin:' + '\t' + self.ids.binnf.text + '\n')
 			file_opt.writelines('MaskPath:' + '\t' + self.ids.maskpath.text + '\n')
 			file_opt.writelines('SDThresh:' + '\t' + self.ids.sdrange.text + '\n')
 			file_opt.writelines('SDShift:' + '\t' + self.ids.sdshift.text + '\n')
@@ -344,16 +339,6 @@ class Tabs(TabbedPanel):
 						self.ids.sigma.text = yank
 					if re.search('Filename', line):
 						self.ids.filenameget.text = yank
-					if re.search('CoordFile', line):
-						self.ids.coordf.text = yank
-					if re.search('FirstSuf', line):
-						self.ids.suffixt.text = yank
-					if re.search('FirstBin', line):
-						self.ids.binnt.text = yank
-					if re.search('SecondSuf', line):
-						self.ids.suffixf.text = yank
-					if re.search('SecondBin', line):
-						self.ids.binnf.text = yank	
 					if re.search('MaskPath', line):
 						self.ids.maskpath.text = yank	
 					if re.search('SDThresh', line):
@@ -491,6 +476,13 @@ class Tabs(TabbedPanel):
 			starfile.write(extractStar, direct + tomName + '.star', overwrite=True)
 			print('Extraction Complete\n')
 			self.ids.mainstar.text = direct + tomName + '.star'
+
+	def calculateAngles(self):
+		coordM = self.ids.coordsM.text
+		coordC = self.ids.coordsC.text
+		starf = self.ids.mainstar.text
+		starf = starfile.read(starf)
+
 
 	plt.ion()
 
@@ -1219,12 +1211,6 @@ class Tabs(TabbedPanel):
 	# 						file_opt.close()
 	# 	os.remove(micronames)
 	# 	return
-	
-	def path_1(self):
-		self.ids.cmmf.text = '/cmm_files'
-		if self.ids.cmmf.text[0] !=  '/':
-			self.ids.cmmf.text = '/' + self.ids.cmmf.text
-		return
 
 	def calculate_ang(self):
 		# check need for cwd

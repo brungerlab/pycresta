@@ -711,7 +711,7 @@
 					pos: self.pos
 					size: self.size
 			GridLayout:
-				rows: 1
+				rows: 2
 				spacing: 20
 				canvas:
 					Color:
@@ -721,9 +721,9 @@
 						size: self.size
 				BoxLayout:
 					orientation: 'vertical'
-					size_hint_y: 1.5
+					size_hint_y: 1.2
 					Label:
-						size_hint_y: .2
+						size_hint_y: .1
 					BoxLayout:
 						orientation: 'vertical'
 						size_hint_x: .75
@@ -739,7 +739,7 @@
 							text: 'Extraction'
 							color: (0,0,0,1)
 							font_size: 35
-							pos_hint: {'center_x': .15}
+							pos_hint: {'center_x': .1}
 							bold: True
 						Button:
 							text: 'information'
@@ -758,7 +758,7 @@
 						TextInput:
 							text: 'Choose Tomogram Path'
 							size_hint: .9, .7
-							font_size: 30
+							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							id: tomo
@@ -786,7 +786,7 @@
 						TextInput:
 							text: 'Choose Coords Path'
 							size_hint: .9, .7
-							font_size: 30
+							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							id: tomocoords
@@ -818,6 +818,100 @@
 							background_color: 0.2, 0.6, 0.2, .55
 							text: 'Extract Subtomograms'
 							on_release: root.extract()
+							size_hint_x: .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .3
+					Label:
+						size_hint_y: .05
+				BoxLayout:
+					orientation: 'vertical'
+					Label:
+						size_hint_y: .05
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .75
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Calculate Angles'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .12}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.ExtractionInfo().open()
+							size_hint: .15, .45
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						Label:
+							size_hint_y: .05
+						Label:
+							text: 'M Coords Path'
+							bold: True
+							color: (0,0,0,1)
+							font: 30
+							size_hint_y: .6
+						TextInput:
+							text: 'Choose M'
+							size_hint: .9, .7
+							font_size: 30
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: coordsM
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose M'
+							on_release: root.show_tomo()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .1
+						Label:
+							text: 'C Coords Path'
+							bold: True
+							color: (0,0,0,1)
+							font: 30
+							size_hint_y: .6
+						TextInput:
+							text: 'Choose C'
+							size_hint: .9, .7
+							font_size: 30
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: coordsC
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose C'
+							on_release: root.show_tomocoords()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Calculate Angles'
+							on_release: root.calculateAngles()
 							size_hint_x: .4
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
@@ -2245,194 +2339,6 @@
 						size_hint_y: .2
 				Label:
 					size_hint_y: .07
-
-	TabbedPanelItem:
-		text: 'Calc. Angles'
-		BoxLayout:
-			spacing: 10
-			canvas:
-				Color:
-					rgba: 1, 1, 1, .2
-				Rectangle:
-					pos: self.pos
-					size: self.size
-			
-			orientation: 'vertical'
-			TextInput:
-				canvas:
-					Color:
-						rgba: 1, 1, 1, .6
-					Rectangle:
-						pos: self.pos
-						size: self.size
-				multiline: True
-				readonly: True
-				size_hint_y: .12
-				size_hint_x: .9
-				pos_hint: {'center_x': .5, 'center_y': .6}
-				text: 'Enter the path of the folder containing .cmm files. Then enter the folder path which contains .coords files for that tomogram. Specify which file you want using the suffix and ensure proper binning.'
-			GridLayout:
-				canvas:
-					Color:
-						rgba: 1, 1, 1, .6
-					Rectangle:
-						pos: self.pos
-						size: self.size
-				rows:1
-				cols:2
-				size_hint_y: .2
-				spacing: 15
-				BoxLayout:
-					orientation: 'vertical'
-					size_hint_x: .75
-					Label: 
-						text: 'Cmm file path'
-					BoxLayout:
-						orientation: 'horizontal'
-						size_hint_x: .7
-						pos_hint: {'center_x': .5, 'center_y': .5}
-						BoxLayout:
-							orientation: 'vertical'
-							size_hint: .3, .5
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						TextInput:
-							text: '/'
-							size_hint: 1.5, .8
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: cmmf
-				Button:
-					background_color: 0.2, 0.6, 0.2, .55
-					size_hint_x: .25
-					text: 'Get path from Coord Picker'
-					on_release: root.path_1()
-			BoxLayout:
-				canvas:
-					Color:
-						rgba: 1, 1, 1, .6
-					Rectangle:
-						pos: self.pos
-						size: self.size
-				orientation: 'vertical'
-				spacing: 15
-				Label:
-					text: 'Calculate Rotations'
-					color: (0,0,0,1)
-					font_size: 35
-					pos_hint: {'center_x': .2}
-					size_hint_y: .7
-					bold: True
-				Label:
-					text: 'Coordinate Files Folder Path'
-					size_hint_y: .7
-				TextInput:
-					text: '/'
-					size_hint: .7, .7
-					pos_hint: {'center_x': .5}
-					multiline: False
-					id: coordf
-				Label:
-					text: 'Note: must contain all of the .coord files'
-					color: (250, 250, 31, 1)
-					size_hint_y: .5
-				BoxLayout:
-					size_hint: .8, 1.5
-					pos_hint: {'center_x': .445, 'center_y': .5}
-					orientation: 'horizontal'
-					canvas:
-						Color:
-							rgba: .3, .3, .3, 0.4
-						Rectangle:
-							pos: self.pos
-							size: self.size
-					BoxLayout:
-						orientation: 'vertical'
-						size_hint: .3, .5
-						pos_hint: {'center_x': .7, 'center_y': .5}
-						CheckBox:
-							id: otherdir
-						Label:
-							text: 'Activate row'
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							text: 'First .coord file suffix'
-						TextInput:
-							text: 'I'
-							size_hint_x: .3
-							pos_hint: {'center_x': .5}
-							multiline: False
-							id: suffixt
-						Label:
-							text: ''
-							color: (250, 250, 31, 1)
-							size_hint_y: .5
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							text: 'First .coord file Bin'
-						TextInput:
-							text: '1'
-							size_hint_x: .3
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: binnt
-						Label:
-							text: ' '
-							size_hint_y: .5
-				BoxLayout:
-					size_hint: .7, 1.5
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					orientation: 'horizontal'
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							text: 'Second .coord file suffix'
-						TextInput:
-							text: 'C'
-							size_hint_x: .3
-							pos_hint: {'center_x': .5}
-							multiline: False
-							id: suffixf
-						Label:
-							text: ''
-							color: (250, 250, 31, 1)
-							size_hint_y: .5
-					BoxLayout:
-						orientation: 'vertical'
-						Label:
-							text: 'Second .coord file Bin'
-						TextInput:
-							text: '4'
-							size_hint_x: .3
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: binnf
-						Label:
-							text: ' '
-							size_hint_y: .5
-				Button:
-					background_color: 0.2, 0.6, 0.2, .55
-					text: 'Calculate Angles'
-					on_release: root.calculate_ang()
-					size_hint: .28, .8
-					pos_hint: {'center_x': .5}
-				Label:
-					text: 'Output Path'
-					size_hint_y: .5
-				BoxLayout:
-					orientation: 'horizontal'
-					size_hint: .8, .9
-					pos_hint: {'center_x': .5, 'center_y': .5}
-					TextInput:
-						text: '/cmm_files/Out'
-						size_hint: 1.5, .55
-						multiline: False
-						pos_hint: {'center_x': .5, 'center_y': .5}
-						id: outputp
-				Label:
-					text: ' '
-					size_hint_y: .3
 	
 	# TabbedPanelItem:
 	# 	text: 'Parser'

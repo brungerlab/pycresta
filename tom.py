@@ -2,16 +2,18 @@
 
 # import python packages
 import os
-import numpy as np
-from scipy import ndimage
-from scipy.fft import fftn, fftshift, ifftn, ifftshift
-from skimage.morphology import remove_small_objects
-import starfile
-import mrcfile
-import matplotlib.pyplot as plt
-import pandas as pd
 import shutil
 import subprocess
+import numpy as np
+import pandas as pd
+from scipy import ndimage
+from scipy.spatial.transform import Rotation as R
+from scipy.fft import fftn, fftshift, ifftn, ifftshift
+from skspatial.objects import Points
+from skimage.morphology import remove_small_objects
+import matplotlib.pyplot as plt
+import starfile
+import mrcfile
 
 # import C-file
 import ctypes
@@ -138,7 +140,6 @@ def cylindermask(vol, radius, sigma, center):
     for iz in range(vol.shape[2]):
         vol[:, :, iz] = vol[:, :, iz] * mask
     return vol
-
 
 # 3D Signal Subtraction Functions
 def readList(listName, pxsz, extstar, angles):
@@ -1010,3 +1011,38 @@ def rescale3d(in_vol, new_size):
 
     return out
 
+# calculate angles 
+def calcangles(dataframe):
+    # split up dataframe columns
+    Xmem = dataframe["Xmem"].astype(int).to_numpy()
+    Ymem = dataframe["Ymem"].astype(int).to_numpy()
+    Zmem = dataframe["Zmem"].astype(int).to_numpy()
+    Xcen = dataframe["Xcen"].astype(int).to_numpy()
+    Ycen = dataframe["Ycen"].astype(int).to_numpy()
+    Zcen = dataframe["Zcen"].astype(int).to_numpy()
+    #normalize cen values
+    for i in range(0, len(Xmem)):
+        Xcen[i] = Xcen[i]-Xmem[i]
+        Ycen[i] = Ycen[i]-Ymem[i]
+        Zcen[i] = Zcen[i] - Zmem[i]
+
+    #put points into array, give them plotting param
+    points = np.array([Xcen, Ycen, Zcen], dtype=float)
+    points = (np.transpose(points))
+    points = Points(points)
+    vector_1 = [0, 0, 1]
+    vector_2 = points
+    unit_vector_1 = vector_1 / np.linalg.norm(vector_1)
+    unit_vector_2 = 0
+    newangs = np.zeros((len(points), 3))
+    for w in range(0, len(points)):
+        unit_vector_2 = vector_2[w] / np.linalg.norm(vector_2[w])
+        dot_product = np.dot(unit_vector_2, unit_vector_1)
+        angle = np.arccos(dot_product)
+        crossprod = np.cross(unit_vector_2, unit_vector_1)
+        axis = np.asarray(crossprod)
+        axis = axis / np.sqrt(np.dot(axis, axis))
+        r = R.from_rotvec(angle * axis)
+        newangs[w, :] = r.as_euler('ZYZ', degrees=True)
+        
+    return newangs
