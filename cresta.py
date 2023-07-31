@@ -130,6 +130,9 @@ class Tabs(TabbedPanel):
 			else:
 				self.ids.mainstar.text = starfpath
 				self.ids.mainsubtomo.text = "/".join(self.ids.mainstar.text.split("/")[:-1]) + '/'
+				starfilted = starfpath.replace('.star', '_filtered.star')
+				if os.path.isfile(starfilted) == True:
+					self.ids.mainstarfilt.text = starfilted
 		elif len(starfpath) == 0:
 			self.ids.mainstar.text = 'Choose Unfiltered Star File Path'
 		self.dismiss_popup()
@@ -273,7 +276,6 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('TomoCoord:' + '\t' + self.ids.tomocoords.text + '\n')
 			file_opt.writelines('Index:' + '\t' + self.ids.index.text + '\n')
 			file_opt.writelines('Indall:' + '\t' + self.ids.index2.text + '\n')
-			file_opt.writelines('SurfaceLvl:' + '\t' + self.ids.surface_level.text + '\n')
 			file_opt.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
 			file_opt.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
 			file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
@@ -334,8 +336,6 @@ class Tabs(TabbedPanel):
 						self.ids.index.text = yank
 					if re.search('Indall', line):
 						self.ids.index2.text = yank
-					if re.search('SurfaceLvl', line):
-						self.ids.surface_level.text = yank
 					if re.search('Defocus', line):
 						self.ids.defoc.text = yank
 					if re.search('SnrFall', line):
@@ -405,12 +405,13 @@ class Tabs(TabbedPanel):
 		tomogram = self.ids.tomo.text
 		coordfile = self.ids.tomocoords.text
 		# tomogram path
-		direct = '/'.join(tomogram.split('/')[:-1]) + '/'
-		# tomogram name
+		direct = '/'.join(tomogram.split('/')[:-2]) + '/'
+		# tomogram date and name
+		tomDate = tomogram.split('/')[-2]
 		tomName = tomogram.split('/')[-1].replace('.mrc', '')
 		# use for star file micrographName and imageName
-		micrograph = 'Tomograms/' + tomName + '/' + tomogram.split('/')[-1]
-		subdirect = 'Tomograms/' + tomName + '/Extract/'
+		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
+		subdirect = tomDate + '/' + tomName + '/Extract/'
 		# use for full path containing subtomograms
 		directory = direct + subdirect
 		# memory map the tomogram
@@ -481,14 +482,15 @@ class Tabs(TabbedPanel):
 			for thread in threads:
 				thread.join()
 			# move tomogram and coords to the new subtomogram directory
-			shutil.move(self.ids.tomo.text, direct + 'Tomograms/' + tomName + '/')
-			shutil.move(coordfile, direct + 'Tomograms/' + tomName + '/')
+			shutil.move(self.ids.tomo.text, direct + tomDate + '/' + tomName + '/')
+			shutil.move(coordfile, direct + tomDate + '/' + tomName + '/')
 			# create data frame for star file
 			columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
 			df = pd.DataFrame(data, columns=columns)
 			extractStar = {"optics": pd.DataFrame(), "particles": df}
 			starfile.write(extractStar, direct + tomName + '.star', overwrite=True)
 			print('Extraction Complete\n')
+			self.ids.mainstar.text = direct + tomName + '.star'
 
 	plt.ion()
 
@@ -753,7 +755,6 @@ class Tabs(TabbedPanel):
 			direct = self.ids.mainsubtomo.text
 			if self.ids.mainsubtomo.text[-1] != '/':
 				direct = self.ids.mainsubtomo.text + '/'
-			levels = self.ids.surface_level.text
 			pxsz = float(self.ids.A1.text)
 			curindex = int(self.ids.index.text)
 			self.ids.pickcoordtext.text = 'Please wait. Opening ChimeraX.'
@@ -766,8 +767,8 @@ class Tabs(TabbedPanel):
 			# set total index value
 			self.ids.index2.text = str(len(imageNames))
 
-			# create cmm_files folder inside subtomogram directory specified on master key
-			cmmdir = direct + 'cmm_files'
+			# create subcoord_files folder inside subtomogram directory specified on master key
+			cmmdir = direct + 'subcoord_files'
 			if os.path.isdir(cmmdir) == False:
 				os.mkdir(cmmdir)
 
@@ -775,7 +776,7 @@ class Tabs(TabbedPanel):
 			chim3 = direct + 'chimcoord.py'
 			tmpflnam = direct + starfinal
 			file_opt = open(chim3, 'w')
-			file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + cmmdir + "\")" + "\n" + "run(session, \"open " + tmpflnam + "\")" + "\n" + "run(session, \"set bgColor white;volume #1 level " + levels + ";\")" + "\n" + "run(session, \"color radial #1.1 palette #ff0000:#ff7f7f:#ffffff:#7f7fff:#0000ff center 127.5,127.5,127.5;\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
+			file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + cmmdir + "\")" + "\n" + "run(session, \"open " + tmpflnam + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
 			file_opt.close()
 			print(subprocess.getstatusoutput(ChimeraX_dir + '/chimerax ' + chim3))
 
@@ -925,9 +926,9 @@ class Tabs(TabbedPanel):
 				direct = self.ids.mainsubtomo.text + '/'
 
 		# set directory path
-		directory = direct + 'cmm_files/'
+		directory = direct + 'subcoord_files/'
 
-		# check that /cmm_files/ folder exists
+		# check that /subcoord_files/ folder exists
 		if os.path.exists(directory) == False:
 			print(directory + ' does not exist. Please save coordinates first.')
 			return
@@ -1032,7 +1033,6 @@ class Tabs(TabbedPanel):
 											# file_opt = open(folder + '/' + cutName + '.coords', 'a')
 											# file_opt.writelines(finalx + ' ' + finaly + ' ' + finalz + '\n')
 											# file_opt.close()
-											shutil.copy(folder + '/' + filename, '/' + subtomoFolder + '/' + filename)
 		
 		# add new information to intermediate star file
 		star_data = starfile.read(starf)
@@ -1777,10 +1777,14 @@ class Tabs(TabbedPanel):
 		name = imageNames[index - 1]
 		self.ids.visualizestep.text = 'Currently on file ' + "/".join(name.split("/")[-3:])
 		fileName = subtomodir + name
+		if self.ids.visualizeInvert.active == True:
+			mrc = mrcfile.read(fileName)
+			mrc = mrc * -1
+			mrcfile.write(fileName, mrc, overwrite=True)
 		# run ChimeraX
 		vis = subtomodir + 'visualize.py'
 		file_opt = open(vis, 'w')
-		file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + subtomodir + "\")" + "\n" + "run(session, \"open " + fileName + "\")" + "\n" + "run(session, \"set bgColor white;volume #1 level " + '0.5' + ";\")" + "\n" + "run(session, \"color radial #1.1 palette #ff0000:#ff7f7f:#ffffff:#7f7fff:#0000ff center 127.5,127.5,127.5;\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
+		file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + subtomodir + "\")" + "\n" + "run(session, \"open " + fileName + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
 		file_opt.close()
 		print(subprocess.getstatusoutput(chimeraDir + '/chimerax ' + vis))
 		os.remove(vis)

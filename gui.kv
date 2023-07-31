@@ -247,7 +247,7 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'subtomogram' folder.\nA star file is generated."
+			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'Extract' folder.\nA star file is generated."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -364,7 +364,7 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose Filtered Star File, Subtomogram Directory, and ChimeraX\npaths on 'master key'.\n\nPress view to open the first subtomogram.\nAfter viewing, close Chimera, and press either 'accept' or 'reject'.\n\nSaved files will be copied into an 'accepted' folder,\nand added to an _accepted.star star file.\n\nRejected files will be added to a _rejected.star star file.\n\nUse the arrows to move between subtomograms."
+			text: "Choose Filtered Star File, Subtomogram Directory, and ChimeraX\npaths on 'master key'.\n\nPress view to open the first subtomogram.\nAfter viewing, close Chimera, and press either 'accept' or 'reject'.\n\nSaved files will be added to an _accepted.star star file.\n\nRejected files will be added to a _rejected.star star file.\n\nUse the arrows to move between subtomograms."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -748,7 +748,7 @@
 							size_hint: .15, .45
 							pos_hint: {'center_x': .5, 'center_y': .5}	
 						Label:
-							size_hint_y: .2
+							size_hint_y: .05
 						Label:
 							text: 'Tomogram File Path'
 							bold: True
@@ -757,7 +757,7 @@
 							size_hint_y: .6
 						TextInput:
 							text: 'Choose Tomogram Path'
-							size_hint: .9, .4
+							size_hint: .9, .7
 							font_size: 30
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -785,7 +785,7 @@
 							size_hint_y: .6
 						TextInput:
 							text: 'Choose Coords Path'
-							size_hint: .9, .4
+							size_hint: .9, .7
 							font_size: 30
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -879,22 +879,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .9, .6
+							size_hint: .5, .6
 							pos_hint: {'center_x': .5}
-							BoxLayout:
-								orientation: 'vertical'
-								size_hint: .4, .8
-								pos_hint: {'center_y': .5}
-								Label:
-									text: 'Surface level'
-									size_hint: 1, .8
-									pos_hint: {'center_x': .5, 'center_y': .5}
-								TextInput:
-									text: '0.5'
-									multiline: False
-									size_hint: .7, .8
-									pos_hint: {'center_x': .5, 'center_y': .5}
-									id: surface_level
 							Label:
 								text: 'Index'
 								size_hint_x: .2
@@ -1830,6 +1816,17 @@
 							color: (250, 250, 31, 1)
 						BoxLayout:
 							orientation: 'horizontal'
+							size_hint: .25, .5
+							pos_hint: {'center_x': .475, 'center_y': .5}
+							CheckBox:
+								state: 'normal'
+								id: visualizeInvert
+							Label:
+								text: 'Invert Contrast'
+								bold: True
+								color: (0,0,0,1)
+						BoxLayout:
+							orientation: 'horizontal'
 							size_hint: .3, .4
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							Label:
@@ -1919,12 +1916,12 @@
 						Label:
 							size_hint_y: .2
 					Label:
-						size_hint_y: .05
+						size_hint_y: .025
 				BoxLayout:
 					orientation: 'vertical'
-					size_hint_y: 1.5
+					size_hint_y: 1
 					Label:
-						size_hint_y: .05
+						size_hint_y: .025
 					BoxLayout:
 						orientation: 'vertical'
 						size_hint_x: .75
@@ -1965,15 +1962,15 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							multiline: False
 							id: refBasename
-						Label:
-							text: 'Minimum Particle Number'
-							size_hint_y: .8
-						TextInput:
-							text: '1'
-							size_hint_x: .1
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: minParticleNum
+						# Label:
+						# 	text: 'Minimum Particle Number'
+						# 	size_hint_y: .8
+						# TextInput:
+						# 	text: '1'
+						# 	size_hint_x: .1
+						# 	pos_hint: {'center_x': .5, 'center_y': .5}
+						# 	multiline: False
+						# 	id: minParticleNum
 						Button:
 							background_color: 0.2, 0.6, 0.2, .55
 							text: 'Plot Back'

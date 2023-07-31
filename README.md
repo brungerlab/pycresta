@@ -69,14 +69,17 @@ Use Test_Data and TestExamples folders to confirm that everything works.
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ### Creating CrESTA in Python:
 
-This software is translated from https://github.com/johnjacobpeters/tom_cryoET (in Matlab) with new features added.
-Use of https://mathesaurus.sourceforge.net/matlab-numpy.html to convert Matlab code into Python NumPy.
+This software is translated from [John Jacob Peters' repository](https://github.com/johnjacobpeters/tom_cryoET) (in Matlab) with new features added.
 
-cresta.py contains the functions that respond to user input on the GUI (pressing buttons).
-tom.py contains helper functions for the cresta.py functions, and is the python version of the TOM Toolbox Matlab functions used in the old repository.
-gui.kv builds the user interface, and gives text inputs/buttons unique id's that can be accessed in cresta.py.
-The old Matlab repository called one C function, rot3d.c, which has been kept in this repository for runtime optimization.
+Use of [NumPy Cheat Sheet](https://mathesaurus.sourceforge.net/matlab-numpy.html) to convert Matlab code into Python NumPy.
 
-This paper contains the conceptual background for the functions and calculations: https://www.sciencedirect.com/science/article/pii/S1047847722000211
+[The Matlab to Python Converter](https://translate.mat2py.org/) also proved useful, but required testing and editing after.
 
-Repository history can be found at: https://github.com/psliz05/pycrest
+- cresta.py contains the functions that respond to user input on the GUI (pressing buttons).
+- tom.py contains helper functions for the cresta.py functions, and is the python version of the TOM Toolbox Matlab functions used in the old repository.
+- gui.kv builds the user interface, and gives text inputs/buttons unique id's that can be accessed in cresta.py.
+- The old Matlab repository called one C function, rot3d.c, which has been kept in this repository for runtime optimization.
+
+[This paper](https://www.sciencedirect.com/science/article/pii/S1047847722000211) contains the conceptual background for the functions and calculations.
+
+The pycresta repository history can be found [here](https://github.com/psliz05/pycrest); before it was transitioned to this current repo.
