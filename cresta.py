@@ -1901,13 +1901,15 @@ class Tabs(TabbedPanel):
 			imgName = row.rlnImageName.split('/')[-1]
 			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
 			classNum = random.randint(1, 3)
-			model = [file for file in classes if "00" + classNum in file][0]
+			# get model associated with class num
+			model = [file for file in classes if str(00) + classNum in file][0]
 			coords = [int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateY)]
 			angles = [float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)]
 			shifts = [float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)]
 			# transform corresponding model by inversed angles and shifts specified in starfile
 			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True) # not sure about shifton
 			# shift model to coords specified in star file (to be implemented)
+			# create new mrcfile
 			mrcfile.new(subtomoDirect + "/plotback_" + imgName, transformed)
 		return
 
