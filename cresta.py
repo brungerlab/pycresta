@@ -1897,8 +1897,12 @@ class Tabs(TabbedPanel):
 	def plotBack(self):
 		subtomoDirect = self.ids.mainsubtomo.text
 		starf = self.ids.mainstar.text
-		classPath = self.ids.refPath.text
+		if self.ids.refPath.text[-1] != '/':
+			classPath = self.ids.refPath.text + '/'
+		else:
+			classPath = self.ids.refPath.text
 		classBasename = self.ids.refBasename.text
+		angpix = float(self.ids.A1.text)
 		bxsz = float(self.ids.px1.text)
 		boxsize = [bxsz, bxsz, bxsz]
 		# get models in class that matches basename
@@ -1909,28 +1913,29 @@ class Tabs(TabbedPanel):
 		# iterate through each row of dataframe
 		for row in star_data.itertuples(index=False):
 			imgName = row.rlnImageName
-			print(imgName)
 			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
 			classNum = str(random.randint(1, 3))
 			# get model associated with class num
 			model = classPath + [file for file in classes if "00" + classNum in file][0]
-			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateY)])
+			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
 			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
 			shifts = np.array([float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)])
-			print(angles)
-			print(shifts)
 			# transform corresponding model by inversed angles and shifts specified in starfile
-			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True) # not sure about shifton
-			# shift model to coords specified in star file (to be implemented)
+			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True)
 			# create "plotback" folder
 			folderPath = subtomoDirect + "/" + '/'.join(imgName.split('/')[:-1]) + "/plotback/"
 			if not os.path.exists(folderPath):
 				os.makedirs(folderPath)
 			# create new mrcfile
 			transformed = transformed.astype(np.float32)
-			print(len(transformed))
 			mrcName = imgName.split('/')[-1]
-			mrcfile.new(folderPath + mrcName  , transformed, overwrite=True)
+			mrcfile.new(folderPath + mrcName, transformed, overwrite=True)
+			# shift model to coords specified in star file
+			with mrcfile.open(folderPath + mrcName, 'r+') as mrc:
+				mrc.voxel_size = angpix
+				mrc.header.nxstart = coords[0] - bxsz
+				mrc.header.nystart = coords[1] - bxsz
+				mrc.header.nzstart = coords[2] - bxsz
 		return
 
 	pass
