@@ -322,6 +322,11 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('Indall:' + '\t' + self.ids.index2.text + '\n')
 			file_opt.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
 			file_opt.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
+			file_opt.writelines('Highpass:' + '\t' + self.ids.highpass.text + '\n')
+			file_opt.writelines('Voltage:' + '\t' + self.ids.voltage.text + '\n')
+			file_opt.writelines('CS:' + '\t' + self.ids.cs.text + '\n')
+			file_opt.writelines('Envelope:' + '\t' + self.ids.envelope.text + '\n')
+			file_opt.writelines('BFactor:' + '\t' + self.ids.bfactor.text + '\n')
 			file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
 			file_opt.writelines('Filename:' + '\t' + self.ids.filenameget.text + '\n')
 			file_opt.writelines('MaskPath:' + '\t' + self.ids.maskpath.text + '\n')
@@ -383,6 +388,16 @@ class Tabs(TabbedPanel):
 						self.ids.defoc.text = yank
 					if re.search('SnrFall', line):
 						self.ids.snrval.text = yank
+					if re.search('Highpass', line):
+						self.ids.highpass.text = yank
+					if re.search('Voltage', line):
+						self.ids.voltage.text = yank
+					if re.search('CS', line):
+						self.ids.cs.text = yank
+					if re.search('Envelope', line):
+						self.ids.envelope.text = yank
+					if re.search('BFactor', line):
+						self.ids.bfactor.text = yank
 					if re.search('Sigma', line):
 						self.ids.sigma.text = yank
 					if re.search('Filename', line):
@@ -438,10 +453,11 @@ class Tabs(TabbedPanel):
 		tomogram = self.ids.tomo.text
 		coordfile = self.ids.tomocoords.text
 		# tomogram path
-		direct = '/'.join(tomogram.split('/')[:-2]) + '/'
+		direct = '/'.join(tomogram.split('/')[:-3]) + '/'
 		# tomogram date and name
-		tomDate = tomogram.split('/')[-2]
-		tomName = tomogram.split('/')[-1].replace('.mrc', '')
+		tomDate = tomogram.split('/')[-3]
+		tomName = tomogram.split('/')[-2]
+		tomogName = tomogram.split('/')[-1].replace('.mrc', '')
 		# use for star file micrographName and imageName
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
 		subdirect = tomDate + '/' + tomName + '/Sub/'
@@ -461,9 +477,9 @@ class Tabs(TabbedPanel):
 				# create subtomogram file name
 				number = '000000' + str(i)
 				number = number[-6:]
-				name = directory + tomName + number + '.mrc'
+				name = directory + tomogName + number + '.mrc'
 				# create imageName for star file
-				starName = subdirect + tomName + number + '.mrc'
+				starName = subdirect + tomogName + number + '.mrc'
 				# access coordinates from coords file
 				line = coord[i]
 				pos = line.split(' ')[1:]
@@ -514,16 +530,13 @@ class Tabs(TabbedPanel):
 					threads[i].join()
 			for thread in threads:
 				thread.join()
-			# move tomogram and coords to the new subtomogram directory
-			shutil.move(self.ids.tomo.text, direct + tomDate + '/' + tomName + '/')
-			shutil.move(coordfile, direct + tomDate + '/' + tomName + '/')
 			# create data frame for star file
 			columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
 			df = pd.DataFrame(data, columns=columns)
 			extractStar = {"optics": pd.DataFrame(), "particles": df}
-			starfile.write(extractStar, direct + tomName + '.star', overwrite=True)
+			starfile.write(extractStar, direct + tomogName + '.star', overwrite=True)
 			print('Extraction Complete\n')
-			self.ids.mainstar.text = direct + tomName + '.star'
+			self.ids.mainstar.text = direct + tomogName + '.star'
 			self.ids.mainsubtomo.text = direct
 
 	def calculateAngles(self):
@@ -814,7 +827,10 @@ class Tabs(TabbedPanel):
 		try:
 			# initialize variables
 			ChimeraX_dir = self.ids.chimera_path.text
-			listName = self.ids.mainstarfilt.text
+			if self.ids.pickcoordFiltered.active == True:
+				listName = self.ids.mainstarfilt.text
+			else:
+				listName = self.ids.mainstar.text
 			direct = self.ids.mainsubtomo.text
 			if self.ids.mainsubtomo.text[-1] != '/':
 				direct = self.ids.mainsubtomo.text + '/'
@@ -889,7 +905,10 @@ class Tabs(TabbedPanel):
 		return
 
 	def right_pick(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.pickcoordFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		try:
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
 			self.ids.index2.text = str(len(imageNames))
@@ -914,7 +933,10 @@ class Tabs(TabbedPanel):
 		return
 	
 	def fastright_pick(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.pickcoordFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		try:
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
 			self.ids.index2.text = str(len(imageNames))
@@ -940,7 +962,10 @@ class Tabs(TabbedPanel):
 
 	def left_pick(self):
 		try:
-			starf = self.ids.mainstarfilt.text
+			if self.ids.pickcoordFiltered.active == True:
+				starf = self.ids.mainstarfilt.text
+			else:
+				starf = self.ids.mainstar.text
 			self.ids.pickcoordtext.text = 'Press Pick Coordinates'
 			# decrease index by one
 			if int(self.ids.index.text) == 1:
@@ -959,7 +984,10 @@ class Tabs(TabbedPanel):
 	
 	def fastleft_pick(self):
 		try:
-			starf = self.ids.mainstarfilt.text
+			if self.ids.pickcoordFiltered.active == True:
+				starf = self.ids.mainstarfilt.text
+			else:
+				starf = self.ids.mainstar.text
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
 			self.ids.pickcoordtext.text = 'Press Pick Coordinates'
 			# decrease index by one
@@ -975,7 +1003,10 @@ class Tabs(TabbedPanel):
 
 	def note(self):
 		# create note
-		starf = self.ids.mainstarfilt.text
+		if self.ids.pickcoordFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		direct = "/".join(starf.split("/")[:-1]) + '/'
 		filename = self.ids.filenameget.text
 		subtom = filename.split('/')[-2]
@@ -1562,7 +1593,10 @@ class Tabs(TabbedPanel):
 
 	def visualize(self):
 		# view current subtomogram
-		starf = self.ids.mainstarfilt.text
+		if self.ids.visualizeFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		subtomodir = self.ids.mainsubtomo.text
 		chimeraDir = self.ids.chimera_path.text
 		index = int(self.ids.visind1.text)
@@ -1597,7 +1631,10 @@ class Tabs(TabbedPanel):
 		return
 
 	def right_visualize(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.visualizeFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		# set index max
 		try:
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
@@ -1627,7 +1664,10 @@ class Tabs(TabbedPanel):
 			return
 
 	def fastright_visualize(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.visualizeFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		# set index max
 		try:
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
@@ -1657,7 +1697,10 @@ class Tabs(TabbedPanel):
 			return
 
 	def left_visualize(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.visualizeFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		# check if index limit reached
 		if int(self.ids.visind1.text) == 1:
 			print('Outside of index bounds')
@@ -1686,7 +1729,10 @@ class Tabs(TabbedPanel):
 			return
 		
 	def fastleft_visualize(self):
-		starf = self.ids.mainstarfilt.text
+		if self.ids.visualizeFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
 		# check if index is too low
 		if int(self.ids.visind1.text) <= 10:
 			self.ids.visind1.text = '1'
