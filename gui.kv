@@ -812,9 +812,9 @@
 							text: 'Extraction'
 							color: (0,0,0,1)
 							font_size: 35
-							pos_hint: {'center_x': .1}
+							pos_hint: {'center_x': .08}
 							bold: True
-							size_hint_y: .4
+							size_hint_y: .5
 						Button:
 							text: 'information'
 							background_color: 0, 1.2, 2, .5
@@ -822,7 +822,7 @@
 							size_hint: .15, .45
 							pos_hint: {'center_x': .5, 'center_y': .5}	
 						Label:
-							text: 'Tomogram File Path'
+							text: 'Tomogram and Coords File Paths'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
@@ -847,12 +847,6 @@
 							on_release: root.show_tomo()
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: 'Coordinates File Path'
-							bold: True
-							color: (0,0,0,1)
-							font: 30
-							size_hint_y: .4
 						TextInput:
 							text: 'Choose Coords Path'
 							size_hint: .9, .75
@@ -875,7 +869,7 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .2, .6
+							size_hint: .2, .5
 							pos_hint: {'center_x': .475, 'center_y': .5}
 							CheckBox:
 								state: 'down'
@@ -892,7 +886,7 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							text: ' '
-							size_hint_y: .3
+							size_hint_y: .2
 					Label:
 						size_hint_y: .025
 				BoxLayout:
@@ -915,6 +909,7 @@
 							color: (0,0,0,1)
 							font_size: 35
 							pos_hint: {'center_x': .12}
+							size_hint_y: .5
 							bold: True
 						Button:
 							text: 'information'
@@ -923,13 +918,13 @@
 							size_hint: .15, .45
 							pos_hint: {'center_x': .5, 'center_y': .5}	
 						Label:
-							text: 'Vector Start Point'
+							text: 'Vector Start and End Points'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
 							size_hint_y: .6
 						TextInput:
-							text: 'Choose Start Coords'
+							text: 'Choose Vector Start Coords'
 							size_hint: .9, .7
 							font_size: 25
 							halign: 'center'
@@ -948,14 +943,8 @@
 							on_release: root.show_startvec()
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: 'Vector End Point'
-							bold: True
-							color: (0,0,0,1)
-							font: 30
-							size_hint_y: .6
 						TextInput:
-							text: 'Choose End Coords'
+							text: 'Choose Vector End Coords'
 							size_hint: .9, .7
 							font_size: 25
 							halign: 'center'
@@ -982,7 +971,7 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							text: ' '
-							size_hint_y: .3
+							size_hint_y: .2
 					Label:
 						size_hint_y: .1
 
@@ -2141,7 +2130,6 @@
 							on_release: Factory.PlotBackInfo().open()
 							size_hint: .2, .8
 							pos_hint: {'center_x': .5, 'center_y': .5}	
-						
 						Label: 
 							text: 'Ref Path'
 						TextInput:

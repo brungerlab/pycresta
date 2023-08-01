@@ -243,7 +243,7 @@ class Tabs(TabbedPanel):
 		if len(startvecpath) != 0:
 			self.ids.vectorStart.text = startvecpath
 		elif len(startvecpath) == 0:
-			self.ids.vectorStart.text = 'Choose Start Path'
+			self.ids.vectorStart.text = 'Choose Vector Start Path'
 		self.dismiss_popup()
 
 # end vector path save
@@ -258,7 +258,7 @@ class Tabs(TabbedPanel):
 		if len(endvecpath) != 0:
 			self.ids.vectorEnd.text = endvecpath
 		elif len(endvecpath) == 0:
-			self.ids.vectorEnd.text = 'Choose End Path'
+			self.ids.vectorEnd.text = 'Choose Vector End Path'
 		self.dismiss_popup()
 
 # parse star file save
@@ -313,6 +313,7 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
 			file_opt.writelines('BoxSize:' + '\t' + self.ids.px1.text + '\n')
 			file_opt.writelines('PxSize:' + '\t' + self.ids.A1.text + '\n')
+			file_opt.writelines('Threads:' + '\t' + self.ids.CPU.text + '\n')
 			file_opt.writelines('ChimeraX:' + '\t' + self.ids.chimera_path.text + '\n')
 			file_opt.writelines('Tomogram:' + '\t' + self.ids.tomo.text + '\n')
 			file_opt.writelines('TomoCoord:' + '\t' + self.ids.tomocoords.text + '\n')
@@ -338,6 +339,8 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('CCCWedge:' + '\t' + self.ids.cccwedge.text + '\n')
 			file_opt.writelines('Volvol:' + '\t' + self.ids.volvol.text + '\n')
 			file_opt.writelines('Volwedge:' + '\t' + self.ids.volwedge.text + '\n')
+			file_opt.writelines('RefPath:' + '\t' + self.ids.refPath.text + '\n')
+			file_opt.writelines('RefBasename:' + '\t' + self.ids.refBasename.text + '\n')
 			file_opt.close()
 			self.ids.pullpath.text = save
 		except IndexError:
@@ -370,6 +373,8 @@ class Tabs(TabbedPanel):
 						self.ids.px1.text = yank
 					if re.search('PxSize', line):
 						self.ids.A1.text = yank
+					if re.search('Threads', line):
+						self.ids.CPU.text = yank
 					if re.search('ChimeraX', line):
 						self.ids.chimera_path.text = yank
 					if re.search('Tomogram', line):
@@ -420,6 +425,10 @@ class Tabs(TabbedPanel):
 						self.ids.volvol.text = yank
 					if re.search('Volwedge', line):
 						self.ids.volwedge.text = yank
+					if re.search('RefPath', line):
+						self.ids.refPath.text = yank
+					if re.search('RefBasename', line):
+						self.ids.refBasename.text = yank
 		except FileNotFoundError:
 			print('Enter a file path')
 		except IsADirectoryError:
@@ -1130,11 +1139,11 @@ class Tabs(TabbedPanel):
 												mrcfile.new(direct + subtomo, subby, overwrite=True)
 												with mrcfile.open(direct + subtomo, 'r+') as mrc:
 													mrc.voxel_size = angpix
-											# # create files
+											# create .coords file
 											# eman = name[::-1]
 											# cutName = re.sub('\d{6}','', eman)
 											# cutName = cutName[::-1]
-											# file_opt = open(folder + '/' + cutName + '.coords', 'a')
+											# file_opt = open(folder + '/' + subtomo + '.coords', 'a')
 											# file_opt.writelines(finalx + ' ' + finaly + ' ' + finalz + '\n')
 											# file_opt.close()
 		
@@ -1326,7 +1335,7 @@ class Tabs(TabbedPanel):
 
 	def mask(self):
 		try:
-			direct = self.ids.mainmrc.text
+			direct = self.ids.mainsubtomo.text
 			box = int(self.ids.px1.text)
 			angpix = float(self.ids.A1.text)
 			rad = float(self.ids.radius.text)
