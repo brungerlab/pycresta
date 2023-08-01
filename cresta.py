@@ -1837,18 +1837,33 @@ class Tabs(TabbedPanel):
 		self.ids.visualizefeedback.text = 'Subtomogram Rejected'
 		self.ids.visualizefeedback.color = (0,.3,0,1)
 
-	def plottedBack(self):
+	def plotBack(self):
+		subtomoDirect = self.ids.mainsubtomo.text
 		starf = self.ids.mainstar.text
-		refPath = self.ids.refPath.text
-		refBasename = self.ids.refBasename.text
-		minParticleNum = float(self.ids.minParticleNum.text)
-		boxsize = float(self.ids.px1.text)
-		boxsize = [boxsize, boxsize, boxsize]
-		folderPath = "/".join(starf.split("/")[:-1]) + "/"
-		plotOut = folderPath + 'plotted'
-		if os.path.isdir(plotOut) == False:
-			os.makedirs(plotOut, exist_ok=True)
-		tom.plotBack(starf, refPath, refBasename, plotOut, boxsize, minParticleNum)
+		classPath = self.ids.refPath.text
+		classBasename = self.ids.refBasename.text
+		bxsz = float(self.ids.px1.text)
+		boxsize = [bxsz, bxsz, bxsz]
+		# create "plotback" folder (to be implemented)
+		# get models in class that matches basename
+		folder = os.listdir(classPath)
+		classes = [file for file in folder if classBasename in file]
+		# read starfile as dataframe
+		star_data = starfile.read(starf)["particles"]
+		# iterate through each row of dataframe
+		for row in star_data.itertuples(index=False):
+			imgName = row.rlnImageName.split('/')[-1]
+			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
+			classNum = random.randint(1, 3)
+			model = [file for file in classes if "00" + classNum in file][0]
+			coords = [int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateY)]
+			angles = [float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)]
+			shifts = [float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)]
+			# transform corresponding model by inversed angles and shifts specified in starfile
+			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True) # not sure about shifton
+			# shift model to coords specified in star file (to be implemented)
+			mrcfile.new(subtomoDirect + "/plotback_" + imgName, transformed)
+		return
 
 	pass
 
