@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import numpy as np
 import pandas as pd
-from scipy import ndimage
 from scipy.spatial.transform import Rotation as R
 from scipy.fft import fftn, fftshift, ifftn, ifftshift
 from skspatial.objects import Points
@@ -858,37 +857,6 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
     for x in range(len(removeList1)):
         subprocess.run(['sed', '-i', '', '/' + inputstar['rlnImageName'][removeList1[x]].replace('/', '\\/') + '/d', outputstar1])
     return
-
-
-def paste2(a, b, co):
-    d1, d2, d3 = b.shape
-    s1, s2, s3 = a.shape
-
-    vx = np.arange(max(1, co[0]), min(s1, co[0] + d1))
-    vy = np.arange(max(1, co[1]), min(s2, co[1] + d2))
-    wx = np.arange(max(-co[0] + 2, 1), min(s1 - co[0] + 1, d1))
-    wy = np.arange(max(-co[1] + 2, 1), min(s2 - co[1] + 1, d2))
-
-    if vx.size > 0 and vy.size > 0:
-        if d3 == 1:
-            a[vx[:, None], vy] = np.maximum(a[vx[:, None], vy], b[wx[:, None], wy])
-        else:
-            vz = np.arange(max(1, co[2]), min(s3, co[2] + d3))
-            wz = np.arange(max(-co[2] + 2, 1), min(s3 - co[2] + 1, d3))
-            if vz.size > 0:
-                a[vx[:, None], vy, vz[:, None]] = np.maximum(a[vx[:, None], vy, vz[:, None]], b[wx[:, None], wy, wz[:, None]])
-    return a
-
-def rescale3d(in_vol, new_size):
-    out_tmp = np.zeros([new_size[0], new_size[1], in_vol.shape[2]], dtype=in_vol.dtype)
-    for iz in range(in_vol.shape[2]):
-        out_tmp[:, :, iz] = ndimage.zoom(in_vol[:, :, iz], (new_size[0] / in_vol.shape[0], new_size[1] / in_vol.shape[1]), order=1)
-    
-    out = np.zeros(new_size + (in_vol.shape[2],), dtype=in_vol.dtype)
-    for ix in range(out_tmp.shape[0]):
-        out[ix, :, :] = ndimage.zoom(out_tmp[ix, :, :], (new_size[1] / out_tmp.shape[1], new_size[2] / out_tmp.shape[2]), order=1)
-
-    return out
 
 # calculate angles 
 def calcangles(dataframe):

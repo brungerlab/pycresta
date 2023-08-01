@@ -5,21 +5,14 @@ kivy.require('2.1.0')
 
 #python packages
 import os, subprocess
-from subprocess import call
 from threading import Thread
 import re
 import shutil
 import time
 import pandas as pd
 import numpy as np
-from scipy.fftpack import fftn, ifftn, ifftshift
 import starfile
 import mrcfile
-import sys
-import csv
-from pathlib import Path
-import math
-import glob
 import matplotlib.pyplot as plt
 import weakref
 from datetime import timedelta
@@ -35,19 +28,11 @@ from kivy.config import Config
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 #importing necessary kivy features
 from kivy.app import App
-from kivy.graphics import Canvas, Color
 from kivy.lang import Builder
-from kivy.properties import ColorProperty, NumericProperty, ObjectProperty, StringProperty
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.button import Button
-from kivy.uix.checkbox import CheckBox
-from kivy.uix.filechooser import FileChooserListView
-from kivy.uix.gridlayout import GridLayout
+from kivy.properties import ObjectProperty
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.spinner import Spinner
 from kivy.uix.tabbedpanel import TabbedPanel
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
@@ -103,29 +88,23 @@ class EndVecFinder(FloatLayout):
     endvecdsave = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
-
-# class ParStarFinder(FloatLayout):
-# 	parstardsave = ObjectProperty(None)
-# 	text_input = ObjectProperty(None)
-# 	cancel = ObjectProperty(None)
     
 class MaskFinder(FloatLayout):
     maskdsave = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
     
-#giving buttons functionality
 class Tabs(TabbedPanel):
 	
 	label = Label(text="Sigma")
 	label2 = Label(text=" ", size_hint_y=.8)
 	sigma = TextInput(text="5", multiline=False, size_hint_x=.12, size_hint_y=1.9, pos_hint={'center_x': .5, 'center_y': .5})
 
-# close filechooser popups
+	# close filechooser popups
 	def dismiss_popup(self):
 		self._popup.dismiss()
 		
-# star file unfiltered save
+	# star file unfiltered save
 	def show_star(self):
 		content = StarFinder(stardsave=self.starsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Unfiltered Star File", content=content,
@@ -149,7 +128,7 @@ class Tabs(TabbedPanel):
 			self.ids.mainstar.text = 'Choose Unfiltered Star File Path'
 		self.dismiss_popup()
 
-# star file filtered save
+	# star file filtered save
 	def show_starfilt(self):
 		content = StarFiltFinder(stardfiltsave=self.starfiltsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Filtered Star File", content=content,
@@ -168,7 +147,7 @@ class Tabs(TabbedPanel):
 			self.ids.mainstarfilt.text = 'Choose Filtered Star File Path'
 		self.dismiss_popup()
 
-# subtomogram directory save
+	# subtomogram directory save
 	def show_subtomo(self):
 		content = SubtomoFinder(subtomodsave=self.subtomosave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Subtomogram Directory", content=content,
@@ -183,7 +162,7 @@ class Tabs(TabbedPanel):
 			self.ids.mainsubtomo.text = 'Choose Subtomogram Directory'
 		self.dismiss_popup()
 
-# mrc directory save
+	# mrc directory save
 	def show_mrc(self):
 		content = MrcFinder(mrcdsave=self.mrcsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Mrc Directory", content=content,
@@ -198,7 +177,7 @@ class Tabs(TabbedPanel):
 			self.ids.mainmrc.text = 'Choose Mrc Directory'
 		self.dismiss_popup()
 
-# tomogram path save
+	# tomogram path save
 	def show_tomo(self):
 		content = TomoFinder(tomodsave=self.tomosave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Tomogram Path", content=content,
@@ -216,7 +195,7 @@ class Tabs(TabbedPanel):
 			self.ids.tomo.text = 'Choose Tomogram Path'
 		self.dismiss_popup()
 
-# tomogram coords path save
+	# tomogram coords path save
 	def show_tomocoords(self):
 		content = TomoCoordsFinder(tomocoordsdsave=self.tomocoordssave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Tomogram Coords Path", content=content,
@@ -231,7 +210,7 @@ class Tabs(TabbedPanel):
 			self.ids.tomocoords.text = 'Choose Coords Path'
 		self.dismiss_popup()
 
-# start vector path save
+	# start vector path save
 	def show_startvec(self):
 		content = StartVecFinder(startvecdsave=self.startvecsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Start Vector Path", content=content,
@@ -246,7 +225,7 @@ class Tabs(TabbedPanel):
 			self.ids.vectorStart.text = 'Choose Vector Start Path'
 		self.dismiss_popup()
 
-# end vector path save
+	# end vector path save
 	def show_endvec(self):
 		content = EndVecFinder(endvecdsave=self.endvecsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save End Vector Path", content=content,
@@ -261,25 +240,7 @@ class Tabs(TabbedPanel):
 			self.ids.vectorEnd.text = 'Choose Vector End Path'
 		self.dismiss_popup()
 
-# parse star file save
-	# def show_parstar(self):
-	# 	content = ParStarFinder(parstardsave=self.parstarsave, cancel=self.dismiss_popup)
-	# 	self._popup = Popup(title="Save Parser Star File", content=content,
-    #                         size_hint=(0.9, 0.9))
-	# 	self._popup.open()
-
-	# def parstarsave(self, path, filename):
-	# 	parstarpath = filename
-	# 	if len(parstarpath) != 0:
-	# 		if parstarpath.endswith('.star') == False:
-	# 			self.ids.restar.text = 'Not a ".star" file — Choose Star File Path'
-	# 		else:
-	# 			self.ids.restar.text = parstarpath
-	# 	elif len(parstarpath) == 0:
-	# 		self.ids.restar.text = 'Choose Star File Path'
-	# 	self.dismiss_popup()
-
-# mask path save
+	# mask path save
 	def show_mask(self):
 		content = MaskFinder(maskdsave=self.masksave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Mask Path", content=content,
@@ -434,6 +395,7 @@ class Tabs(TabbedPanel):
 		except IsADirectoryError:
 			print('Enter a text file')
 
+	# transition between wiener and gaussian filters
 	def show_screen(self):
 		self.ids.first_row_wiener.clear_widgets()
 		self.ids.second_row_wiener.clear_widgets()
@@ -458,6 +420,7 @@ class Tabs(TabbedPanel):
 			text = Label(text="Please select a filter")
 			self.ids.gaussian_row.add_widget(text)
 	
+	# tomogram extraction
 	def extract(self):
 		tomogram = self.ids.tomo.text
 		coordfile = self.ids.tomocoords.text
@@ -548,6 +511,7 @@ class Tabs(TabbedPanel):
 			self.ids.mainstar.text = direct + tomogName + '.star'
 			self.ids.mainsubtomo.text = direct
 
+	# calculate subtomogram angles
 	def calculateAngles(self):
 		# read coord files and unfiltered star file
 		coordStart = self.ids.vectorStart.text
@@ -577,8 +541,9 @@ class Tabs(TabbedPanel):
 		starf['particles'] = star_data
 		starfile.write(starf, self.ids.mainstar.text, overwrite=True)
 
+	# graph for wiener function
 	plt.ion()
-
+	# wiener and gaussian filtering
 	def filter_vol(self):
 		try:
 			self.ids['sigma'] = weakref.ref(Tabs.sigma)
@@ -605,7 +570,7 @@ class Tabs(TabbedPanel):
 
 			if wienerbutton == False and gaussianbutton == False:
 				print("At least one option needs to be selected.")
-		#	wiener
+			# wiener
 			if wienerbutton == True:
 				if starButton:
 					imageFileNames = starfile.read(starf)["particles"]["rlnImageName"]
@@ -720,7 +685,7 @@ class Tabs(TabbedPanel):
 
 				plt.show(block=False)
 
-		#	gaussian
+			# gaussian
 			if gaussianbutton == True:
 				from scipy.ndimage import gaussian_filter
 				if starButton:
@@ -832,6 +797,7 @@ class Tabs(TabbedPanel):
 		except FileNotFoundError:
 			print("This directory does not exist")
 
+	# coordinate picker
 	def pick_coord(self):
 		try:
 			# initialize variables
@@ -846,7 +812,7 @@ class Tabs(TabbedPanel):
 			pxsz = float(self.ids.A1.text)
 			curindex = int(self.ids.index.text)
 			self.ids.pickcoordtext.text = 'Please wait. Opening ChimeraX.'
-		#	Find the filename and tomogram name for the current index
+			# find the filename and tomogram name for the current index
 			imageNames = starfile.read(listName)["particles"]["rlnImageName"]
 			folderNames = starfile.read(listName)["particles"]["rlnMicrographName"]
 			starfinal = imageNames[curindex - 1]
@@ -913,6 +879,7 @@ class Tabs(TabbedPanel):
 
 		return
 
+	# next subtomogram
 	def right_pick(self):
 		if self.ids.pickcoordFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -941,6 +908,7 @@ class Tabs(TabbedPanel):
 			return
 		return
 	
+	# next subtomogram * 10
 	def fastright_pick(self):
 		if self.ids.pickcoordFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -969,6 +937,7 @@ class Tabs(TabbedPanel):
 			return
 		return
 
+	# previous subtomogram
 	def left_pick(self):
 		try:
 			if self.ids.pickcoordFiltered.active == True:
@@ -991,6 +960,7 @@ class Tabs(TabbedPanel):
 			self.ids.pickcoordtext.text = 'Click above to begin.'
 		return
 	
+	# previous subtomogram * 10
 	def fastleft_pick(self):
 		try:
 			if self.ids.pickcoordFiltered.active == True:
@@ -1010,6 +980,7 @@ class Tabs(TabbedPanel):
 			print("This star file does not exist")
 		return
 
+	# add coord picker note
 	def note(self):
 		# create note
 		if self.ids.pickcoordFiltered.active == True:
@@ -1028,7 +999,7 @@ class Tabs(TabbedPanel):
 		print('Saved to ' + direct + file_path)
 		return
 
-	# re-extraction (coordinate re-picker)
+	# re-extraction from picked coordinates
 	def reextraction(self):
 		# initialize variables
 		starf = self.ids.mainstarfilt.text
@@ -1246,91 +1217,7 @@ class Tabs(TabbedPanel):
 		os.remove(cmmStar)
 		return
 
-	# def parse(self):
-	# 	starpar = self.ids.restar.text
-	# 	outpar = "/".join(self.ids.restar.text.split("/")[:-1]) + '/newcoord/'
-	# 	if os.path.exists(outpar) == False:
-	# 		os.mkdir(outpar)
-	# 	xstar = '_rlnCoordinateX'
-	# 	ystar = '_rlnCoordinateY'
-	# 	zstar = '_rlnCoordinateZ'
-	# 	microstar = '_rlnMicrographName'
-	# 	micronames = outpar + 'microname.txt'
-	# 	file_opt = open(micronames, 'w')
-	# 	file_opt.write('')
-	# 	file_opt.close()
-	# #	finding correct column indexes
-	# 	with open(starpar) as par:
-	# 		for line in par:
-	# 			if re.search(xstar, line):
-	# 				xcol = re.findall(r'\d+', line)
-	# 				xcol = int(xcol[0]) - 1
-	# 			if re.search(ystar, line):
-	# 				ycol = re.findall(r'\d+', line)
-	# 				ycol = int(ycol[0]) - 1	
-	# 			if re.search(zstar, line):
-	# 				zcol = re.findall(r'\d+', line)
-	# 				zcol = int(zcol[0]) - 1
-	# 			if re.search(microstar, line):
-	# 				microcol = re.findall(r'\d+', line)
-	# 				microcol = int(microcol[0]) - 1
-	# 			if re.search('.mrc', line):
-	# 				fold = line.split()
-	# 				unique = fold[microcol]
-	# 				file_opt = open(micronames, 'a')
-	# 				file_opt.write(unique + '\n')
-	# 				file_opt.close()
-	# #	searching for unique tomograms
-	# 	lines_seen = set()
-	# 	with open(micronames, 'r+') as tomb:
-	# 		d = tomb.readlines()
-	# 		tomb.seek(0)
-	# 		for i in d:
-	# 			if i not in lines_seen:
-	# 				tomb.write(i)
-	# 				lines_seen.add(i)
-	# 		tomb.truncate()
-	# 	with open(micronames) as stap:
-	# 		for line in stap:
-	# 			tine = line.strip()
-	# 			fine = tine.replace('\n', '')
-	# 			ending = fine.rsplit('/', 1)[-1]
-	# 			vine = ending.replace('.mrc', '')
-	# 			if re.search('_filt', vine):
-	# 				vine = vine.replace('_filt', '')
-	# 			edge = outpar + vine + '_subcoord.coord'
-	# 			file_opt = open(edge, 'w')
-	# 			file_opt.writelines('')
-	# 			file_opt.close()
-	# 			with open(starpar) as rats:
-	# 				for line in rats:
-	# 					if re.search(fine, line):
-	# 						sline = line.split()
-	# 					#	extracting the correct values
-	# 						xst = str(int(float(sline[xcol])))
-	# 						yst = str(int(float(sline[ycol])))
-	# 						zst = str(int(float(sline[zcol])))
-	# 						allcooc = xst + '\t' + yst + '\t' + zst + '\t'
-	# 						if int(xst) < 800 and int(yst) < 800 and int(zst) < 800:
-	# 							print('WARNING: Double check that files in ' + vine + ' are binned!')
-	# 					#	create the coord file
-	# 						file_opt = open(edge, 'a')
-	# 						if self.ids.cooc.active == True:
-	# 							file_opt.writelines(allcooc)
-	# 						if self.ids.othercols.text != '':
-	# 							other = self.ids.othercols.text
-	# 							parts = other.split(',')
-	# 							for item in parts:
-	# 								if len(item) > 0:
-	# 									spot = int(item)
-	# 									spod = spot - 1
-	# 									info = sline[spod]
-	# 									file_opt.writelines(info + '\t')
-	# 						file_opt.writelines('\n')
-	# 						file_opt.close()
-	# 	os.remove(micronames)
-	# 	return
-
+	# create masks
 	def mask(self):
 		try:
 			direct = self.ids.mainsubtomo.text
@@ -1443,6 +1330,7 @@ class Tabs(TabbedPanel):
 		cut_part_and_movefunc(mask, starf, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg)
 		return
 
+	# calculate cross correlation coefficient
 	def calculate_ccc(self):
 		cccVol1 = self.ids.cccvolone.text
 		cccVol2 = self.ids.cccvoltwo.text
@@ -1455,6 +1343,7 @@ class Tabs(TabbedPanel):
 		print(ccc)
 		return
 
+	# filter subtomograms by CCC
 	def filter_ccc(self):
 		volume = self.ids.volvol.text
 		star = self.ids.mainstar.text
@@ -1466,6 +1355,7 @@ class Tabs(TabbedPanel):
 		tom.ccc_loop(star, volume, cccthresh, boxsize, zoom, wedge)
 		return
 	
+	# flip a random subset of subtomograms by 180 degrees
 	def randFlip(self):
 		self.ids.randaxis.text = ""
 		starf = self.ids.mainstar.text
@@ -1510,6 +1400,7 @@ class Tabs(TabbedPanel):
 			raise ValueError("Unsupported file extension.")
 		return
 
+	# subtomogram rotation function
 	def rotate_subtomos(self, listName, dir, pxsz, boxsize, shifton, ownAngs):
 		boxsize = [boxsize, boxsize, boxsize]
 		fileNames, angles, shifts, list_length, pickPos, new_star_name = tom.readList(listName, pxsz, 'rottrans', ownAngs)
@@ -1546,6 +1437,7 @@ class Tabs(TabbedPanel):
 			thread.join()
 		return
 	
+	# rotate by star file
 	def rotate(self):
 		starf = self.ids.mainstar.text
 		if self.ids.mainsubtomo.text[-1] != '/':
@@ -1561,6 +1453,7 @@ class Tabs(TabbedPanel):
 		print('Rotation by Star File Complete\n')
 		return
 	
+	# rotate by manual angle/axis
 	def manualrotate(self):
 		self.ids.noaxis.text = " "
 		starf = self.ids.mainstar.text
@@ -1602,6 +1495,7 @@ class Tabs(TabbedPanel):
 	# used to store a subtomogram's accepted/rejected status
 	indexToVal = {}
 
+	# visualize subtomograms
 	def visualize(self):
 		# view current subtomogram
 		if self.ids.visualizeFiltered.active == True:
@@ -1641,6 +1535,7 @@ class Tabs(TabbedPanel):
 		self.ids.visualizefeedback.color = (.6,0,0,1)
 		return
 
+	# next subtomogram
 	def right_visualize(self):
 		if self.ids.visualizeFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -1674,6 +1569,7 @@ class Tabs(TabbedPanel):
 			self.ids.visualizefeedback.color = (250, 250, 31, 1)
 			return
 
+	# next subtomogram * 10
 	def fastright_visualize(self):
 		if self.ids.visualizeFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -1707,6 +1603,7 @@ class Tabs(TabbedPanel):
 			self.ids.visualizefeedback.color = (250, 250, 31, 1)
 			return
 
+	# previous subtomogram
 	def left_visualize(self):
 		if self.ids.visualizeFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -1739,6 +1636,7 @@ class Tabs(TabbedPanel):
 			self.ids.visualizefeedback.color = (250, 250, 31, 1)
 			return
 		
+	# previous subtomogram * 10
 	def fastleft_visualize(self):
 		if self.ids.visualizeFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
@@ -1771,6 +1669,7 @@ class Tabs(TabbedPanel):
 			self.ids.visualizefeedback.color = (250, 250, 31, 1)
 			return
 
+	# accept the current subtomogram
 	def saveVisual(self):
 		index = int(self.ids.visind1.text) - 1
 		self.indexToVal[index + 1] = "accepted"
@@ -1834,7 +1733,7 @@ class Tabs(TabbedPanel):
 		self.ids.visualizefeedback.text = 'Subtomogram Accepted'
 		self.ids.visualizefeedback.color = (0,.3,0,1)
 
-
+	# reject the current subtomogram
 	def noSaveVisual(self):
 		index = int(self.ids.visind1.text) - 1
 		self.indexToVal[index + 1] = "rejected"
@@ -1894,6 +1793,7 @@ class Tabs(TabbedPanel):
 		self.ids.visualizefeedback.text = 'Subtomogram Rejected'
 		self.ids.visualizefeedback.color = (0,.3,0,1)
 
+	# plot back into tomogram
 	def plotBack(self):
 		subtomoDirect = self.ids.mainsubtomo.text
 		starf = self.ids.mainstar.text
