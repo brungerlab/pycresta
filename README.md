@@ -49,6 +49,8 @@ Pip installs:
 
 	pip3 install scikit-image
 
+	pip3 install scikit-spatial
+
 	pip3 install mrcfile
 
 	pip3 install starfile
@@ -63,7 +65,7 @@ then 'cd' to the pycresta directory, run:
 enter `python3 cresta.py` to start CrESTA
 
 ----------------------------------------------------------------------------------------------------------------------------
-Use Test_Data and TestExamples folders to confirm that everything works.
+See the [Google Drive Files](https://drive.google.com/drive/folders/1_1u66QeEMyWK0kxrFrkLmuDgQMvQY5Np?usp=sharing) for test data and tomograms.
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------

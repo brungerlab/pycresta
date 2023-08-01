@@ -180,6 +180,66 @@
                 text: "Save"
                 on_release: root.tomocoordsdsave(filechooser.path, text_input.text)
 
+<StartVecFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.startvecdsave(filechooser.path, text_input.text)
+
+<EndVecFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+			size_hint_y: .05
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.endvecdsave(filechooser.path, text_input.text)
+
 # <ParStarFinder>:
 #     text_input: text_input
 #     BoxLayout:
@@ -247,7 +307,20 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'Extract' folder.\nA star file is generated."
+			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'Sub' folder.\nA star file is generated."
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<CalcAnglesInfo@Popup>
+	size_hint: .75, .45
+	title: 'Calculate Angles'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Choose vector start and end coordinates paths.\n\nCalculates angles and inserts them into\nthe 'unfiltered star file' on Master Key.\nRecommended after Extraction.\n"
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -723,7 +796,7 @@
 					orientation: 'vertical'
 					size_hint_y: 1.2
 					Label:
-						size_hint_y: .1
+						size_hint_y: .05
 					BoxLayout:
 						orientation: 'vertical'
 						size_hint_x: .75
@@ -741,6 +814,7 @@
 							font_size: 35
 							pos_hint: {'center_x': .1}
 							bold: True
+							size_hint_y: .4
 						Button:
 							text: 'information'
 							background_color: 0, 1.2, 2, .5
@@ -748,16 +822,14 @@
 							size_hint: .15, .45
 							pos_hint: {'center_x': .5, 'center_y': .5}	
 						Label:
-							size_hint_y: .05
-						Label:
 							text: 'Tomogram File Path'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
-							size_hint_y: .6
+							size_hint_y: .4
 						TextInput:
 							text: 'Choose Tomogram Path'
-							size_hint: .9, .7
+							size_hint: .9, .75
 							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -776,16 +848,14 @@
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
-							size_hint_y: .1
-						Label:
 							text: 'Coordinates File Path'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
-							size_hint_y: .6
+							size_hint_y: .4
 						TextInput:
 							text: 'Choose Coords Path'
-							size_hint: .9, .7
+							size_hint: .9, .75
 							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -824,11 +894,11 @@
 							text: ' '
 							size_hint_y: .3
 					Label:
-						size_hint_y: .05
+						size_hint_y: .025
 				BoxLayout:
 					orientation: 'vertical'
 					Label:
-						size_hint_y: .05
+						size_hint_y: .025
 					BoxLayout:
 						orientation: 'vertical'
 						size_hint_x: .75
@@ -849,24 +919,22 @@
 						Button:
 							text: 'information'
 							background_color: 0, 1.2, 2, .5
-							on_release: Factory.ExtractionInfo().open()
+							on_release: Factory.CalcAnglesInfo().open()
 							size_hint: .15, .45
 							pos_hint: {'center_x': .5, 'center_y': .5}	
 						Label:
-							size_hint_y: .05
-						Label:
-							text: 'M Coords Path'
+							text: 'Vector Start Point'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
 							size_hint_y: .6
 						TextInput:
-							text: 'Choose M'
+							text: 'Choose Start Coords'
 							size_hint: .9, .7
-							font_size: 30
+							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							id: coordsM
+							id: vectorStart
 							multiline: True
 							readonly: True
 							cursor_blink: False
@@ -876,25 +944,23 @@
 							selection_color: (1,1,1,0)
 						Button:
 							background_color: 0, 1.2, 2, .5
-							text: 'Choose M'
-							on_release: root.show_tomo()
+							text: 'Choose Start Path'
+							on_release: root.show_startvec()
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
-							size_hint_y: .1
-						Label:
-							text: 'C Coords Path'
+							text: 'Vector End Point'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
 							size_hint_y: .6
 						TextInput:
-							text: 'Choose C'
+							text: 'Choose End Coords'
 							size_hint: .9, .7
-							font_size: 30
+							font_size: 25
 							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							id: coordsC
+							id: vectorEnd
 							multiline: True
 							readonly: True
 							cursor_blink: False
@@ -904,8 +970,8 @@
 							selection_color: (1,1,1,0)
 						Button:
 							background_color: 0, 1.2, 2, .5
-							text: 'Choose C'
-							on_release: root.show_tomocoords()
+							text: 'Choose End Path'
+							on_release: root.show_endvec()
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Button:
@@ -918,7 +984,7 @@
 							text: ' '
 							size_hint_y: .3
 					Label:
-						size_hint_y: .2
+						size_hint_y: .1
 
 	TabbedPanelItem:
 		text: 'Re-Extraction'

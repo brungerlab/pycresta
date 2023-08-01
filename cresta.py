@@ -93,6 +93,16 @@ class TomoCoordsFinder(FloatLayout):
     tomocoordsdsave = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
+    
+class StartVecFinder(FloatLayout):
+    startvecdsave = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    
+class EndVecFinder(FloatLayout):
+    endvecdsave = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
 
 # class ParStarFinder(FloatLayout):
 # 	parstardsave = ObjectProperty(None)
@@ -219,6 +229,36 @@ class Tabs(TabbedPanel):
 			self.ids.tomocoords.text = 'Choose Coords Path'
 		self.dismiss_popup()
 
+# start vector path save
+	def show_startvec(self):
+		content = StartVecFinder(startvecdsave=self.startvecsave, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Save Start Vector Path", content=content,
+                            size_hint=(0.9, 0.9))
+		self._popup.open()
+
+	def startvecsave(self, path, filename):
+		startvecpath = filename
+		if len(startvecpath) != 0:
+			self.ids.vectorStart.text = startvecpath
+		elif len(startvecpath) == 0:
+			self.ids.vectorStart.text = 'Choose Start Path'
+		self.dismiss_popup()
+
+# end vector path save
+	def show_endvec(self):
+		content = EndVecFinder(endvecdsave=self.endvecsave, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Save End Vector Path", content=content,
+                            size_hint=(0.9, 0.9))
+		self._popup.open()
+
+	def endvecsave(self, path, filename):
+		endvecpath = filename
+		if len(endvecpath) != 0:
+			self.ids.vectorEnd.text = endvecpath
+		elif len(endvecpath) == 0:
+			self.ids.vectorEnd.text = 'Choose End Path'
+		self.dismiss_popup()
+
 # parse star file save
 	# def show_parstar(self):
 	# 	content = ParStarFinder(parstardsave=self.parstarsave, cancel=self.dismiss_popup)
@@ -274,6 +314,8 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('ChimeraX:' + '\t' + self.ids.chimera_path.text + '\n')
 			file_opt.writelines('Tomogram:' + '\t' + self.ids.tomo.text + '\n')
 			file_opt.writelines('TomoCoord:' + '\t' + self.ids.tomocoords.text + '\n')
+			file_opt.writelines('StartVect:' + '\t' + self.ids.vectorStart.text + '\n')
+			file_opt.writelines('EndVect:' + '\t' + self.ids.vectorEnd.text + '\n')
 			file_opt.writelines('Index:' + '\t' + self.ids.index.text + '\n')
 			file_opt.writelines('Indall:' + '\t' + self.ids.index2.text + '\n')
 			file_opt.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
@@ -327,6 +369,10 @@ class Tabs(TabbedPanel):
 						self.ids.tomo.text = yank
 					if re.search('TomoCoord', line):
 						self.ids.tomocoords.text = yank
+					if re.search('StartVect', line):
+						self.ids.vectorStart.text = yank
+					if re.search('EndVect', line):
+						self.ids.vectorEnd.text = yank
 					if re.search('Index', line):
 						self.ids.index.text = yank
 					if re.search('Indall', line):
@@ -396,7 +442,7 @@ class Tabs(TabbedPanel):
 		tomName = tomogram.split('/')[-1].replace('.mrc', '')
 		# use for star file micrographName and imageName
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
-		subdirect = tomDate + '/' + tomName + '/Extract/'
+		subdirect = tomDate + '/' + tomName + '/Sub/'
 		# use for full path containing subtomograms
 		directory = direct + subdirect
 		# memory map the tomogram
@@ -476,13 +522,36 @@ class Tabs(TabbedPanel):
 			starfile.write(extractStar, direct + tomName + '.star', overwrite=True)
 			print('Extraction Complete\n')
 			self.ids.mainstar.text = direct + tomName + '.star'
+			self.ids.mainsubtomo.text = direct
 
 	def calculateAngles(self):
-		coordM = self.ids.coordsM.text
-		coordC = self.ids.coordsC.text
+		# read coord files and unfiltered star file
+		coordStart = self.ids.vectorStart.text
+		coordEnd = self.ids.vectorEnd.text
 		starf = self.ids.mainstar.text
 		starf = starfile.read(starf)
-
+		# initialize data list
+		data = []
+		# open and loop through the vector start and end files
+		with open(coordStart, 'r') as mem, open(coordEnd, 'r') as cen:
+			for lineM, lineC in zip(mem, cen):
+				lineM = lineM.strip()
+				lineC = lineC.strip()
+				posM = lineM.split(' ')
+				posC = lineC.split(' ')
+				# append the x,y,z from each coord file to row
+				row = [posM[0], posM[1], posM[2], posC[0], posC[1], posC[2]]
+				data.append(row)
+		columns = ['Xmem', 'Ymem', 'Zmem', 'Xcen', 'Ycen', 'Zcen']
+		# convert data to dataframe
+		dataframe = pd.DataFrame(data, columns=columns)
+		# call calcangles function from tom.py
+		newangs = tom.calcangles(dataframe)
+		# insert the angles into the star file
+		star_data = pd.DataFrame.from_dict(starf['particles'])
+		star_data.loc[:, ['rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi']] = newangs
+		starf['particles'] = star_data
+		starfile.write(starf, self.ids.mainstar.text, overwrite=True)
 
 	plt.ion()
 
@@ -1211,275 +1280,6 @@ class Tabs(TabbedPanel):
 	# 						file_opt.close()
 	# 	os.remove(micronames)
 	# 	return
-
-	def calculate_ang(self):
-		# check need for cwd
-		cwd = os.getcwd()
-		star = self.ids.mainstar.text
-		self.ids.coordf.text = self.ids.coordf.text.strip()
-		if self.ids.coordf.text[-1] != '/':
-			self.ids.coordf.text = self.ids.coordf.text + '/'
-		CoordDir = self.ids.coordf.text
-		Suffix = self.ids.suffixf.text
-		Bin = self.ids.binnf.text
-		Suffixt = self.ids.suffixt.text
-		Bint = self.ids.binnt.text
-		head, tail = os.path.split(star)
-		if head[-1] != '/':
-			head = head + '/'
-		Out = self.ids.outputp.text
-		CMMDir = self.ids.cmmf.text
-		if os.path.exists(Out) == False:
-			os.mkdir(Out)
-		tempo = Out
-		if os.path.exists(tempo + '/temp') == False:
-			os.mkdir(tempo + '/temp')
-		tempy = tempo + '/temp'
-		starfile = star
-	#	This gets the positions of micrograph name, and original x y and z coordinates from the star file
-		with open(starfile) as bigstar:
-			corx = '_rlnCoordinateX'
-			cory = '_rlnCoordinateY'
-			corz = '_rlnCoordinateZ'
-			image = '_rlnImageName'
-			micrograph = '_rlnMicrographName'
-			optics = '_rlnOpticsGroup'
-			groupno = '_rlnGroupNumber'
-			anglerot = '_rlnAngleRot'
-			angletil = '_rlnAngleTilt'
-			anglepsi = '_rlnAnglePsi'
-			for line in bigstar:
-				if re.search(corx, line):
-					Xpos = re.findall(r'\d+', line)
-					Xpos = int(Xpos[0]) - 1	
-				if re.search(cory, line):
-					Ypos = re.findall(r'\d+', line)
-					Ypos = int(Ypos[0]) - 1		
-				if re.search(corz, line):
-					Zpos = re.findall(r'\d+', line)
-					Zpos = int(Zpos[0]) - 1
-				if re.search(image, line):
-					Namepos = re.findall(r'\d+', line)
-					Namepos = int(Namepos[0]) - 1
-				if re.search(micrograph, line):
-					Micropos = re.findall(r'\d+', line)
-					Micropos = int(Micropos[0]) - 1
-				if re.search(optics, line):
-					Opticspos = re.findall(r'\d+', line)
-					Opticspos = int(Opticspos[0]) - 1
-				if re.search(groupno, line):
-					Groupnopos = re.findall(r'\d+', line)
-					Groupnopos = int(Groupnopos[0]) - 1
-				if re.search(anglerot, line):
-					Rotpos = re.findall(r'\d+', line)
-					Rotpos = int(Rotpos[0]) - 1
-				if re.search(angletil, line):
-					Tilpos = re.findall(r'\d+', line)
-					Tilpos = int(Tilpos[0]) - 1
-				if re.search(anglepsi, line):
-					Psipos = re.findall(r'\d+', line)
-					Psipos = int(Psipos[0]) - 1
-	#	Makes new file without headers called decapitated.txt
-		line_length = 0
-		with open(starfile) as bigstar:
-			for line in bigstar:
-				if (len(line) > line_length):
-					line_length = len(line)
-		line_length = line_length - 5
-		smallstar = tempy + '/decapitated.txt'
-		file_opt = open(smallstar, 'w')
-		file_opt.writelines('')
-		file_opt.close()
-		with open(starfile) as bigstar:
-			for line in bigstar:
-				if len(line) >= line_length:
-					file_opt = open(smallstar, 'a')
-					file_opt.writelines(line)
-					file_opt.close()
-	#	break txt into just the lines regarding our specific file
-		smalleststar = tempy + '/capped.txt'
-		file_opt = open(smalleststar, 'w')
-		file_opt.writelines('')
-		file_opt.close()
-		openup = CMMDir
-		back, actual = os.path.split(openup)
-		for line in open(smallstar, 'r'):
-			if re.search(actual, line):
-				file_opt = open(smalleststar, 'a')
-				file_opt.writelines(line)
-				file_opt.close()	
-	#	find which line numbers we are focusing on
-		numbers = []
-		findcmm = os.fsencode(openup)
-		for file in os.listdir(findcmm):
-			filename = os.fsdecode(file)
-			if filename.endswith('.cmm'):
-				filenoend = filename.replace('.cmm', '')
-				with open(smalleststar) as cap:
-					for num, line in enumerate(cap, 1):
-						if filenoend in line:
-							numbers.append(num)
-		if self.ids.otherdir.active == False:
-	#	create a file with the original coords
-			tinystar = tempy + '/ogcor.txt'
-			file_opt = open(tinystar, 'w')
-			file_opt.writelines('')
-			file_opt.close()
-			with open(smalleststar) as cap:
-				for line in cap:
-					capsplit = line.split()
-					XCor = capsplit[Xpos]
-					YCor = capsplit[Ypos]
-					ZCor = capsplit[Zpos]
-					file_opt = open(tinystar, 'a')
-					file_opt.writelines(XCor + '$' + YCor + '$' + ZCor + '\n')
-					file_opt.close()
-		else:
-			tinystar = tempy + '/ogcor.txt'
-			file_opt = open(tinystar, 'w')
-			file_opt.writelines('')
-			file_opt.close()
-			firstact = actual[0:3]
-			suffixfolder = os.fsencode(CoordDir)
-			for file in os.listdir(suffixfolder):
-				filename = os.fsdecode(file)
-				if re.search(firstact, filename):
-					if re.search(Suffix, filename):
-						with open(CoordDir + filename, 'r') as suffixtext:
-							for line in suffixtext:
-								capsplit = line.split()
-								XCor = str(round(float(capsplit[0]) * float(Bint)))
-								YCor = str(round(float(capsplit[1]) * float(Bint)))
-								ZCor = str(round(float(capsplit[2]) * float(Bint)))
-								file_opt = open(tinystar, 'a')
-								file_opt.writelines(XCor + '$' + YCor + '$' + ZCor + '\n')
-								file_opt.close()
-	#	get the suffix file coords binned
-		allbinned = tempy + '/bincor.txt'
-		file_opt = open(allbinned, 'w')
-		file_opt.writelines('')
-		file_opt.close()
-		firstact = actual[0:3]
-		suffixfolder = os.fsencode(CoordDir)
-		for file in os.listdir(suffixfolder):
-			filename = os.fsdecode(file)
-			if re.search(firstact, filename):
-				if re.search(Suffix, filename):
-					with open(CoordDir + filename, 'r') as suffixtext:
-						for line in suffixtext:
-							diffchar = line.split()
-							getbinned = str(round(float(diffchar[0]) * float(Bin)))
-							getbinned1 = str(round(float(diffchar[1]) * float(Bin)))
-							getbinned2 = str(round(float(diffchar[2]) * float(Bin)))
-							file_opt = open(allbinned, 'a')
-							file_opt.writelines(getbinned + '$' + getbinned1 + '$' + getbinned2 + '\n')
-							file_opt.close()
-	#	narrow down coords to our files
-		final = tempy + '/final.txt'
-		file_opt = open(final, 'w')
-		file_opt.writelines('')
-		file_opt.close()
-		for item in numbers:
-			with open(smalleststar) as cap:
-				eachcap = cap.readlines()
-				savecap = eachcap[item - 1]
-				savecap = savecap.split()
-				Tomname = savecap[Namepos]
-			with open(tinystar) as og:
-				eachog = og.readlines()
-				Tomog = eachog[item - 1]
-				Tomog = Tomog.replace('\n', '')
-			with open(allbinned) as binn:
-				eachbin = binn.readlines()
-				Tombin = eachbin[item - 1]
-				Tombin = Tombin.replace('\n', '')
-			file_opt = open(final, 'a')
-			file_opt.writelines(Tomname + '$' + Tomog + '$' + Tombin + '\n')
-			file_opt.close()
-	#	make the data into csv file
-		centers2data = pd.read_csv(final, delimiter = '$')
-		centers2data.to_csv(tempo + '/centers2data.csv', index=None)
-	#	get euler angles script
-		print(subprocess.getstatusoutput('python3 ' + cwd + '/transform_project_JL.py ' + 'calcangles --csv ' + tempo + '/centers2data.csv ' + '--outdir ' + tempo))
-		nounds = tempo + '/neweulerangs_round.csv'
-		nanc = tempo + '/neweulerangs.csv'
-		nangnames = 0
-		with open(nanc, 'r') as nangs, open(nounds, 'w') as nound:
-			reader = csv.reader(nangs, delimiter = ',')
-			writer = csv.writer(nound, delimiter = ',')
-			for row in reader:
-				with open(smalleststar) as cap:
-					rownum = numbers[nangnames]
-					eachcap = cap.readlines()
-					savecap = eachcap[rownum - 1]
-					savecap = savecap.split()
-					Tomname = savecap[Namepos]
-				colValues = []
-				for col in row:
-					colValues.append(round(float(col), 2))
-				colValues.append(Tomname)
-				writer.writerow(colValues)
-				nangnames = nangnames + 1
-		os.rename(nounds, nanc)
-		AllTomo = os.fsencode(openup)
-		Tomo = actual
-		if re.search('_filt', Tomo):
-			Tomo = Tomo.replace('_filt', '')
-		if os.path.exists(tempy + '/' + Tomo + '_expanded.txt'):
-			os.remove(tempy + '/' + Tomo + '_expanded.txt')
-		expanded = tempy + '/' + Tomo + '_expanded.txt'
-	#	make file names unique based on having multiple coordinates
-		with open(openup + '/NameCoord.txt') as names:
-			seenline = set()
-			rep = 1
-			iteratesh = 0
-			for line in names:
-				line = line.replace('\n', '')
-				if line in seenline:
-					rep = rep + 1
-				else:
-					rep = 1
-				swap = re.sub('.cmm', '.mrc', line)
-				expand = re.sub('_filt', '_' + str(rep) + '_filt', swap)
-				seenline.add(line)
-				with open(openup + '/' + Tomo + '.shift') as shiftfile:
-					focus = shiftfile.readlines()
-					theline = focus[iteratesh]
-					expund = theline.replace('filename', expand)
-					expund = expund.replace('\n', '')
-					with open(starfile) as starry:
-						for line in starry:
-							if re.search(swap, line):
-								fract = line.split()
-								microname = fract[Micropos]
-								optic = fract[Opticspos]
-					with open(nanc) as findang:
-						for line in findang:
-							if re.search(swap, line):
-								broke = line.split(',')
-								Rot = broke[0]
-								Tilt = broke[1]
-								Psi = broke[2]
-								angle = Rot + '\t' + Tilt + ' \t' + Psi
-					file_opt = open(expanded, 'a')
-					file_opt.writelines(expund + '\t' + microname + '\t' + optic + '\t' + angle + '\n')
-					file_opt.close()
-					iteratesh = iteratesh + 1
-		newstar = tempo + '/' + Tomo + '_Newstar.star'
-		file_opt = open(newstar, 'w')
-		file_opt.writelines('')
-		file_opt.close()
-	#	get rid of all temp files
-		os.rename(expanded, newstar)
-		os.remove(nanc)
-		os.remove(tempo + '/centers2data.csv')
-		os.remove(smallstar)
-		os.remove(smalleststar)
-		os.remove(tinystar)
-		os.remove(allbinned)
-		os.remove(final)
-		os.rmdir(tempy)
-		return
 
 	def mask(self):
 		try:
