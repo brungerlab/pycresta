@@ -1899,7 +1899,6 @@ class Tabs(TabbedPanel):
 		classBasename = self.ids.refBasename.text
 		bxsz = float(self.ids.px1.text)
 		boxsize = [bxsz, bxsz, bxsz]
-		# create "plotback" folder (to be implemented)
 		# get models in class that matches basename
 		folder = os.listdir(classPath)
 		classes = [file for file in folder if classBasename in file]
@@ -1907,19 +1906,29 @@ class Tabs(TabbedPanel):
 		star_data = starfile.read(starf)["particles"]
 		# iterate through each row of dataframe
 		for row in star_data.itertuples(index=False):
-			imgName = row.rlnImageName.split('/')[-1]
+			imgName = row.rlnImageName
+			print(imgName)
 			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
-			classNum = random.randint(1, 3)
+			classNum = str(random.randint(1, 3))
 			# get model associated with class num
-			model = [file for file in classes if str(00) + classNum in file][0]
-			coords = [int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateY)]
-			angles = [float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)]
-			shifts = [float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)]
+			model = classPath + [file for file in classes if "00" + classNum in file][0]
+			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateY)])
+			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
+			shifts = np.array([float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)])
+			print(angles)
+			print(shifts)
 			# transform corresponding model by inversed angles and shifts specified in starfile
 			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True) # not sure about shifton
 			# shift model to coords specified in star file (to be implemented)
+			# create "plotback" folder
+			folderPath = subtomoDirect + "/" + '/'.join(imgName.split('/')[:-1]) + "/plotback/"
+			if not os.path.exists(folderPath):
+				os.makedirs(folderPath)
 			# create new mrcfile
-			mrcfile.new(subtomoDirect + "/plotback_" + imgName, transformed)
+			transformed = transformed.astype(np.float32)
+			print(len(transformed))
+			mrcName = imgName.split('/')[-1]
+			mrcfile.new(folderPath + mrcName  , transformed, overwrite=True)
 		return
 
 	pass
