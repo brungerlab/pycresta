@@ -1039,7 +1039,18 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .5, .6
+							size_hint: .35, .3
+							pos_hint: {'center_x': .475, 'center_y': .5}
+							CheckBox:
+								state: 'normal'
+								id: pickcoordInvert
+							Label:
+								text: 'Invert Contrast'
+								bold: True
+								color: (0,0,0,1)
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .45, .4
 							pos_hint: {'center_x': .5}
 							Label:
 								text: 'Index'

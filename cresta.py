@@ -143,6 +143,8 @@ class Tabs(TabbedPanel):
 				starfilted = starfpath.replace('.star', '_filtered.star')
 				if os.path.isfile(starfilted) == True:
 					self.ids.mainstarfilt.text = starfilted
+				else:
+					self.ids.mainstarfilt.text = 'Choose Filtered Star File Path'
 		elif len(starfpath) == 0:
 			self.ids.mainstar.text = 'Choose Unfiltered Star File Path'
 		self.dismiss_popup()
@@ -836,11 +838,21 @@ class Tabs(TabbedPanel):
 			# create and run python script to open ChimeraX
 			chim3 = direct + 'chimcoord.py'
 			tmpflnam = direct + starfinal
+			# invert subtomogram if active
+			if self.ids.pickcoordInvert.active == True:
+				mrc = mrcfile.read(tmpflnam)
+				mrc = mrc * -1
+				mrcfile.write(tmpflnam, mrc, overwrite=True)
+			# run ChimeraX
 			file_opt = open(chim3, 'w')
 			file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + cmmdir + "\")" + "\n" + "run(session, \"open " + tmpflnam + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
 			file_opt.close()
 			print(subprocess.getstatusoutput(ChimeraX_dir + '/chimerax ' + chim3))
-
+			# revert subtomogram to original state if necessary
+			if self.ids.pickcoordInvert.active == True:
+				mrc = mrcfile.read(tmpflnam)
+				mrc = mrc * -1
+				mrcfile.write(tmpflnam, mrc, overwrite=True)
 			# create .cmm file inside of respective tomogram directory
 			cmmflip = starfinal.replace('.mrc', '.cmm')
 			endfile = os.path.split(cmmflip)
@@ -1563,6 +1575,7 @@ class Tabs(TabbedPanel):
 		name = imageNames[index - 1]
 		self.ids.visualizestep.text = 'Currently on file ' + "/".join(name.split("/")[-3:])
 		fileName = subtomodir + name
+		# invert subtomogram if active
 		if self.ids.visualizeInvert.active == True:
 			mrc = mrcfile.read(fileName)
 			mrc = mrc * -1
@@ -1574,6 +1587,11 @@ class Tabs(TabbedPanel):
 		file_opt.close()
 		print(subprocess.getstatusoutput(chimeraDir + '/chimerax ' + vis))
 		os.remove(vis)
+		# revert subtomogram to original state if necessary
+		if self.ids.visualizeInvert.active == True:
+			mrc = mrcfile.read(fileName)
+			mrc = mrc * -1
+			mrcfile.write(fileName, mrc, overwrite=True)
 		self.ids.visualizefeedback.text = 'Accept or Reject the Subtomogram'
 		self.ids.visualizefeedback.color = (.6,0,0,1)
 		return
