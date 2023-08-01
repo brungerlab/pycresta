@@ -69,12 +69,15 @@ Use Test_Data and TestExamples folders to confirm that everything works.
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ### Creating CrESTA in Python:
 
-This software is translated from [John Jacob Peters' repository](https://github.com/johnjacobpeters/tom_cryoET) (in Matlab) with new features added.
+This software is translated from [John Jacob Peters' repository](https://github.com/johnjacobpeters/tom_cryoET) (in Matlab) with new features added. The "Tom_Toolbox" folder in John's repository contains functions for performing different calculations, and some of these functions are translated and implemented in tom.py. 
 
-Use of [NumPy Cheat Sheet](https://mathesaurus.sourceforge.net/matlab-numpy.html) to convert Matlab code into Python NumPy.
+When converting code from Matlab to Python, be aware that Python uses 0-based indexing and Matlab uses 1-based indexing. Also make sure that variable datatypes are equivalent (e.g. Matlab's "single" corresponds to "float32" in Python). If you see Matlab code that uses "tom_mrcread()" or "tom_starread()", there is no need to translate these two helper functions: simply import the mrcfile and starfile module in Python and use mrcfile.read() and starfile.read() instead. It is also important to note that some functions used for matrix rotations/translations uses the ZY axis instead of the XY axis, so flipping X and Z values may resolve issues if no other problems are found. For testing, use your IDE's debugger and compare results with the Matlab version of the software. 
+
+Use [NumPy Cheat Sheet](https://mathesaurus.sourceforge.net/matlab-numpy.html) to help with converting Matlab code into Python NumPy.
 
 [The Matlab to Python Converter](https://translate.mat2py.org/) also proved useful, but required testing and editing after.
 
+Files In This Repository:
 - cresta.py contains the functions that respond to user input on the GUI (pressing buttons).
 - tom.py contains helper functions for the cresta.py functions, and is the python version of the TOM Toolbox Matlab functions used in the old repository.
 - gui.kv builds the user interface, and gives text inputs/buttons unique id's that can be accessed in cresta.py.
