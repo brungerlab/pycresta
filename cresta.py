@@ -1140,12 +1140,10 @@ class Tabs(TabbedPanel):
 												with mrcfile.open(direct + subtomo, 'r+') as mrc:
 													mrc.voxel_size = angpix
 											# create .coords file
-											# eman = name[::-1]
-											# cutName = re.sub('\d{6}','', eman)
-											# cutName = cutName[::-1]
-											# file_opt = open(folder + '/' + subtomo + '.coords', 'a')
-											# file_opt.writelines(finalx + ' ' + finaly + ' ' + finalz + '\n')
-											# file_opt.close()
+											subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')
+											file_opt = open(folder + '/' + subName + '.coords', 'a')
+											file_opt.writelines(str(int(x_coord)) + ' ' + str(int(y_coord)) + ' ' + str(int(z_coord)) + '\n')
+											file_opt.close()
 		
 		# add new information to intermediate star file
 		star_data = starfile.read(starf)
@@ -1380,7 +1378,6 @@ class Tabs(TabbedPanel):
 			direc = self.ids.mainsubtomo.text + '/'
 		else:
 			direc = self.ids.mainsubtomo.text
-		boxsize = float(self.ids.px1.text)
 		pxsz = float(self.ids.A1.text)
 		filter = self.ids.filterbackground.active
 		grow = float(self.ids.blurrate.text)
@@ -1393,16 +1390,21 @@ class Tabs(TabbedPanel):
 		randfilt = self.ids.randnoise.active
 		permutebg = self.ids.permutebg.active
 		
-		def cut_part_and_movefunc(maskname, listName, direc, boxsize, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg):
+		def cut_part_and_movefunc(maskname, listName, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg):
 			offSetCenter = [0, 0 ,0]
-			boxsize = [boxsize, boxsize, boxsize]
 			fileNames, angles, shifts, list_length, pickPos, new_star_name = tom.readList(listName, pxsz, 'masked', [])
 			fileNames = [direc + name for name in fileNames]
 			maskh1 = mrcfile.read(maskname)
 			posNew = []
 			aa = time.perf_counter()
-			# for i in range(len(fileNames)):
+			# begin to loop through each subtomogram
 			def processLoop(i):
+				boxsize = []
+				# define boxsize
+				with mrcfile.open(fileNames[i]) as mrc:
+					boxsize.append(float(mrc.header.nx))
+					boxsize.append(float(mrc.header.ny))
+					boxsize.append(float(mrc.header.nz))
 				mrcName = fileNames[i].split('/')[-1]
 				mrcDirec = "/".join(fileNames[i].split('/')[:-1])
 				reextractDir = mrcDirec + '/masked/'
@@ -1438,7 +1440,7 @@ class Tabs(TabbedPanel):
 			print(f'Total masking time: {t2[1]} minutes and {t2[2]} seconds')
 			print('New starfile created: ' + new_star_name + '\n')
 
-		cut_part_and_movefunc(mask, starf, direc, boxsize, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg)
+		cut_part_and_movefunc(mask, starf, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg)
 		return
 
 	def calculate_ccc(self):
