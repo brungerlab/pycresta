@@ -295,9 +295,9 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('SDThresh:' + '\t' + self.ids.sdrange.text + '\n')
 			file_opt.writelines('SDShift:' + '\t' + self.ids.sdshift.text + '\n')
 			file_opt.writelines('MaskBlur:' + '\t' + self.ids.blurrate.text + '\n')
-			file_opt.writelines('CCCVolone:' + '\t' + self.ids.cccvolone.text + '\n')
-			file_opt.writelines('CCCVoltwo:' + '\t' + self.ids.cccvoltwo.text + '\n')
-			file_opt.writelines('CCCWedge:' + '\t' + self.ids.cccwedge.text + '\n')
+			# file_opt.writelines('CCCVolone:' + '\t' + self.ids.cccvolone.text + '\n')
+			# file_opt.writelines('CCCVoltwo:' + '\t' + self.ids.cccvoltwo.text + '\n')
+			# file_opt.writelines('CCCWedge:' + '\t' + self.ids.cccwedge.text + '\n')
 			file_opt.writelines('Volvol:' + '\t' + self.ids.volvol.text + '\n')
 			file_opt.writelines('Volwedge:' + '\t' + self.ids.volwedge.text + '\n')
 			file_opt.writelines('RefPath:' + '\t' + self.ids.refPath.text + '\n')
@@ -376,12 +376,12 @@ class Tabs(TabbedPanel):
 						self.ids.sdshift.text = yank	
 					if re.search('MaskBlur', line):
 						self.ids.blurrate.text = yank	
-					if re.search('CCCVolone', line):
-						self.ids.cccvolone.text = yank
-					if re.search('CCCVoltwo', line):
-						self.ids.cccvoltwo.text = yank
-					if re.search('CCCWedge', line):
-						self.ids.cccwedge.text = yank
+					# if re.search('CCCVolone', line):
+					# 	self.ids.cccvolone.text = yank
+					# if re.search('CCCVoltwo', line):
+					# 	self.ids.cccvoltwo.text = yank
+					# if re.search('CCCWedge', line):
+					# 	self.ids.cccwedge.text = yank
 					if re.search('Volvol', line):
 						self.ids.volvol.text = yank
 					if re.search('Volwedge', line):
@@ -432,7 +432,7 @@ class Tabs(TabbedPanel):
 		tomogName = tomogram.split('/')[-1].replace('.mrc', '')
 		# use for star file micrographName and imageName
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
-		subdirect = tomDate + '/' + tomName + '/Sub/'
+		subdirect = tomDate + '/' + tomName + '/sub/'
 		# use for full path containing subtomograms
 		directory = direct + subdirect
 		# memory map the tomogram
@@ -454,11 +454,12 @@ class Tabs(TabbedPanel):
 				starName = subdirect + tomogName + number + '.mrc'
 				# access coordinates from coords file
 				line = coord[i]
-				pos = line.split(' ')[1:]
+				line = line.strip()
+				pos = line.split(' ')
 				# convert coordinates to integers
 				x = int(pos[0])
 				y = int(pos[1])
-				z = int(pos[2].strip())
+				z = int(pos[2])
 				# create and append star file rows for subtomogram
 				row = [micrograph, x, y, z, starName, 'wedgefx2.mrc', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 				data.append(row)
@@ -1110,6 +1111,7 @@ class Tabs(TabbedPanel):
 												mrcfile.new(direct + subtomo, subby, overwrite=True)
 												with mrcfile.open(direct + subtomo, 'r+') as mrc:
 													mrc.voxel_size = angpix
+											print('Re-extracted ' + direct + subtomo)
 											# create .coords file
 											subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')
 											file_opt = open(folder + '/' + subName + '.coords', 'a')
@@ -1213,6 +1215,7 @@ class Tabs(TabbedPanel):
 		star_data['particles'] = df1
 		starfileName = starf.split("/")[-1].split(".")[0].replace('_filtered', '')
 		starfile.write(star_data, direct + '/' + starfileName + '_reextract.star', overwrite=True)
+		print('Re-extraction complete. Star file written: ' + direct + '/' + starfileName + '_reextract.star\n')
 		# remove intermediate star file
 		os.remove(cmmStar)
 		return
@@ -1331,17 +1334,17 @@ class Tabs(TabbedPanel):
 		return
 
 	# calculate cross correlation coefficient
-	def calculate_ccc(self):
-		cccVol1 = self.ids.cccvolone.text
-		cccVol2 = self.ids.cccvoltwo.text
-		wedge = self.ids.cccwedge.text
-		star = self.ids.mainstar.text
-		zoom = 40
-		boxsize = float(self.ids.px1.text)
-		boxsize = [boxsize, boxsize, boxsize]
-		ccc = tom.ccc_calc(star, cccVol1, cccVol2, boxsize, zoom, wedge)
-		print(ccc)
-		return
+	# def calculate_ccc(self):
+	# 	cccVol1 = self.ids.cccvolone.text
+	# 	cccVol2 = self.ids.cccvoltwo.text
+	# 	wedge = self.ids.cccwedge.text
+	# 	star = self.ids.mainstar.text
+	# 	zoom = 40
+	# 	boxsize = float(self.ids.px1.text)
+	# 	boxsize = [boxsize, boxsize, boxsize]
+	# 	ccc = tom.ccc_calc(star, cccVol1, cccVol2, boxsize, zoom, wedge)
+	# 	print(ccc)
+	# 	return
 
 	# filter subtomograms by CCC
 	def filter_ccc(self):

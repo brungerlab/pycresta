@@ -277,20 +277,20 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose a tomogram file path and a '.coords' file path.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'Sub' folder.\nA star file is generated."
+			text: "Choose a tomogram file path and a '.coords' file path.\nCoords file should consist of rows of\nx,y,z coordinates in pixels.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'sub' folder.\nA star file is generated."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
 			text: 'Close'
 			on_release: root.dismiss()
 <CalcAnglesInfo@Popup>
-	size_hint: .75, .45
+	size_hint: .75, .5
 	title: 'Calculate Angles'
 	BoxLayout:
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose vector start and end coordinates paths.\n\nCalculates angles and inserts them into\nthe 'unfiltered star file' on Master Key.\nRecommended after Extraction.\n"
+			text: "Choose vector start and end coordinates paths.\nThese coordinate files should consist of rows of\nx,y,z coordinates (in pixels) that match the sequence\nof coordinates in the .coords file.\n\nCalculates angles and inserts them into\nthe 'unfiltered star file' on Master Key.\nRecommended after Extraction."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -348,19 +348,19 @@
 			pos_hint: {'center_x': .5}
 			text: 'Close'
 			on_release: root.dismiss()
-<CCCInfo@Popup>
-	size_hint: .75, .35
-	title: 'Calculate CCC - Two Volumes'
-	BoxLayout:
-		orientation: 'vertical'
-		Label:
-			halign: 'center'
-			text: "Calculates the cross-correlation coefficient between the specified volumes,\n and using the specified missing wedge file.\n\nUnfiltered Star file containing Volume 2 must be entered on master key.\n\nThe cross-correlation coefficient is displayed in the log file\nand printed in the terminal."
-		Button:
-			size_hint: .5, .25
-			pos_hint: {'center_x': .5}
-			text: 'Close'
-			on_release: root.dismiss()
+# <CCCInfo@Popup>
+# 	size_hint: .75, .35
+# 	title: 'Calculate CCC - Two Volumes'
+# 	BoxLayout:
+# 		orientation: 'vertical'
+# 		Label:
+# 			halign: 'center'
+# 			text: "Calculates the cross-correlation coefficient between the specified volumes,\n and using the specified missing wedge file.\n\nUnfiltered Star file containing Volume 2 must be entered on master key.\n\nThe cross-correlation coefficient is displayed in the log file\nand printed in the terminal."
+# 		Button:
+# 			size_hint: .5, .25
+# 			pos_hint: {'center_x': .5}
+# 			text: 'Close'
+# 			on_release: root.dismiss()
 <VolumeStar@Popup>
 	size_hint: .75, .4
 	title: 'Volume & Star File'
@@ -2152,7 +2152,7 @@
 				BoxLayout:
 					orientation: 'horizontal'
 					Label:
-						size_hint_x: .05
+						size_hint_x: .3
 					BoxLayout:
 						orientation: 'vertical'
 						pos_hint: {'center_x': .5}
@@ -2252,67 +2252,67 @@
 							color: (.6,0,0,1)
 							fontsize: 25
 
-					Label:
-						size_hint_x: .05
+					# Label:
+					# 	size_hint_x: .05
 
-					BoxLayout:
-						orientation: 'vertical'
-						pos_hint: {'center_x': .5}
-						canvas:
-							Color:
-								rgba: .5, .5, .5, 0.4
-							Rectangle:
-								pos: self.pos
-								size: self.size
-						spacing: 15
-						Label:
-							text: 'Calculate CCC - Two Volumes'
-							color: (0,0,0,1)
-							font_size: 35
-							pos_hint: {'center_x': .34}
-							bold: True
-						Button:
-							text: 'information'
-							background_color: 0, 1.2, 2, .5
-							on_release: Factory.CCCInfo().open()
-							size_hint: .27, .8
-							pos_hint: {'center_x': .5, 'center_y': .5}	
+					# BoxLayout:
+					# 	orientation: 'vertical'
+					# 	pos_hint: {'center_x': .5}
+					# 	canvas:
+					# 		Color:
+					# 			rgba: .5, .5, .5, 0.4
+					# 		Rectangle:
+					# 			pos: self.pos
+					# 			size: self.size
+					# 	spacing: 15
+					# 	Label:
+					# 		text: 'Calculate CCC - Two Volumes'
+					# 		color: (0,0,0,1)
+					# 		font_size: 35
+					# 		pos_hint: {'center_x': .34}
+					# 		bold: True
+					# 	Button:
+					# 		text: 'information'
+					# 		background_color: 0, 1.2, 2, .5
+					# 		on_release: Factory.CCCInfo().open()
+					# 		size_hint: .27, .8
+					# 		pos_hint: {'center_x': .5, 'center_y': .5}	
 						
-						Label: 
-							text: 'Volume 1'
-						TextInput:
-							text: '.mrc'
-							size_hint_x: .9
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: cccvolone
-						Label:
-							text: 'Volume 2'
-						TextInput:
-							text: '.mrc'
-							size_hint_x: .9
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: cccvoltwo
-						Label:
-							text: 'Missing wedge file'
-						TextInput:
-							text: '.mrc'
-							size_hint_x: .9
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: cccwedge
-						Button:
-							background_color: 0.2, 0.6, 0.2, .55
-							text: 'Calculate CCC'
-							on_release: root.calculate_ccc()
-							size_hint_x: .5
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: ' '
-							size_hint_y: .04
+					# 	Label: 
+					# 		text: 'Volume 1'
+					# 	TextInput:
+					# 		text: '.mrc'
+					# 		size_hint_x: .9
+					# 		pos_hint: {'center_x': .5, 'center_y': .5}
+					# 		multiline: False
+					# 		id: cccvolone
+					# 	Label:
+					# 		text: 'Volume 2'
+					# 	TextInput:
+					# 		text: '.mrc'
+					# 		size_hint_x: .9
+					# 		pos_hint: {'center_x': .5, 'center_y': .5}
+					# 		multiline: False
+					# 		id: cccvoltwo
+					# 	Label:
+					# 		text: 'Missing wedge file'
+					# 	TextInput:
+					# 		text: '.mrc'
+					# 		size_hint_x: .9
+					# 		pos_hint: {'center_x': .5, 'center_y': .5}
+					# 		multiline: False
+					# 		id: cccwedge
+					# 	Button:
+					# 		background_color: 0.2, 0.6, 0.2, .55
+					# 		text: 'Calculate CCC'
+					# 		on_release: root.calculate_ccc()
+					# 		size_hint_x: .5
+					# 		pos_hint: {'center_x': .5, 'center_y': .5}
+					# 	Label:
+					# 		text: ' '
+					# 		size_hint_y: .04
 					Label:
-						size_hint_x: .05
+						size_hint_x: .3
 
 				Label:
 					size_hint_y: .07
