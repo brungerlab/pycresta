@@ -1837,8 +1837,8 @@ class Tabs(TabbedPanel):
 			with mrcfile.open(folderPath + mrcName, 'r+') as mrc:
 				mrc.voxel_size = angpix
 				mrc.header.nxstart = coords[0] - bxsz / 2
-				mrc.header.nystart = 1000 - (coords[2] - bxsz / 2)
-				mrc.header.nzstart = coords[1] - bxsz / 2
+				mrc.header.nystart = coords[1] - bxsz / 2
+				mrc.header.nzstart = 1000 - (coords[2] - bxsz / 2)
 		return
 
 	pass
