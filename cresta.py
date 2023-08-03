@@ -420,10 +420,28 @@ class Tabs(TabbedPanel):
 			text = Label(text="Please select a filter")
 			self.ids.gaussian_row.add_widget(text)
 	
-	# tomogram extraction
 	def extract(self):
-		tomogram = self.ids.tomo.text
-		coordfile = self.ids.tomocoords.text
+		if self.ids.tomoFolder:
+			folder = self.ids.tomo.text
+			# Iterate over the files in the directory
+			for f in os.listdir(folder):
+				# Get the full path of each tomogram folder in the data folder
+				tomoFolder = os.path.join(folder, f)
+				# Get tomogram and coordsfile from tomogram folder
+				for file in os.listdir(tomoFolder):
+					if '.mrc' in file:
+						tomogram = os.path.join(tomoFolder, file)
+					if '.coords' in file:
+						coordfile = os.path.join(tomoFolder, file)
+				# Perform extraction
+				self.extract_helper(tomogram, coordfile)	
+		else:
+			tomogram = self.ids.tomo.text
+			coordfile = self.ids.tomocoords.text
+			self.extract_helper(tomogram, coordfile)
+
+	# tomogram extraction
+	def extract_helper(self, tomogram, coordfile):
 		# tomogram path
 		direct = '/'.join(tomogram.split('/')[:-3]) + '/'
 		# tomogram date and name

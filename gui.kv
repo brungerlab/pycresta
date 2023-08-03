@@ -785,18 +785,30 @@
 							pos_hint: {'center_x': .08}
 							bold: True
 							size_hint_y: .5
-						Button:
-							text: 'information'
-							background_color: 0, 1.2, 2, .5
-							on_release: Factory.ExtractionInfo().open()
-							size_hint: .15, .45
-							pos_hint: {'center_x': .5, 'center_y': .5}	
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .6, .775
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							padding: 20
+							Button:
+								text: 'information'
+								background_color: 0, 1.2, 2, .5
+								on_release: Factory.ExtractionInfo().open()
+								size_hint: .7, 1.3
+							BoxLayout:
+								orientation: 'horizontal'
+								CheckBox:
+									state: 'normal'
+									id: tomoFolder
+								Label:
+									text: 'Use tomogram folder'
+									color: (0,0,0,1)
 						Label:
 							text: 'Tomogram and Coords File Paths'
 							bold: True
 							color: (0,0,0,1)
 							font: 30
-							size_hint_y: .4
+							size_hint_y: .3
 						TextInput:
 							text: 'Choose Tomogram Path'
 							size_hint: .9, .75
