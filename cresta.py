@@ -31,6 +31,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.label import Label
+from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.floatlayout import FloatLayout
@@ -64,6 +65,11 @@ class SubtomoFinder(FloatLayout):
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
+class WedgeFinder(FloatLayout):
+    wedgedsave = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    
 class MrcFinder(FloatLayout):
     mrcdsave = ObjectProperty(None)
     text_input = ObjectProperty(None)
@@ -96,6 +102,7 @@ class MaskFinder(FloatLayout):
     
 class Tabs(TabbedPanel):
 	
+	# create gaussian row
 	label = Label(text="Sigma")
 	label2 = Label(text=" ", size_hint_y=.8)
 	sigma = TextInput(text="5", multiline=False, size_hint_x=.12, size_hint_y=1.9, pos_hint={'center_x': .5, 'center_y': .5})
@@ -162,7 +169,22 @@ class Tabs(TabbedPanel):
 			self.ids.mainsubtomo.text = 'Choose Subtomogram Directory'
 		self.dismiss_popup()
 
-	# mrc directory save
+	# wedge file save
+	def show_wedge(self):
+		content = WedgeFinder(wedgedsave=self.wedgesave, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Save Wedge File", content=content,
+                            size_hint=(0.9, 0.9))
+		self._popup.open()
+
+	def wedgesave(self, path, filename):
+		wedgepath = filename
+		if len(wedgepath) != 0:
+			self.ids.mainwedge.text = wedgepath
+		elif len(wedgepath) == 0:
+			self.ids.mainwedge.text = 'Choose Wedge File'
+		self.dismiss_popup()
+
+	# mrc file save
 	def show_mrc(self):
 		content = MrcFinder(mrcdsave=self.mrcsave, cancel=self.dismiss_popup)
 		self._popup = Popup(title="Save Mrc Directory", content=content,
@@ -271,6 +293,7 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
 			file_opt.writelines('StarFileFilt:' + '\t' + self.ids.mainstarfilt.text + '\n')
 			file_opt.writelines('SubtomoPath:' + '\t' + self.ids.mainsubtomo.text + '\n')
+			file_opt.writelines('WedgePath:' + '\t' + self.ids.mainwedge.text + '\n')
 			file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
 			file_opt.writelines('BoxSize:' + '\t' + self.ids.px1.text + '\n')
 			file_opt.writelines('PxSize:' + '\t' + self.ids.A1.text + '\n')
@@ -299,7 +322,6 @@ class Tabs(TabbedPanel):
 			# file_opt.writelines('CCCVoltwo:' + '\t' + self.ids.cccvoltwo.text + '\n')
 			# file_opt.writelines('CCCWedge:' + '\t' + self.ids.cccwedge.text + '\n')
 			file_opt.writelines('Volvol:' + '\t' + self.ids.volvol.text + '\n')
-			file_opt.writelines('Volwedge:' + '\t' + self.ids.volwedge.text + '\n')
 			file_opt.writelines('RefPath:' + '\t' + self.ids.refPath.text + '\n')
 			file_opt.writelines('RefBasename:' + '\t' + self.ids.refBasename.text + '\n')
 			file_opt.close()
@@ -328,6 +350,8 @@ class Tabs(TabbedPanel):
 						self.ids.mainstarfilt.text = yank
 					if re.search('SubtomoPath', line):
 						self.ids.mainsubtomo.text = yank
+					if re.search('WedgePath', line):
+						self.ids.mainwedge.text = yank
 					if re.search('MrcPath', line):
 						self.ids.mainmrc.text = yank
 					if re.search('BoxSize', line):
@@ -384,8 +408,6 @@ class Tabs(TabbedPanel):
 					# 	self.ids.cccwedge.text = yank
 					if re.search('Volvol', line):
 						self.ids.volvol.text = yank
-					if re.search('Volwedge', line):
-						self.ids.volwedge.text = yank
 					if re.search('RefPath', line):
 						self.ids.refPath.text = yank
 					if re.search('RefBasename', line):
@@ -433,6 +455,11 @@ class Tabs(TabbedPanel):
 		# use for star file micrographName and imageName
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
 		subdirect = tomDate + '/' + tomName + '/sub/'
+		# set wedge file name
+		if len(self.ids.mainwedge.text) != 0:
+			wedge = (self.ids.mainwedge.text).replace(direct, '')
+		else:
+			wedge = 'NA'
 		# use for full path containing subtomograms
 		directory = direct + subdirect
 		# memory map the tomogram
@@ -461,7 +488,7 @@ class Tabs(TabbedPanel):
 				y = int(pos[1])
 				z = int(pos[2])
 				# create and append star file rows for subtomogram
-				row = [micrograph, x, y, z, starName, 'wedgefx2.mrc', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+				row = [micrograph, x, y, z, starName, wedge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 				data.append(row)
 				# shift coordinates to top left corner of the boxsize for extraction
 				x = x - boxsize/2
@@ -541,7 +568,12 @@ class Tabs(TabbedPanel):
 		star_data.loc[:, ['rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi']] = newangs
 		starf['particles'] = star_data
 		starfile.write(starf, self.ids.mainstar.text, overwrite=True)
-
+	
+	def mrcWords(self):
+		if self.ids.mrcfilter.active == True:
+			self.ids.mainmrc.foreground_color = (0,0,.6,1)
+		else:
+			self.ids.mainmrc.foreground_color = (0,0,.6,0)
 	# graph for wiener function
 	plt.ion()
 	# wiener and gaussian filtering
@@ -1350,7 +1382,7 @@ class Tabs(TabbedPanel):
 	def filter_ccc(self):
 		volume = self.ids.volvol.text
 		star = self.ids.mainstar.text
-		wedge = self.ids.volwedge.text
+		wedge = self.ids.mainwedge.text
 		cccthresh = float(self.ids.cccthresh.text)
 		boxsize = float(self.ids.px1.text)
 		boxsize = [boxsize, boxsize, boxsize]
@@ -1838,7 +1870,7 @@ class Tabs(TabbedPanel):
 				mrc.voxel_size = angpix
 				mrc.header.nxstart = coords[0] - bxsz / 2
 				mrc.header.nystart = coords[1] - bxsz / 2
-				mrc.header.nzstart = 1000 - (coords[2] - bxsz / 2)
+				mrc.header.nzstart = ((coords[2] - bxsz / 2) * -1) + 2000
 		return
 
 	pass
