@@ -445,19 +445,21 @@ class Tabs(TabbedPanel):
 	# tomogram extraction
 	def extract(self):
 		if self.ids.tomoFolder.active:
-			folder = self.ids.tomo.text
+			folder = ('/').join(self.ids.tomo.text.split('/')[:-2])
+			print(folder)
 			# Iterate over the files in the directory
 			for f in os.listdir(folder):
 				# Get the full path of each tomogram folder in the data folder
 				tomoFolder = os.path.join(folder, f)
-				# Get tomogram and coordsfile from tomogram folder
-				for file in os.listdir(tomoFolder):
-					if '.mrc' in file:
-						tomogram = os.path.join(tomoFolder, file)
-					if '.coords' in file:
-						coordfile = os.path.join(tomoFolder, file)
-				# Perform extraction
-				self.extract_helper(tomogram, coordfile)	
+				if os.path.isdir(tomoFolder) == True:
+					# Get tomogram and coordsfile from tomogram folder
+					for file in os.listdir(tomoFolder):
+						if file.endswith('.mrc'):
+							tomogram = os.path.join(tomoFolder, file)
+						if file.endswith('.coords'):
+							coordfile = os.path.join(tomoFolder, file)
+					# Perform extraction
+					self.extract_helper(tomogram, coordfile)	
 		else:
 			tomogram = self.ids.tomo.text
 			coordfile = self.ids.tomocoords.text
@@ -474,10 +476,10 @@ class Tabs(TabbedPanel):
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
 		subdirect = tomDate + '/' + tomName + '/sub/'
 		# set wedge file name
-		if len(self.ids.mainwedge.text) != 0:
-			wedge = (self.ids.mainwedge.text).replace(direct, '')
-		else:
+		if self.ids.mainwedge.text == 'Choose Wedge File':
 			wedge = 'NA'
+		else:
+			wedge = (self.ids.mainwedge.text).replace(direct, '')
 		# use for full path containing subtomograms
 		directory = direct + subdirect
 		# memory map the tomogram
