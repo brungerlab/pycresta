@@ -784,7 +784,7 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
         #     starbox = float(starmrc.header.nx)
         # if starbox != wedgebox:
         #     print('Star File Volume and Missing Wedge box sizes do not match.')
-        #     return
+        #     continue
         invol2 = mrcfile.read(direct + (inputstar['rlnImageName'][i]))
         invol2 = np.transpose(invol2, (2,1,0))
         mwcorrvol2 = invol2 * wedge

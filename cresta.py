@@ -100,6 +100,11 @@ class MaskFinder(FloatLayout):
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
     
+class RefPathFinder(FloatLayout):
+    refpathdsave = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    
 class Tabs(TabbedPanel):
 	
 	# create gaussian row
@@ -119,7 +124,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def starsave(self, path, filename):
-		starfpath = filename
+		starfpath = filename.strip()
 		if len(starfpath) != 0:
 			if starfpath.endswith('.star') == False:
 				self.ids.mainstar.text = 'Not a ".star" file — Choose Unfiltered Star File Path'
@@ -143,7 +148,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def starfiltsave(self, path, filename):
-		starfiltpath = filename
+		starfiltpath = filename.strip()
 		if len(starfiltpath) != 0:
 			if starfiltpath.endswith('.star') == False:
 				self.ids.mainstarfilt.text = 'Not a ".star" file — Choose Unfiltered Star File Path'
@@ -162,7 +167,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def subtomosave(self, path, filename):
-		subtomopath = path
+		subtomopath = path.strip()
 		if len(subtomopath) != 0:
 			self.ids.mainsubtomo.text = subtomopath + '/'
 		elif len(subtomopath) == 0:
@@ -177,7 +182,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def wedgesave(self, path, filename):
-		wedgepath = filename
+		wedgepath = filename.strip()
 		if len(wedgepath) != 0:
 			self.ids.mainwedge.text = wedgepath
 		elif len(wedgepath) == 0:
@@ -192,13 +197,14 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def mrcsave(self, path, filename):
-		mrcpath = path
+		mrcpath = path.strip()
 		if len(mrcpath) != 0:
 			self.ids.mainmrc.text = mrcpath + '/'
 		elif len(mrcpath) == 0:
 			self.ids.mainmrc.text = 'Choose Mrc Directory'
 		self.dismiss_popup()
 
+	# change extraction appearance if user selected automated extraction
 	def updateExtract(self):
 		if self.ids.tomoFolder.active == True:
 			self.ids.tomo.text = 'Choose Directory with Tomogram Folders'
@@ -208,6 +214,7 @@ class Tabs(TabbedPanel):
 			self.ids.tomo.text = 'Choose Tomogram Path'
 			self.ids.tomocoords.text = 'Choose Coords Path'
 			self.ids.tomocoordbutton.background_color = (0, 1.2, 2, .5)
+
 	# tomogram path save
 	def show_tomo(self):
 		content = TomoFinder(tomodsave=self.tomosave, cancel=self.dismiss_popup)
@@ -217,9 +224,9 @@ class Tabs(TabbedPanel):
 
 	def tomosave(self, path, filename):
 		if self.ids.tomoFolder.active == False:
-			tomopath = filename
+			tomopath = filename.strip()
 		else: 
-			tomopath = path + '/'
+			tomopath = path.strip() + '/'
 		if len(tomopath) != 0:
 			if tomopath.endswith('.mrc') == False and self.ids.tomoFolder.active == False:
 				self.ids.tomo.text = 'Not a ".mrc" file — Choose Tomogram Path'
@@ -237,7 +244,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def tomocoordssave(self, path, filename):
-		tomocoordspath = filename
+		tomocoordspath = filename.strip()
 		if len(tomocoordspath) != 0:
 			self.ids.tomocoords.text = tomocoordspath
 		elif len(tomocoordspath) == 0:
@@ -252,7 +259,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def startvecsave(self, path, filename):
-		startvecpath = filename
+		startvecpath = filename.strip()
 		if len(startvecpath) != 0:
 			self.ids.vectorStart.text = startvecpath
 		elif len(startvecpath) == 0:
@@ -267,7 +274,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def endvecsave(self, path, filename):
-		endvecpath = filename
+		endvecpath = filename.strip()
 		if len(endvecpath) != 0:
 			self.ids.vectorEnd.text = endvecpath
 		elif len(endvecpath) == 0:
@@ -282,7 +289,7 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def masksave(self, path, filename):
-		maskpath = filename
+		maskpath = filename.strip()
 		if len(maskpath) != 0:
 			if maskpath.endswith('.mrc') == False:
 				self.ids.maskpath.text = 'Not a ".mrc" file — Choose Mask Path'
@@ -290,6 +297,21 @@ class Tabs(TabbedPanel):
 				self.ids.maskpath.text = maskpath
 		elif len(maskpath) == 0:
 			self.ids.maskpath.text = 'Choose Mask Path'
+		self.dismiss_popup()
+
+	# ref path save
+	def show_refpath(self):
+		content = RefPathFinder(refpathdsave=self.refpathsave, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Save Ref Path", content=content,
+                            size_hint=(0.9, 0.9))
+		self._popup.open()
+
+	def refpathsave(self, path, filename):
+		refpath = path.strip()
+		if len(refpath) != 0:
+			self.ids.refPath.text = refpath + '/'
+		elif len(refpath) == 0:
+			self.ids.refPath.text = 'Choose Ref Path'
 		self.dismiss_popup()
 
 	# save project info
@@ -710,7 +732,8 @@ class Tabs(TabbedPanel):
 					star_data["particles"] = df
 					starfile.write(star_data, subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star', overwrite=True)
 					self.ids.mainstarfilt.text = subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star'
-					print('Wiener Filtering by Star File Complete\n')
+					print('Wiener Filtering by Star File Complete')
+					print('New Star File Created: ' + subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star\n')
 
 				elif mrcButton:
 					# create folder
@@ -755,8 +778,33 @@ class Tabs(TabbedPanel):
 					# make wiener graph
 					tom.wienergraph(angpix, defoc, snrratio, highpassnyquist, voltage, cs, envelope, bfactor, phasebutton)
 					print('Wiener Filtering by Subtomogram Directory Complete\n')
+				
 
 				plt.show(block=False)
+
+				# create wiener filter save file
+				def saveTxt(file):
+					file.writelines('PxSize:' + '\t' + self.ids.A1.text + '\n')
+					file.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
+					file.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
+					file.writelines('Highpass:' + '\t' + self.ids.highpass.text + '\n')
+					file.writelines('Voltage:' + '\t' + self.ids.voltage.text + '\n')
+					file.writelines('CS:' + '\t' + self.ids.cs.text + '\n')
+					file.writelines('Envelope:' + '\t' + self.ids.envelope.text + '\n')
+					file.writelines('BFactor:' + '\t' + self.ids.bfactor.text + '\n')
+				
+				if starButton:
+					save = '/' + '/'.join(starf.split('/')[:-1]) + '/wienerSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
+					saveTxt(file_opt)
+					file_opt.close()
+				else:
+					save = direct + 'filtered/wienerSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
+					saveTxt(file_opt)
+					file_opt.close()
 
 			# gaussian
 			if gaussianbutton == True:
@@ -825,7 +873,8 @@ class Tabs(TabbedPanel):
 					star_data["particles"] = df
 					starfile.write(star_data, subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star', overwrite=True)
 					self.ids.mainstarfilt.text = subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star'
-					print('Gaussian Filtering by Star File Complete\n')
+					print('Gaussian Filtering by Star File Complete')
+					print('New Star File Created: ' + subtomodir + starf.split("/")[-1].split(".")[0] + '_filtered.star\n')
 
 				elif mrcButton:
 					# create folder
@@ -866,6 +915,8 @@ class Tabs(TabbedPanel):
 					for thread in threads:
 						thread.join()
 					print('Gaussian Filtering by Subtomogram Directory Complete\n')
+
+
 
 		except FileNotFoundError:
 			print("This directory does not exist")
@@ -1471,6 +1522,7 @@ class Tabs(TabbedPanel):
 			df["Flipped"] = flipped
 			new_star["particles"] = df
 			starfile.write(new_star, _ + "_randFlip" + ".star", overwrite=True)
+			print('New Star File Created: ' + _ + "_randFlip" + ".star\n")
 
 		else:
 			raise ValueError("Unsupported file extension.")

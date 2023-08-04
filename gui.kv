@@ -300,6 +300,36 @@
                 text: "Save"
                 on_release: root.maskdsave(filechooser.path, text_input.text)
 
+<RefPathFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 0
+            multiline: False
+			size_hint_y: 0
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.refpathdsave(filechooser.path, text_input.text)
+
 <ExtractionInfo@Popup>
 	size_hint: .75, .6
 	title: 'Extract Subtomograms'
@@ -314,13 +344,13 @@
 			text: 'Close'
 			on_release: root.dismiss()
 <CalcAnglesInfo@Popup>
-	size_hint: .75, .5
+	size_hint: .75, .8
 	title: 'Calculate Angles'
 	BoxLayout:
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose vector start and end coordinates paths.\nThese coordinate files should consist of rows of\nx,y,z coordinates (in pixels) that match the sequence\nof coordinates in the .coords file.\n\nCalculates angles and inserts them into\nthe 'unfiltered star file' on Master Key.\nRecommended after Extraction."
+			text: "Choose vector start and end coordinates paths.\nThese coordinate files should consist of rows of\nx,y,z coordinates (in pixels) that match the sequence\nof coordinates in the .coords file.\n\nCalculates angles and inserts them into\nthe 'unfiltered star file' on Master Key.\nRecommended after Extraction.\n\nAdditional Info:\n\nRefer to /utilities/ script file and John Peters' paper.\nStart vector point is M (ISV vesicle membrane at the interface),\nend vector point is C (ISV center).\nI is the center of the interface. V is a V-ATPase on the ISV.\n\nThese are stored in the .coordsC and .coordsV, etc files.\nNote that for the particular test example, they are all in bin-4.\nThe .coords file is in bin-1.\nThe full set of coordinates (bin-4) are in .coords_bin4."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -2172,14 +2202,30 @@
 							on_release: Factory.PlotBackInfo().open()
 							size_hint: .2, .8
 							pos_hint: {'center_x': .5, 'center_y': .5}	
-						Label: 
-							text: 'Ref Path'
-						TextInput:
-							text: '.mrc'
-							size_hint_x: .9
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, 1
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: refPath
+							TextInput:
+								text: 'Choose Ref Path'
+								size_hint: 1.5, 1
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: refPath
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Ref Path'
+							on_release: root.show_refpath()
+							size_hint: .35, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							text: 'Ref Basename'
 						TextInput:
