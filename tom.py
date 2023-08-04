@@ -323,7 +323,6 @@ def shift(im, delta):
 def rotate(input, angles, boxsize):
     # This is a 3d Euler rotation around (zxz)-axes
     # with Euler angles (psi,theta,phi)
-
     center = np.ceil(np.array(input.shape) / 2)
     ip = 'l'
     taper = 'no'
@@ -762,15 +761,15 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
     outputstar1 = starf.replace('.star', '_ccc_above.star')
     outputstar = starf.replace('.star', '_ccc_below.star')
     inputstar = starfile.read(starf)['particles']
-    # with mrcfile.open(cccvol1in) as invmrc:
-    #     involbox = float(invmrc.header.nx)
+    with mrcfile.open(cccvol1in) as invmrc:
+        involbox = float(invmrc.header.nx)
     invol1 = mrcfile.read(cccvol1in)
     invol1 = np.transpose(invol1, (2,1,0))
-    # with mrcfile.open(mswedge) as wedmrc:
-    #     wedgebox = float(wedmrc.header.nx)
-    # if involbox != wedgebox:
-    #     print('Volume 1 and Missing Wedge box sizes do not match.')
-    #     return
+    with mrcfile.open(mswedge, permissive=True) as wedmrc:
+        wedgebox = float(wedmrc.header.nx)
+    if involbox != wedgebox:
+        print('Volume 1 and Missing Wedge box sizes do not match.')
+        return
     wedge = mrcfile.read(mswedge)
     wedge = np.transpose(wedge, (2,1,0))
     direct = "/".join(starf.split("/")[:-1]) + '/'
@@ -780,11 +779,11 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
     # looping through each mrc, apply rots and shift, calculating ccc
     cccval = np.zeros(len(inputstar))
     for i in range(len(inputstar)):
-        # with mrcfile.open(direct + (inputstar['rlnImageName'][i])) as starmrc:
-        #     starbox = float(starmrc.header.nx)
-        # if starbox != wedgebox:
-        #     print('Star File Volume and Missing Wedge box sizes do not match.')
-        #     continue
+        with mrcfile.open(direct + (inputstar['rlnImageName'][i])) as starmrc:
+            starbox = float(starmrc.header.nx)
+        if starbox != wedgebox:
+            print('Star File Volume and Missing Wedge box sizes do not match.')
+            continue
         invol2 = mrcfile.read(direct + (inputstar['rlnImageName'][i]))
         invol2 = np.transpose(invol2, (2,1,0))
         mwcorrvol2 = invol2 * wedge
@@ -854,44 +853,3 @@ def calcangles(dataframe):
         newangs[w, :] = r.as_euler('ZYZ', degrees=True)
         
     return newangs
-
-# def ccc_calc(starf, cccvol1in, cccvol2in, boxsize, zoomrange, mswedge):
-#     inputstar = starfile.read(starf)['particles']
-#     invol1 = mrcfile.read(cccvol1in)
-#     invol1 = np.transpose(invol1, (2,1,0))
-#     invol2 = mrcfile.read(cccvol2in)
-#     invol2 = np.transpose(invol2, (2,1,0))
-#     wedge = mrcfile.read(mswedge)
-#     wedge = np.transpose(wedge, (2,1,0))
-#     direct = "/".join(starf.split("/")[:-1]) + '/'
-#     file_path = "calculate_ccc.txt" 
-#     ccc_file = open(direct + file_path, "w")
-
-#     # match volume 2 to star file line
-#     mwcorrvol2 = invol2 * wedge
-#     vol2name = "/".join(cccvol2in.split("/")[-2:])
-#     i = 0
-#     for j in range(len(inputstar)):
-#         if "/".join(inputstar['rlnImageName'][j].split("/")[-2:]) == vol2name:
-#             i = j
-#             break
-
-#     # pull in shifts and rotations from star file
-#     shiftOut = np.array([inputstar['rlnOriginXAngst'][i], inputstar['rlnOriginYAngst'][i],inputstar['rlnOriginZAngst'][i]]) / -2.62
-#     rotateOut = np.array([inputstar['rlnAnglePsi'][i],inputstar['rlnAngleTilt'][i], inputstar['rlnAngleRot'][i]]) * -1
-#     fixedRotations = eulerconvert_xmipp(rotateOut[0], rotateOut[1], rotateOut[2])
-#     rotVol = rotate(mwcorrvol2, fixedRotations.conj().transpose(), boxsize)
-#     shiftVol = shift(rotVol, shiftOut.conj().transpose())
-
-#     # apply rotations and shifts to missing wedge
-#     rotMw = rotate(wedge, fixedRotations.conj().transpose(), boxsize)
-#     shiftMw = shift(rotMw, shiftOut.conj().transpose())
-
-#     # calculate ccf and sum values
-#     ccf = corr_wedge(invol1, shiftVol, shiftMw, shiftMw, boxsize)
-#     left = round(boxsize[0]/2-zoomrange)
-#     right = round(boxsize[0]/2+zoomrange)
-#     cccval = np.sum(ccf[left:right,left:right,left:right])
-#     #save cccval in text file (calculate_ccc.txt)
-#     ccc_file.write(f"{inputstar['rlnImageName'][i]}:  {cccval}\n")
-#     return cccval

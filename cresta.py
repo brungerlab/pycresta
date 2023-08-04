@@ -19,6 +19,7 @@ from datetime import timedelta
 import random
 import mrcfile
 import starfile
+from scipy.spatial.transform import Rotation as R
 
 #import tom.py
 import tom
@@ -1457,19 +1458,6 @@ class Tabs(TabbedPanel):
 		cut_part_and_movefunc(mask, starf, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg)
 		return
 
-	# calculate cross correlation coefficient
-	# def calculate_ccc(self):
-	# 	cccVol1 = self.ids.cccvolone.text
-	# 	cccVol2 = self.ids.cccvoltwo.text
-	# 	wedge = self.ids.cccwedge.text
-	# 	star = self.ids.mainstar.text
-	# 	zoom = 40
-	# 	boxsize = float(self.ids.px1.text)
-	# 	boxsize = [boxsize, boxsize, boxsize]
-	# 	ccc = tom.ccc_calc(star, cccVol1, cccVol2, boxsize, zoom, wedge)
-	# 	print(ccc)
-	# 	return
-
 	# filter subtomograms by CCC
 	def filter_ccc(self):
 		volume = self.ids.volvol.text
@@ -1948,8 +1936,17 @@ class Tabs(TabbedPanel):
 			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
 			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
 			shifts = np.array([float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)])
+
+
 			# transform corresponding model by inversed angles and shifts specified in starfile
-			transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True)
+			# transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True)
+			angs = np.flip(angles.conj().transpose())
+			transformed = tom.processParticler(model, angs, boxsize, shifts.conj().transpose() * -1, shifton=False)
+
+			# X-axis  corresponds to  phi=0     psi=0   theta=alpha
+        	# Y-axis  corresponds to  phi=270   psi=90  theta=alpha
+        	# Z-axis  corresponds to  phi=alpha psi=0   theta=0
+
 			# create "plotback" folder
 			folderPath = subtomoDirect + "/" + '/'.join(imgName.split('/')[:-1]) + "/plotback/"
 			if not os.path.exists(folderPath):
@@ -1963,7 +1960,7 @@ class Tabs(TabbedPanel):
 				mrc.voxel_size = angpix
 				mrc.header.nxstart = coords[0] - bxsz / 2
 				mrc.header.nystart = coords[1] - bxsz / 2
-				mrc.header.nzstart = ((coords[2] - bxsz / 2) * -1) + 2000
+				mrc.header.nzstart = coords[2] - bxsz / 2
 		return
 
 	pass
