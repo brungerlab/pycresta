@@ -199,6 +199,15 @@ class Tabs(TabbedPanel):
 			self.ids.mainmrc.text = 'Choose Mrc Directory'
 		self.dismiss_popup()
 
+	def updateExtract(self):
+		if self.ids.tomoFolder.active == True:
+			self.ids.tomo.text = 'Choose Directory with Tomogram Folders'
+			self.ids.tomocoords.text = ''
+			self.ids.tomocoordbutton.background_color = (1, 1, 1, .5)
+		else:
+			self.ids.tomo.text = 'Choose Tomogram Path'
+			self.ids.tomocoords.text = 'Choose Coords Path'
+			self.ids.tomocoordbutton.background_color = (0, 1.2, 2, .5)
 	# tomogram path save
 	def show_tomo(self):
 		content = TomoFinder(tomodsave=self.tomosave, cancel=self.dismiss_popup)
@@ -207,9 +216,12 @@ class Tabs(TabbedPanel):
 		self._popup.open()
 
 	def tomosave(self, path, filename):
-		tomopath = filename
+		if self.ids.tomoFolder.active == False:
+			tomopath = filename
+		else: 
+			tomopath = path + '/'
 		if len(tomopath) != 0:
-			if tomopath.endswith('.mrc') == False:
+			if tomopath.endswith('.mrc') == False and self.ids.tomoFolder.active == False:
 				self.ids.tomo.text = 'Not a ".mrc" file — Choose Tomogram Path'
 			else:
 				self.ids.tomo.text = tomopath
@@ -445,19 +457,26 @@ class Tabs(TabbedPanel):
 	# tomogram extraction
 	def extract(self):
 		if self.ids.tomoFolder.active:
-			folder = ('/').join(self.ids.tomo.text.split('/')[:-2])
-			print(folder)
+			folder = self.ids.tomo.text
 			# Iterate over the files in the directory
 			for f in os.listdir(folder):
 				# Get the full path of each tomogram folder in the data folder
 				tomoFolder = os.path.join(folder, f)
 				if os.path.isdir(tomoFolder) == True:
 					# Get tomogram and coordsfile from tomogram folder
+					tomogram = ''
+					coordfile = ''
 					for file in os.listdir(tomoFolder):
 						if file.endswith('.mrc'):
 							tomogram = os.path.join(tomoFolder, file)
 						if file.endswith('.coords'):
 							coordfile = os.path.join(tomoFolder, file)
+					if tomogram == '':
+						print('Tomogram File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
+						continue
+					if coordfile == '':
+						print('Coordinate File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
+						continue
 					# Perform extraction
 					self.extract_helper(tomogram, coordfile)	
 		else:
@@ -555,7 +574,8 @@ class Tabs(TabbedPanel):
 			df = pd.DataFrame(data, columns=columns)
 			extractStar = {"optics": pd.DataFrame(), "particles": df}
 			starfile.write(extractStar, direct + tomogName + '.star', overwrite=True)
-			print('Extraction Complete\n')
+			print('Extraction Complete')
+			print('New Star File Created: ' + direct + tomogName + '.star\n')
 			self.ids.mainstar.text = direct + tomogName + '.star'
 			self.ids.mainsubtomo.text = direct
 
@@ -1267,7 +1287,8 @@ class Tabs(TabbedPanel):
 		star_data['particles'] = df1
 		starfileName = starf.split("/")[-1].split(".")[0].replace('_filtered', '')
 		starfile.write(star_data, direct + '/' + starfileName + '_reextract.star', overwrite=True)
-		print('Re-extraction complete. Star file written: ' + direct + '/' + starfileName + '_reextract.star\n')
+		print('Re-extraction complete')
+		print('New Star File Created: ' + direct + '/' + starfileName + '_reextract.star\n')
 		# remove intermediate star file
 		os.remove(cmmStar)
 		return

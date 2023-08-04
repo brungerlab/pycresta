@@ -301,13 +301,13 @@
                 on_release: root.maskdsave(filechooser.path, text_input.text)
 
 <ExtractionInfo@Popup>
-	size_hint: .75, .45
+	size_hint: .75, .6
 	title: 'Extract Subtomograms'
 	BoxLayout:
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Choose a tomogram file path and a '.coords' file path.\nCoords file should consist of rows of\nx,y,z coordinates in pixels.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'sub' folder.\nA star file is generated."
+			text: "Choose a tomogram file path and a '.coords' file path.\nCoords file should consist of rows of\nx,y,z coordinates in pixels.\n\nFor automatic extraction, select the checkbox. Select the\ndirectory that contains the folders for each tomogram file and coordinate file.\nDo not enter a specific .coords file.\n\nProduces subtomograms specified by the .coords file\nand the Master Key boxsize/pixel size.\n\nResults stored in 'sub' folder.\nA star file is generated.\n\nRemember to enter a CTF Image File on the Master Key."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -830,6 +830,7 @@
 								CheckBox:
 									state: 'normal'
 									id: tomoFolder
+									on_active: root.updateExtract()
 								Label:
 									text: 'Use tomogram folder'
 									color: (0,0,0,1)
@@ -875,6 +876,7 @@
 							selection_color: (1,1,1,0)
 						Button:
 							background_color: 0, 1.2, 2, .5
+							id: tomocoordbutton
 							text: 'Choose Coords'
 							on_release: root.show_tomocoords()
 							size_hint: .3, .6
