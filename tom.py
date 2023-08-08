@@ -728,8 +728,10 @@ def processParticler(filename, tmpAng, boxsize, shifts, shifton):
         outH1 = rotate(shift(volTmp, shifts), tmpAng, boxsize)
     else:
         outH1 = rotate(volTmp, tmpAng, boxsize)
-    
-    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
+
+#ATB    
+# I commented out this call to cut_out. It makes the box smaller of there are values < 1. Does not make much sense and causes the subtomograms to get smaller!
+#    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
     return outH1
 
 # CCC Calculations
