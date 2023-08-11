@@ -44,21 +44,21 @@ start and end point coordinates rather than full path names.
 
 6. Masking: populate Master Key at end of Masking
 
-6. Modify: write info about star file and populate Master key at end of Modify -> Rotate... and -> Rotate Manually.
+7. Modify: write info about star file and populate Master key at end of Modify -> Rotate... and -> Rotate Manually.
 
-7. Modify: Set zero angles in new star file after star file or manual rotations.
+9. Modify: Set zero angles in new star file after star file or manual rotations.
 
-8. Extraction: assumes the coords file is an integer with a single space between coordinate points (i.e. "int1 int2 int3"). 
+10. Extraction: assumes the coords file is an integer with a single space between coordinate points (i.e. "int1 int2 int3"). 
 This isn't the default output of IMOD model2point - at least my version - which defaults to float and 
 tab separated values ("    float1    float2    float3"). Comma separated values also fail for the same reason since the string cannot be converted to int. 
 -> Auto-detect format: convert floats to an integer, and handle separators other than single spaces (any number of spaces or other delimiters).
 
-9. Several: Please add a test to ensure that the box dimensions and pixel sizes match in Master Key match those of the 
+11. Several: Please add a test to ensure that the box dimensions and pixel sizes match in Master Key match those of the 
 subtomogram in the rotation tasks, masking, correlation calc. (e.g., prior to calling the rot3d.c function). pixel 
 size mismatch should be warning only. Box dimension mismatch should stop program. Look for "ATB todo" in 
 cresta.py and tom.py. But, there may be other places as well.
 
-9. Related to this, when using Masking with the standard mask file, I get this error message:
+12. Related to this, when using Masking with the standard mask file, I get this error message:
 
 Center, boxsize, filter, grow, normalizeit, sdrange, sdshift,blackdust,whitedust,shiftfil,randfilt,permutebg)
                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -71,11 +71,11 @@ Center, boxsize, filter, grow, normalizeit, sdrange, sdshift,blackdust,whitedust
  IndexError: index 16515072 is out of bounds for axis 0 with size 16515072
 
 
-10. Masking, Modify, and Plot Back: test that shifts from Star file are properly applied.
+13. Masking, Modify, and Plot Back: test that shifts from Star file are properly applied.
 
-11. Extraction: check what happens when extraction is done close border of tomogram? 
+14. Extraction: check what happens when extraction is done close border of tomogram? 
 
-12. Plot back mrc files 14, 15, 16, 22-38  in 201810XX_MPI/SV4_003_dff/sub are all mapped to the same position in Chimera/ChimeraX, although
+15. Plot back mrc files 14, 15, 16, 22-38  in 201810XX_MPI/SV4_003_dff/sub are all mapped to the same position in Chimera/ChimeraX, although
 the header indicates different positions!  What does Chimera/ChimeraX use to position the map?
 
 axelmacbook2023:plotback brunger$ header SV4_003_dff000028.mrc 
