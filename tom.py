@@ -238,6 +238,11 @@ def allocAlign(num_of_entries):
     return Align
 
 def eulerconvert_xmipp(rot, tilt, psi):
+#
+# ATB: eulerconvert_xmipp converts Relion Euler rot, tilt, psi angles to the TOM Euler angle convention phi, psi, theta. 
+# TOM Euler angles are stored in the angles array in the order (phi,psi,theta) rather than the more customary
+# (phi,theta,psi). So to invert the TOM Euler angles, (-psi,-phi,-theta) should be used.
+#
     rot2 = -psi * np.pi / 180
     tilt = -tilt * np.pi / 180
     psi = -rot * np.pi / 180
@@ -270,7 +275,16 @@ def eulerconvert_xmipp(rot, tilt, psi):
 
 def processParticle(filename,tmpAng,tmpShift,maskh1,PickPos,offSetCenter,boxsize,filter,grow,normalizeit, sdRange, sdShift,blackdust,whitedust,shiftfil,randfilt,permutebg):
     volTmp = mrcfile.read(filename)
-    maskh1Trans = shift(rotate(maskh1, tmpAng, boxsize), tmpShift.conj().transpose())
+
+# ATB: note that in contrast to processParticler, this does not swap tmpAng indices 0 and 1. 
+# Since processParticler is called with negative angles, this means that here the inverse rotation 
+# operation is applied (compared to processParticler)
+
+# ATB: this function back-rotates/shifts the volume specified in maskh1 with optional cut, filter, and normalization of the volume specified in filename.
+
+# ATB todo: please add test for consistency of pixels and size of the volume with definitions in Master Key. Pixel mismatch gives warning message, size mismatch stops program.
+
+    maskh1Trans = shift(rotate(maskh1, tmpAng, boxsize, '0'), tmpShift.conj().transpose())
     maskh1Trans = maskh1Trans > 0.14
     vectTrans = pointrotate(offSetCenter,tmpAng[0],tmpAng[1],tmpAng[2])+tmpShift.conj().transpose()
     posNew=(np.round(vectTrans)+PickPos).conj().transpose()
@@ -320,12 +334,25 @@ def shift(im, delta):
     return im
 
 
-def rotate(input, angles, boxsize):
+def rotate(input, angles, boxsize, ip):
     # This is a 3d Euler rotation around (zxz)-axes
-    # with Euler angles (psi,theta,phi)
+    # with Euler angles
+    
+    # ATB: note: often Euler rotation angles are specified in this order: phi, theta, psi, rather than 
+    # in the order stored in the A array whichs is: (phi, psi, theta).
+    # To invert the corresponding rotation operation, use -psi, -theta, -phi. This means -A[1], -A[0], -A[2].
+    
+    #
+    # ATB: note, this is a wrapper function for the c++ code in file rot3d.c.
+    #
+    # ATB: introduced new parameter, ip (ip = l will use the mean of the map to set values that are outside the range of the original map, otherwise, it will use zero)
+    #
     center = np.ceil(np.array(input.shape) / 2)
-    ip = 'l'
-    taper = 'no'
+    
+    
+    # ATB: removed obsolete taper specification 
+    # taper = 'no'
+    
     in_array = input
     in_array = in_array.astype(np.float32)
     euler_angles = np.array(angles)
@@ -336,18 +363,20 @@ def rotate(input, angles, boxsize):
     px = float(center[0])
     py = float(center[1])
     pz = float(center[2])
-    
-    if taper != 'taper':
-        out = np.zeros_like(in_array, dtype=np.float32)
-        pointer_in = np.ctypeslib.ndpointer(shape = in_array.shape, dtype = np.float32)
-        pointer_out = np.ctypeslib.ndpointer(shape = out.shape, dtype = np.float32)
-        pointer_ang = np.ctypeslib.ndpointer(shape = euler_angles.shape, dtype = np.float32)
-        rot_function.rot3d.argtypes = (pointer_in, pointer_out, ctypes.c_long, ctypes.c_long, ctypes.c_long, pointer_ang, ctypes.c_wchar, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_int)
-        rot_function.rot3d.restype = None
-        # call C-Function to do the calculations
-        rot_function.rot3d(in_array, out, sx, sy, sz, euler_angles, ip, px, py, pz, 1)
-        out = out.astype(np.float64)
-    
+
+# ATB: removed obsolete taper if-test    
+#    if taper != 'taper':
+    out = np.zeros_like(in_array, dtype=np.float32)
+    pointer_in = np.ctypeslib.ndpointer(shape = in_array.shape, dtype = np.float32)
+    pointer_out = np.ctypeslib.ndpointer(shape = out.shape, dtype = np.float32)
+    pointer_ang = np.ctypeslib.ndpointer(shape = euler_angles.shape, dtype = np.float32)
+    rot_function.rot3d.argtypes = (pointer_in, pointer_out, ctypes.c_long, ctypes.c_long, ctypes.c_long, pointer_ang, ctypes.c_wchar, ctypes.c_float, ctypes.c_float, ctypes.c_float, ctypes.c_int)
+    rot_function.rot3d.restype = None
+    # call C-Function to do the calculations
+    # ATB removed obsolete ip parameter from call to rot3d
+    rot_function.rot3d(in_array, out, sx, sy, sz, euler_angles, ip, px, py, pz, 1)
+    out = out.astype(np.float64)
+
     return out
 
 def tom_taper(in_data, new_size):
@@ -721,19 +750,24 @@ def tom_filter(im, radius, boxsize, center=None, flag='circ'):
 # rotate subtomogram functions
 def processParticler(filename, tmpAng, boxsize, shifts, shifton):
     volTmp = mrcfile.read(filename)
+#
+# ATB: note that processParticler swaps values in tmpAng indexes 0 and 1, but processParticle (used for masking) does not
+
+#
+# ATB todo: please add test for consistency of pixels and size of the volume with definitions in Master Key. Pixel mismatch gives warning message, size mismatch stops program.
     storey = tmpAng[1]
     tmpAng[1] = tmpAng[0]
     tmpAng[0] = storey
     if shifton == True:
-        outH1 = rotate(shift(volTmp, shifts), tmpAng, boxsize)
+        outH1 = rotate(shift(volTmp, shifts), tmpAng, boxsize, 'l')
     else:
-        outH1 = rotate(volTmp, tmpAng, boxsize)
+        outH1 = rotate(volTmp, tmpAng, boxsize, 'l')
 
 #ATB    
 # I commented out this call to cut_out. It makes the box smaller of there are values < 1. Does not make much sense and causes the subtomograms to get smaller!
 #    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
     return outH1
-
+    
 # CCC Calculations
 def corr_wedge(a, b, wedge_a, wedge_b, boxsize):
     # mask creation
@@ -778,6 +812,10 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
     file_path = "calculate_ccc.txt" 
     ccc_file = open(direct + file_path, "w")
 
+# ATB todo: please add test for consistency of pixels and size of the volume AND WEDGE file with definitions in Master Key. Pixel mismatch gives warning message, size mismatch stops program.
+# ATB todo: parallize loop
+# ATB todo: print info message for each ccc calculation
+
     # looping through each mrc, apply rots and shift, calculating ccc
     cccval = np.zeros(len(inputstar))
     for i in range(len(inputstar)):
@@ -794,11 +832,11 @@ def ccc_loop(starf, cccvol1in, threshold, boxsize, zoomrange, mswedge):
         shiftOut = np.array([inputstar['rlnOriginXAngst'][i], inputstar['rlnOriginYAngst'][i],inputstar['rlnOriginZAngst'][i]]) / -2.62
         rotateOut = np.array([inputstar['rlnAnglePsi'][i],inputstar['rlnAngleTilt'][i], inputstar['rlnAngleRot'][i]]) * -1
         fixedRotations = eulerconvert_xmipp(rotateOut[0], rotateOut[1], rotateOut[2])
-        rotVol = rotate(mwcorrvol2, fixedRotations.conj().transpose(), boxsize)
+        rotVol = rotate(mwcorrvol2, fixedRotations.conj().transpose(), boxsize, 'l')
         shiftVol = shift(rotVol, shiftOut.conj().transpose())
 
         # apply rotations and shifts to missing wedge
-        rotMw = rotate(wedge, fixedRotations.conj().transpose(), boxsize)
+        rotMw = rotate(wedge, fixedRotations.conj().transpose(), boxsize, '0')
         shiftMw = shift(rotMw, shiftOut.conj().transpose())
 
         # calculate ccf and sum values

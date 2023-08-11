@@ -1,110 +1,138 @@
-1. Each time pycresta creates a new directory with subtomograms, please write all information about settings and inputs as a text 
+GENERAL:
+
+1. ATB added comments in various places in rot3d.c, pycresta.py, tom.py related to the various angle conventions and conversions. 
+Please read and and suggest more explanations if needed. The code is extremely convoluted and the angle conventions are quite confusing.
+
+------------------------------------------------------------------------
+ 
+DONE:
+
+1. Plot Back: ATB fixed inverse Euler angle issue in Plot Back (briefly, reverse engineered what was done for masking,
+call to eulerconvert_xmipp, swap angles indices 0 and 1).  ATB also incorporated small shifts from star file and
+added an info message after each plot back subtomogram has been written. I added comments in cresta.py and tom.py.
+
+
+2. Modify: ATB fixed issue: manual (x,y,z) rottrans produces sometimes bus error when operating on previously rotated volumes:
+
+- the issue is this statement in def processParticler in tom.py
+   outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)   
+   I commented it out - it is only used in that place. It makes the box smaller if there are values < 1? This does not make much sense!  
+   it produces a box that is 255,255,255 rather than 256,256,256. This mismatch causes issues with subsequent rotate commands.
+ - another issue is the interpolation exception treatment in rot3d.c. I reverted back to the original code, but included additional cushion:
+ - finally, I calculate the mean of the image density and use that for the pixels outside the range, except for masks where the value is set to zero.
+  - I added comments in rot3d.c.
+ 
+------------------------------------------------------------------------
+
+
+TODO:
+
+1. Filtering: Each time pycresta creates a new directory with subtomograms, please write all information about settings and inputs as a text 
 file into that directory, i.e., project text file. So, if the user performs filtering, the file should contain the information about
 the particular settings and inputs that were used for the filtering job. -->> OK, but please also do for Gaussian.
 
-2. Incorporate calc angles directly into extraction as an option. Ask user to specify the file extensions for the start and end point coordinates rather than full path names. Should
-work for both single tomogram directories as well as batch mode with multiple tomograms in one directory.
+2. Extraction: Incorporate calc angles directly into Extraction as an option. Ask user to specify the file extensions for the 
+start and end point coordinates rather than full path names.  
 
-3. Fix inverse Euler angle issue in Plot Back. 
+3.Extraction: Introduce batch mode for Extraction with multiple tomograms in one directory.
 
-Hi Axel and Patrick,
-Using this package: https://eulerangles.readthedocs.io/en/latest/usage/quick_start.html
+4. Plot Back:
+   - parallelize the process 
+   - test if it works if the star file refers to multiple tomograms.
 
-I was looking at the one that is 90, 0 , -90, and the correct angles should be 0 0 0.  
-So:
->>> input_eulers = np.array([90, 0, -90])
->>> output_euler=euler2euler( input_eulers, source_axes='zyz', source_intrinsic=True, source_right_handed_rotation=True, target_axes='zyz', target_intrinsic=False, target_right_handed_rotation=False, invert_matrix=True)
->>> print(output_euler)
-[-0. -0. -0.]
->>>
+5. Extraction: write info about star file, and populate Master Key at end of Extraction/Calculate Angles
 
+6. Masking: populate Master Key at end of Masking
 
-And that should be correct as far as I could tell. So I think we just need to use this to properly invert the angles and we should be good to go.
-Cheers,
--J
+6. Modify: write info about star file and populate Master key at end of Modify -> Rotate... and -> Rotate Manually.
 
--- new to do (after Augst 6, 2023)
-4. write info about star file, and populate Master Key at end of: Calcuate Angles, Modify -> Rotate... and -> Rotate Manaully. 
+7. Modify: Set zero angles in new star file after star file or manual rotations.
 
-5. Set zero angles in star file after rottrans.
-
-6. Extraction assumes the coords file is an integer with a single space between coordinate points (i.e. "int1 int2 int3"). 
+8. Extraction: assumes the coords file is an integer with a single space between coordinate points (i.e. "int1 int2 int3"). 
 This isn't the default output of IMOD model2point - at least my version - which defaults to float and 
-tab separated values ("    float1    float2    float3"). You can add a flag to force integer output, 
-but the tab separation is locked in. It looks like the code uses line.split(' ') to break up 
-each input line, so tabs are broken into multiple indexes and you end up passing a space to int(pos[idx]).  
-Comma separated values also fail for the same reason since the string cannot be converted to int. 
+tab separated values ("    float1    float2    float3"). Comma separated values also fail for the same reason since the string cannot be converted to int. 
+-> Auto-detect format: convert floats to an integer, and handle separators other than single spaces (any number of spaces or other delimiters).
 
--> Just have python convert to an integer, ignoring what imod does entirely?
+9. Several: Please add a test to ensure that the box dimensions and pixel sizes match in Master Key match those of the 
+subtomogram in the rotation tasks, masking, correlation calc. (e.g., prior to calling the rot3d.c function). pixel 
+size mismatch should be warning only. Box dimension mismatch should stop program. Look for "ATB todo" in 
+cresta.py and tom.py. But, there may be other places as well.
 
+9. Related to this, when using Masking with the standard mask file, I get this error message:
 
-7. manual (x,y,z) rottrans produces sometimes bus error when operating on previously rotated volumes:
-
-- the issue is this statement in def processParticler in tom.py
-
-   outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
-   
-   I commented it out - it is only used in that place. It makes the box smaller if there are values < 1? This does not make much sense!
-   
-   it produces a box that is 255,255,255 rather than 256,256,256. This mismatch causes issues with subsequent rotate commands.
-   
- - another issue is the interpolation exception treatment in rot3d.c. I reverted back to the original code, but included additional cushion:
- 
- - finally, I calculate the mean of the image density and use that for the pixels outside the range.
- 
- /* ATB */
- /* Calculate mean of image array */
- image_size=sx*sy*sz;
- image_sum=0;
- for(i = 0; i < image_size; ++i)
-    image_sum += image[i];
-    image_mean = image_sum/image_size;
- /*   printf("image mean: %f %ld /n",image_mean, image_size); */
- 
- ....
- 
-				/* ATB: modified these tests to test if the pixel +/-1 (in all 3 dimensions) is outside the range of the original image */
-				/* this is to make ensure that the interpolation does not access pixels that are not in the original image */
-				/* Outside values are set to the mean of the image array */
-				r_x = px + rm00 * pi + rm10 * pj + rm20 * pk;
-				/* orig: if (r_x < 0 || r_x > sx_1 ) */
-				if (r_x < 1 || r_x > sx_1-1 ) 
-				{
-					*rotimg++ = image_mean;  /* this pixel was not inside the image */
-					continue;
-				} 
-				r_y = py + rm01 * pi + rm11 * pj + rm21 * pk;
-				/* orig: if (r_y < 0 || r_y > sy_1 ) */
-				if (r_y < 1 || r_y > sy_1-1 ) 
-				{
-					*rotimg++ = image_mean;
-					continue;
-				} 
-				r_z = pz + rm02 * pi + rm12 * pj + rm22 * pk;
-				/* orig: if (r_z < 0 || r_z > sz_1 ) */
-				if (r_z < 1 || r_z > sz_1-1 ) 
-				{
-					*rotimg++ = image_mean;
-					continue;
-				} 
-
- 
-  8. Please add a test to ensure that the box dimensions match those of the subtomogram in the rotate function, prior to calling the rot3d.c function
-   
-
- 
- 
- 
-----
+Center, boxsize, filter, grow, normalizeit, sdrange, sdshift,blackdust,whitedust,shiftfil,randfilt,permutebg)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   File "/Users/brunger/GitHub/pycresta/tom.py", line 296, in processParticle
+     outH1 = maskWithFil(outH1,maskh1Trans, sdRange, sdShift,blackdust,whitedust)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   File "/Users/brunger/GitHub/pycresta/tom.py", line 613, in maskWithFil
+     ind_mean = np.mean(input[indd])
+                        ~~~~~^^^^^^
+ IndexError: index 16515072 is out of bounds for axis 0 with size 16515072
 
 
-Other: 
+10. Masking, Modify, and Plot Back: test that shifts from Star file are properly applied.
 
-4. Try Chimerax plugin ArtiaX, https://pubmed.ncbi.nlm.nih.gov/36251681/, https://onlinelibrary.wiley.com/doi/10.1002/pro.4472  Any comments?
+11. Extraction: check what happens when extraction is done close border of tomogram? 
 
-5. Add the box size and pixel size as a comment into the cmm files? For future.
+12. Plot back mrc files 14, 15, 16, 22-38  in 201810XX_MPI/SV4_003_dff/sub are all mapped to the same position in Chimera/ChimeraX, although
+the header indicates different positions!  What does Chimera/ChimeraX use to position the map?
 
-6. Memory mapping for Filtering? Not possible.
+axelmacbook2023:plotback brunger$ header SV4_003_dff000028.mrc 
+
+ RO image file on unit   1 : SV4_003_dff000028.mrc     Size=      65537 K
+
+ Number of columns, rows, sections .....     256     256     256
+ Map mode ..............................    2   (32-bit real)              
+ Start cols, rows, sects, grid x,y,z ...  776   304  2592     256    256    256
+ Pixel spacing (Angstroms)..............   2.620      2.620      2.620    
+ Cell angles ...........................   90.000   90.000   90.000
+ Fast, medium, slow axes ...............    X    Y    Z
+ Origin on x,y,z .......................    0.000       0.000       0.000    
+ Minimum density ....................... -0.95041E-01
+ Maximum density .......................  0.11996    
+ Mean density ..........................  0.78921E-04
+ RMS deviation from mean................  0.30134E-02
+ tilt angles (original,current) ........   0.0   0.0   0.0   0.0   0.0   0.0
+ Space group,# extra bytes,idtype,lens .        1        0        0        
+
+     1 Titles :
+Created by mrcfile.py                                       2023-08-11 11:48:00
+
+
+xelmacbook2023:plotback brunger$ header SV4_003_dff000027.mrc 
+
+ RO image file on unit   1 : SV4_003_dff000027.mrc     Size=      65537 K
+
+ Number of columns, rows, sections .....     256     256     256
+ Map mode ..............................    2   (32-bit real)              
+ Start cols, rows, sects, grid x,y,z ... 1980   520  3460     256    256    256
+ Pixel spacing (Angstroms)..............   2.620      2.620      2.620    
+ Cell angles ...........................   90.000   90.000   90.000
+ Fast, medium, slow axes ...............    X    Y    Z
+ Origin on x,y,z .......................    0.000       0.000       0.000    
+ Minimum density ....................... -0.96127E-01
+ Maximum density .......................  0.12102    
+ Mean density ..........................  0.73082E-04
+ RMS deviation from mean................  0.30137E-02
+ tilt angles (original,current) ........   0.0   0.0   0.0   0.0   0.0   0.0
+ Space group,# extra bytes,idtype,lens .        1        0        0        0
+
+     1 Titles :
+Created by mrcfile.py                                       2023-08-11 11:47:59
+
+
+
+-------------------------------------------------------------------------
+
+
+OTHER:
+
+1. Try Chimerax plugin ArtiaX, https://pubmed.ncbi.nlm.nih.gov/36251681/, https://onlinelibrary.wiley.com/doi/10.1002/pro.4472  Any comments?
+
+2. Add the box size and pixel size as a comment into the cmm files? For future.
+
+3. Memory mapping for Filtering? Not possible.
 
 
 

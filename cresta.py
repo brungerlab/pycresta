@@ -1537,7 +1537,8 @@ class Tabs(TabbedPanel):
 			mrcfile.write(rotDir + mrcName, outH1, True)
 			with mrcfile.open(rotDir + mrcName, 'r+') as mrc:
 				mrc.voxel_size = pxsz
-			print('Rotation complete for ' + mrcName)
+# ATB: changed print statement: both rotations and shifts are applied
+			print('Rotation/shift complete for ' + mrcName)
 		# thread in batches to optimize runtime
 		threads = []
 		batch_size = int(self.ids.CPU.text)
@@ -1927,22 +1928,61 @@ class Tabs(TabbedPanel):
 		# read starfile as dataframe
 		star_data = starfile.read(starf)["particles"]
 		# iterate through each row of dataframe
+
+# ATB to do: please parallelize this loop
 		for row in star_data.itertuples(index=False):
 			imgName = row.rlnImageName
+            
+# ATB to do: uncomment the following line and test
 			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
 			classNum = str(random.randint(1, 3))
+
 			# get model associated with class num
 			model = classPath + [file for file in classes if "00" + classNum in file][0]
 			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
 			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
-			shifts = np.array([float(row.rlnOriginXAngst), float(row.rlnOriginYAngst), float(row.rlnOriginZAngst)])
+#
+# ATB: call eulerconvert_xmipp (similar to using tom.readList which is used in both the Rotate and Masking tasks),
+# but here we do not use readList to read the star file lines.
+#
+# ATB: eulerconvert_xmipp converts Relion Euler rot, tilt, psi angles to the TOM Euler angle convention phi, psi, theta. 
+# TOM Euler angles are stored in the angles array in the order (phi,psi,theta) rather than the more customary
+# (phi,theta,psi). So to invert the TOM Euler angles, (-psi,-phi,-theta) should be used.
+#
 
+# ATB: debug print statement:
+#			print(angles)
+            
+			euler_angles = tom.eulerconvert_xmipp(angles[0], angles[1], angles[2])
+			angles = euler_angles
+            
+# ATB: debug print statement:
+#			print(angles)
+#
+# ATB: divide shifts by pixel sizes to get pixel positions (similar to what is done in readList) since it calls the tom.shift() function which operates in pixel space
+			shifts = np.array([float(row.rlnOriginXAngst) / angpix, float(row.rlnOriginYAngst) / angpix, float(row.rlnOriginZAngst) / angpix])
+
+#
+# ATB: removed original code:
+#			angs = np.flip(angles.conj().transpose())
+#			transformed = tom.processParticler(model, angs, boxsize, shifts.conj().transpose() * -1, shifton=False)
+            
+# ATB: this swaps values in tmpAng indexes 0 and 1 since they are swapped again processParticle
+# since angles are not negated, this effectively means that we apply the inverted rotation matrix to the model (similar to what is 
+# done when rotating masks which uses processParticle, not processPartiler)
+			storey = angles[1]
+			angles[1] = angles[0]
+			angles[0] = storey
+            
+# ATB: debug print statement:
+#			print(angles)
+#			print(shifts)
+
+# ATB: note that we do not negate angles and shifts here (unlike in the Rotate task)!
 
 			# transform corresponding model by inversed angles and shifts specified in starfile
-			# transformed = tom.processParticler(model, angles, boxsize, shifts, shifton=True)
-			angs = np.flip(angles.conj().transpose())
-			transformed = tom.processParticler(model, angs, boxsize, shifts.conj().transpose() * -1, shifton=False)
-
+			transformed = tom.processParticler(model, angles, boxsize, shifts.conj().transpose(), shifton=True)
+#
 			# X-axis  corresponds to  phi=0     psi=0   theta=alpha
         	# Y-axis  corresponds to  phi=270   psi=90  theta=alpha
         	# Z-axis  corresponds to  phi=alpha psi=0   theta=0
@@ -1961,6 +2001,10 @@ class Tabs(TabbedPanel):
 				mrc.header.nxstart = coords[0] - bxsz / 2
 				mrc.header.nystart = coords[1] - bxsz / 2
 				mrc.header.nzstart = coords[2] - bxsz / 2
+
+# ATB: added print statement
+			print('Plot-back rotation/shift complete for ' + mrcName)
+            
 		return
 
 	pass

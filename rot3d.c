@@ -6,6 +6,15 @@
 /* 3D Rotation */
 void rot3d (float *image,float *rotimg,long sx,long sy,long sz,float *p_euler_A,char ip,float px,float py,float pz, int euler_dim)
 
+	/* ATB: note: often Euler rotation angles are specified in this order: phi, theta, psi, rather than 
+	in the order stored in the A array, which is (phi, psi, theta).
+	To invert the corresponding rotation operation, use -psi, -theta, -phi. This means: -A[1], -A[0], -A[2] */
+
+
+	/* ATB: changed meaning of ip character parameter. It now indicates if the mean of the input image is used to fill pixels that 
+	are not defined by the rotated image (for ip = "l"). Otherwise, these pixels are set to zero (in particular, 
+	for rotating masks or CTF correction/missing wedge files) */
+
 {
 	
 long  sx_1, sy_1, sz_1;	/* highest pixels */
@@ -68,9 +77,10 @@ angle_sin[13]=-sqrt(3)/2;
 angle_sin[14]=-sqrt(2)/2;
 angle_sin[15]=-0.5;
 
+/* ATB: removed the following 3 statements - leftover from previous versions
 sx_1 = sx - 0.5;
 sy_1 = sy - 0.5;
-sz_1 = sz - 0.5;
+sz_1 = sz - 0.5; */
 
 for (i=0, j=0 ; i<16; i++)
 {
@@ -136,7 +146,9 @@ if (euler_dim == 1)
 	rm02=sintheta*sinpsi;
 	rm12=-sintheta*cospsi;
 	rm22=costheta;
-	/*printf("coeff: %f %f %f  %f %f %f  %f %f %f /n",rm00,rm10,rm20,rm01,rm11,rm21,rm02,rm12,rm22);*/
+	
+	/* ATB: debug print statement: 
+	  printf("coeff: %f %f %f  %f %f %f  %f %f %f /n",rm00,rm10,rm20,rm01,rm11,rm21,rm02,rm12,rm22);*/
 }
 else
 {
@@ -152,92 +164,98 @@ else
 }
 
 
-/* ATB */
-/* Calculate mean of image array */
-image_size=sx*sy*sz;
-image_sum=0;
-for(i = 0; i < image_size; ++i)
-   image_sum += image[i];
-   image_mean = image_sum/image_size;
-/*   printf("image mean: %f %ld /n",image_mean, image_size); */
-
-
+/* ATB: Calculate mean of image array if ip is l, otherwise set the mean to zero (for rotating masks or CTF correction (missing wedge) volumes)*/
 if (ip == 'l') 
 {
-	sx_1 = sx - 1;
-	sy_1 = sy - 1;
-	sz_1 = sz - 1;
-	sxy = sx * sy;
-	index1 = sx;
-	index2 = sx + 1;
-	index3 = sxy;
-	index4 = sxy + 1;
-	index5 = sx + sxy;
-	index6 = sx + sxy + 1;
+	image_size=sx*sy*sz;
+	image_sum=0;
+	for(i = 0; i < image_size; ++i)
+	{
+		image_sum += image[i];
+		image_mean = image_sum/image_size;		
+	}
+}
+else
+{
+	image_mean = 0;
+}	
 
-	for (k=0; k < sz; k++)
-	{	
-		for (j=0; j < sy; j++)
+/* ATB: debug print statement: */
+/* printf("image mean, size: %f %ld /n",image_mean, image_size); */
+
+sx_1 = sx - 1;
+sy_1 = sy - 1;
+sz_1 = sz - 1;
+sxy = sx * sy;
+index1 = sx;
+index2 = sx + 1;
+index3 = sxy;
+index4 = sxy + 1;
+index5 = sx + sxy;
+index6 = sx + sxy + 1;
+
+for (k=0; k < sz; k++)
+{	
+	for (j=0; j < sy; j++)
+	{
+		for (i=0; i < sx; i++) 
 		{
-			for (i=0; i < sx; i++) 
+			pi = i-px;
+			pj = j-py;
+			pk = k-pz;
+
+			/* transformation of coordinates */
+
+			
+			/* ATB: modified these tests to test if the pixel +/-1 (in all 3 dimensions) is outside the range of the original image 
+				this is to make ensure that the interpolation does not access pixels that are not in the original image
+				Outside values are set to the mean of the image array */
+			
+			r_x = px + rm00 * pi + rm10 * pj + rm20 * pk;
+			/* orig: if (r_x < 0 || r_x > sx_1 ) */
+			if (r_x < 1 || r_x > sx_1-1 ) 
 			{
-				pi = i-px;
-				pj = j-py;
-				pk = k-pz;
+				*rotimg++ = image_mean;
+				continue;
+			} 
+			r_y = py + rm01 * pi + rm11 * pj + rm21 * pk;
+			/* orig: if (r_y < 0 || r_y > sy_1 ) */
+			if (r_y < 1 || r_y > sy_1-1 ) 
+			{
+				*rotimg++ = image_mean;
+				continue;
+			} 
+			r_z = pz + rm02 * pi + rm12 * pj + rm22 * pk;
+			/* orig: if (r_z < 0 || r_z > sz_1 ) */
+			if (r_z < 1 || r_z > sz_1-1 ) 
+			{
+				*rotimg++ = image_mean;
+				continue;
+			} 
 
-				/* transformation of coordinates */
+			/* ATB: reverted back to the original interpolation code */
+					
+			/* Interpolation */
+			ipx = r_x;
+			vx2 = r_x - ipx;
+			vx1 = 1 - vx2;
+			ipy = r_y;
+			vy2 = r_y - ipy;
+			vy1 = 1 - vy2;
+			ipz = r_z;
+			vz2 = r_z - ipz;
+			vz1 = 1 - vz2;
 
-				
-				/* ATB: modified these tests to test if the pixel +/-1 (in all 3 dimensions) is outside the range of the original image */
-				/* this is to make ensure that the interpolation does not access pixels that are not in the original image */
-				/* Outside values are set to the mean of the image array */
-				r_x = px + rm00 * pi + rm10 * pj + rm20 * pk;
-				/* orig: if (r_x < 0 || r_x > sx_1 ) */
-				if (r_x < 1 || r_x > sx_1-1 ) 
-				{
-					*rotimg++ = image_mean;  /* this pixel was not inside the image */
-					continue;
-				} 
-				r_y = py + rm01 * pi + rm11 * pj + rm21 * pk;
-				/* orig: if (r_y < 0 || r_y > sy_1 ) */
-				if (r_y < 1 || r_y > sy_1-1 ) 
-				{
-					*rotimg++ = image_mean;
-					continue;
-				} 
-				r_z = pz + rm02 * pi + rm12 * pj + rm22 * pk;
-				/* orig: if (r_z < 0 || r_z > sz_1 ) */
-				if (r_z < 1 || r_z > sz_1-1 ) 
-				{
-					*rotimg++ = image_mean;
-					continue;
-				} 
-
-				/* ATB */
-				/* reverted back to the original interpolation code	*/
-						
-				/* Interpolation */
-				ipx = r_x;
-				vx2 = r_x - ipx;
-				vx1 = 1 - vx2;
-				ipy = r_y;
-				vy2 = r_y - ipy;
-				vy1 = 1 - vy2;
-				ipz = r_z;
-				vz2 = r_z - ipz;
-				vz1 = 1 - vz2;
-
-				iindex = ipx + ipy * sx + ipz * sxy;
-				AA = image[iindex] + (image[iindex + 1] - image[iindex]) * vx2; 
-				BB = image[iindex + index1] * vx1 + image[iindex + index2] * vx2;
-				CC = image[iindex + index3] * vx1 + image[iindex + index4] * vx2;
-				DD = image[iindex + index5] * vx1 + image[iindex + index6] * vx2; 
-				*rotimg++ = (AA * vy1 + BB * vy2) * vz1 + (CC * vy1 + DD * vy2) * vz2; 
-				
-			}
+			iindex = ipx + ipy * sx + ipz * sxy;
+			AA = image[iindex] + (image[iindex + 1] - image[iindex]) * vx2; 
+			BB = image[iindex + index1] * vx1 + image[iindex + index2] * vx2;
+			CC = image[iindex + index3] * vx1 + image[iindex + index4] * vx2;
+			DD = image[iindex + index5] * vx1 + image[iindex + index6] * vx2; 
+			*rotimg++ = (AA * vy1 + BB * vy2) * vz1 + (CC * vy1 + DD * vy2) * vz2; 
+			
 		}
 	}
 }
-
+	
 }
 
