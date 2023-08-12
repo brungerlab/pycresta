@@ -16,11 +16,15 @@ added an info message after each plot back subtomogram has been written. I added
 
 - the issue is this statement in def processParticler in tom.py
    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)   
-   I commented it out - it is only used in that place. It makes the box smaller if there are values < 1? This does not make much sense!  
+   ATB commented it out - it is only used in that place. It makes the box smaller if there are values < 1? This does not make much sense!  
    it produces a box that is 255,255,255 rather than 256,256,256. This mismatch causes issues with subsequent rotate commands.
  - another issue is the interpolation exception treatment in rot3d.c. I reverted back to the original code, but included additional cushion:
- - finally, I calculate the mean of the image density and use that for the pixels outside the range, except for masks where the value is set to zero.
+ - finally, ATB calculates the mean of the image density and use that for the pixels outside the range, except for masks where the value is set to zero.
   - I added comments in rot3d.c.
+
+3. Plot back mrc files sometimes were mapped to the same position in Chimera/ChimeraX (e.g,. 14, 15, 16, 22-38  in 201810XX_MPI/SV4_003_dff/sub), although the header indicates different positions.  ATB fixed this by changing from nxstart, nystart, nzstart to origin.x, origin.y, origin.z since that works more reliably in Chimera.
+
+
  
 ------------------------------------------------------------------------
 
@@ -73,53 +77,9 @@ Center, boxsize, filter, grow, normalizeit, sdrange, sdshift,blackdust,whitedust
 
 13. Masking, Modify, and Plot Back: test that shifts from Star file are properly applied.
 
-14. Extraction: check what happens when extraction is done close border of tomogram? 
+14. Extraction: check what happens when extraction is done close border of tomogram? Qiang says:
 
-15. Plot back mrc files 14, 15, 16, 22-38  in 201810XX_MPI/SV4_003_dff/sub are all mapped to the same position in Chimera/ChimeraX, although
-the header indicates different positions!  What does Chimera/ChimeraX use to position the map?
-
-axelmacbook2023:plotback brunger$ header SV4_003_dff000028.mrc 
-
- RO image file on unit   1 : SV4_003_dff000028.mrc     Size=      65537 K
-
- Number of columns, rows, sections .....     256     256     256
- Map mode ..............................    2   (32-bit real)              
- Start cols, rows, sects, grid x,y,z ...  776   304  2592     256    256    256
- Pixel spacing (Angstroms)..............   2.620      2.620      2.620    
- Cell angles ...........................   90.000   90.000   90.000
- Fast, medium, slow axes ...............    X    Y    Z
- Origin on x,y,z .......................    0.000       0.000       0.000    
- Minimum density ....................... -0.95041E-01
- Maximum density .......................  0.11996    
- Mean density ..........................  0.78921E-04
- RMS deviation from mean................  0.30134E-02
- tilt angles (original,current) ........   0.0   0.0   0.0   0.0   0.0   0.0
- Space group,# extra bytes,idtype,lens .        1        0        0        
-
-     1 Titles :
-Created by mrcfile.py                                       2023-08-11 11:48:00
-
-
-xelmacbook2023:plotback brunger$ header SV4_003_dff000027.mrc 
-
- RO image file on unit   1 : SV4_003_dff000027.mrc     Size=      65537 K
-
- Number of columns, rows, sections .....     256     256     256
- Map mode ..............................    2   (32-bit real)              
- Start cols, rows, sects, grid x,y,z ... 1980   520  3460     256    256    256
- Pixel spacing (Angstroms)..............   2.620      2.620      2.620    
- Cell angles ...........................   90.000   90.000   90.000
- Fast, medium, slow axes ...............    X    Y    Z
- Origin on x,y,z .......................    0.000       0.000       0.000    
- Minimum density ....................... -0.96127E-01
- Maximum density .......................  0.12102    
- Mean density ..........................  0.73082E-04
- RMS deviation from mean................  0.30137E-02
- tilt angles (original,current) ........   0.0   0.0   0.0   0.0   0.0   0.0
- Space group,# extra bytes,idtype,lens .        1        0        0        0
-
-     1 Titles :
-Created by mrcfile.py                                       2023-08-11 11:47:59
+For the straddling issue, I think it depends on the box size. For most cases, it is the box rather than the particle itself straddling the border, I would suggest just to fulfill with noise. However, one thing to keep in mind, because of the tilt angle of y-axis as well as the shifting of tilt images, for quite a large region of the border, the missing wedge issue is more terrible. It is better to exclude these particles from averaging. This kind of border is estimated in the WARP reconstructions, not in IMOD ones.
 
 
 
