@@ -649,16 +649,17 @@ class Tabs(TabbedPanel):
 			wienerbutton = self.ids.wienerbutton.active
 			gaussianbutton = self.ids.gaussianbutton.active
 			angpix = float(self.ids.A1.text)
-			defoc = float(self.ids.defoc.text)
-			snrratio = float(self.ids.snrval.text)
-			highpassnyquist = float(self.ids.highpass.text)
-			if gaussianbutton == True:
+			if wienerbutton: 
+				defoc = float(self.ids.defoc.text)
+				snrratio = float(self.ids.snrval.text)
+				highpassnyquist = float(self.ids.highpass.text)
+				voltage = float(self.ids.voltage.text)
+				cs = float(self.ids.cs.text)
+				envelope = float(self.ids.envelope.text)
+				bfactor = float(self.ids.bfactor.text)
+				phasebutton = self.ids.phaseflip.active
+			if gaussianbutton:
 				sigval = float(self.ids.sigma.text)
-			voltage = float(self.ids.voltage.text)
-			cs = float(self.ids.cs.text)
-			envelope = float(self.ids.envelope.text)
-			bfactor = float(self.ids.bfactor.text)
-			phasebutton = self.ids.phaseflip.active
 			starf = self.ids.mainstar.text
 			subtomodir = self.ids.mainsubtomo.text
 			mrcButton = self.ids.mrcfilter.active
@@ -916,8 +917,20 @@ class Tabs(TabbedPanel):
 					for thread in threads:
 						thread.join()
 					print('Gaussian Filtering by Subtomogram Directory Complete\n')
-
-
+				
+				# create gaussian filter save file
+				if starButton:
+					save = '/' + '/'.join(starf.split('/')[:-1]) + '/gaussianSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
+					file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
+					file_opt.close()
+				else:
+					save = direct + 'filtered/gaussianSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
+					file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
+					file_opt.close()
 
 		except FileNotFoundError:
 			print("This directory does not exist")
