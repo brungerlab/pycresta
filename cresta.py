@@ -665,6 +665,17 @@ class Tabs(TabbedPanel):
 			mrcButton = self.ids.mrcfilter.active
 			starButton = self.ids.starfilter.active
 
+			# create wiener filter save file
+			def saveTxt(file):
+				file.writelines('PxSize:' + '\t' + self.ids.A1.text + '\n')
+				file.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
+				file.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
+				file.writelines('Highpass:' + '\t' + self.ids.highpass.text + '\n')
+				file.writelines('Voltage:' + '\t' + self.ids.voltage.text + '\n')
+				file.writelines('CS:' + '\t' + self.ids.cs.text + '\n')
+				file.writelines('Envelope:' + '\t' + self.ids.envelope.text + '\n')
+				file.writelines('BFactor:' + '\t' + self.ids.bfactor.text + '\n')
+
 			if wienerbutton == False and gaussianbutton == False:
 				print("At least one option needs to be selected.")
 			# wiener
@@ -677,8 +688,15 @@ class Tabs(TabbedPanel):
 						folderPath = "/".join(fileName.split("/")[:-1]) + "/"
 						filterout = subtomodir + folderPath + 'filtered/'
 						if os.path.isdir(filterout) == False:
-							os.makedirs(filterout, exist_ok=True)
+							os.makedirs(filterout, exist_ok=True) 
 
+						# make project text file
+						save = filterout + 'wienerSave.txt'
+						file_opt = open(save, 'w')
+						file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
+						saveTxt(file_opt)
+						file_opt.close()
+						
 						print('Now filtering ' + fileName)
 						fullFilePath = subtomodir + fileName
 
@@ -742,6 +760,14 @@ class Tabs(TabbedPanel):
 					filterout = direct + 'filtered/'
 					if os.path.exists(filterout) == False:
 						os.mkdir(filterout)
+					
+					# create project text file
+					save = direct + 'filtered/wienerSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
+					saveTxt(file_opt)
+					file_opt.close()
+					
 					# apply filter to all .mrc files in the folder
 					myFiles = [f for f in os.listdir(direct) if f.endswith(".mrc")]
 					def wienerMrcLoop(i):
@@ -781,32 +807,7 @@ class Tabs(TabbedPanel):
 					tom.wienergraph(angpix, defoc, snrratio, highpassnyquist, voltage, cs, envelope, bfactor, phasebutton)
 					print('Wiener Filtering by Subtomogram Directory Complete\n')
 				
-
 				plt.show(block=False)
-
-				# create wiener filter save file
-				def saveTxt(file):
-					file.writelines('PxSize:' + '\t' + self.ids.A1.text + '\n')
-					file.writelines('Defocus:' + '\t' + self.ids.defoc.text + '\n')
-					file.writelines('SnrFall:' + '\t' + self.ids.snrval.text + '\n')
-					file.writelines('Highpass:' + '\t' + self.ids.highpass.text + '\n')
-					file.writelines('Voltage:' + '\t' + self.ids.voltage.text + '\n')
-					file.writelines('CS:' + '\t' + self.ids.cs.text + '\n')
-					file.writelines('Envelope:' + '\t' + self.ids.envelope.text + '\n')
-					file.writelines('BFactor:' + '\t' + self.ids.bfactor.text + '\n')
-				
-				if starButton:
-					save = '/' + '/'.join(starf.split('/')[:-1]) + '/wienerSave.txt'
-					file_opt = open(save, 'w')
-					file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
-					saveTxt(file_opt)
-					file_opt.close()
-				else:
-					save = direct + 'filtered/wienerSave.txt'
-					file_opt = open(save, 'w')
-					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
-					saveTxt(file_opt)
-					file_opt.close()
 
 			# gaussian
 			if gaussianbutton == True:
@@ -824,6 +825,13 @@ class Tabs(TabbedPanel):
 						if os.path.exists(filterout) == False:
 							os.mkdir(filterout)
 						
+						#create project text file
+						save = filterout + '/gaussianSave.txt'
+						file_opt = open(save, 'w')
+						file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
+						file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
+						file_opt.close()
+
 						print('Now filtering ' + fileName)
 						fullFilePath = subtomodir + fileName
 
@@ -883,6 +891,14 @@ class Tabs(TabbedPanel):
 					filterout = direct + 'filtered/'
 					if os.path.exists(filterout) == False:
 						os.mkdir(filterout)
+						
+					# create project text file
+					save = direct + 'filtered/gaussianSave.txt'
+					file_opt = open(save, 'w')
+					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
+					file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
+					file_opt.close()
+
 					# apply filter to all .mrc files in the folder
 					myFiles = [f for f in os.listdir(direct) if f.endswith(".mrc")]
 					def gaussianMrcLoop(i):
@@ -917,20 +933,6 @@ class Tabs(TabbedPanel):
 					for thread in threads:
 						thread.join()
 					print('Gaussian Filtering by Subtomogram Directory Complete\n')
-				
-				# create gaussian filter save file
-				if starButton:
-					save = '/' + '/'.join(starf.split('/')[:-1]) + '/gaussianSave.txt'
-					file_opt = open(save, 'w')
-					file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
-					file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
-					file_opt.close()
-				else:
-					save = direct + 'filtered/gaussianSave.txt'
-					file_opt = open(save, 'w')
-					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
-					file_opt.writelines('Sigma:' + '\t' + self.ids.sigma.text + '\n')
-					file_opt.close()
 
 		except FileNotFoundError:
 			print("This directory does not exist")
