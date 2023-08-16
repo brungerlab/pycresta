@@ -544,7 +544,7 @@ class Tabs(TabbedPanel):
 				# access coordinates from coords file
 				line = coord[i]
 				line = line.strip()
-				pos = line.split(' ')
+				pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
 				# convert coordinates to integers
 				x = int(pos[0])
 				y = int(pos[1])
