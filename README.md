@@ -22,7 +22,7 @@ sudo rm -rf /Library/Developer/CommandLineTools
 sudo xcode-select --install
 ```
 ----------------------------------------------------------------------------------------------------------------------------
-Install sld2 packages:
+Install sdl2 packages:
 
 	brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer 
 ----------------------------------------------------------------------------------------------------------------------------
