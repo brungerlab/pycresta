@@ -4,7 +4,7 @@
 -> Make sure that you don't execute the SBGrid shell script otherwise some python programs get installed in the SBGrid path!
 
 ----------------------------------------------------------------------------------------------------------------------------
-Install Homebrew:
+Method A: Installation on Mac OS via Homebrew:
 
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -58,7 +58,19 @@ Pip installs:
 	pip3 install matplotlib
 
 ----------------------------------------------------------------------------------------------------------------------------
-then 'cd' to the pycresta directory, run:
+Method B: Installation via conda:
+
+	conda create -n pycresta python=3.11.5
+	
+	source activate pycresta
+	
+	pip install ffpyplayer kivy kivy-examples kiwisolver
+	
+	pip install pandas scipy scikit-image scikit-spatial mrcfile starfile matplotlib
+
+----------------------------------------------------------------------------------------------------------------------------
+
+After installation, then 'cd' to the pycresta directory, run:
 
 	cc -fPIC -shared -o rot3d.so rot3d.c 
 
