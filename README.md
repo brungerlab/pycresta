@@ -4,6 +4,9 @@
 -> Make sure that you don't execute the SBGrid shell script otherwise some python programs get installed in the SBGrid path!
 
 ----------------------------------------------------------------------------------------------------------------------------
+There are two installation methods: method A uses Homebrew and only works on Mac OS and method B uses conda and works on both Mac OS and linux computers
+
+----------------------------------------------------------------------------------------------------------------------------
 Method A: Installation on Mac OS via Homebrew:
 
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -58,7 +61,7 @@ Pip installs:
 	pip3 install matplotlib
 
 ----------------------------------------------------------------------------------------------------------------------------
-Method B: Installation via conda:
+Method B: Installation via conda. Install conda, see https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 	conda create -n pycresta python=3.11.5
 	
