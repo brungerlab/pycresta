@@ -62,6 +62,8 @@ Method B: Installation via conda:
 
 	conda create -n pycresta python=3.11.5
 	
+	cd ~/miniconda3/envs/pycresta
+	
 	source activate pycresta
 	
 	pip install ffpyplayer kivy kivy-examples kiwisolver
