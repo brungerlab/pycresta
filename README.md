@@ -75,7 +75,7 @@ Method B: Installation via conda. Install conda, see https://docs.conda.io/proje
  
     conda activate pycresta
  
- command needs to be executed each time a new terminal window is opened.    
+ command needs to exectuted each time a new terminal window is opened.    
 ----------------------------------------------------------------------------------------------------------------------------
 
 After installation, then 'cd' to the pycresta directory, run:
