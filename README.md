@@ -74,8 +74,9 @@ Method B: Installation via conda. Install conda, see https://docs.conda.io/proje
  Note: when using this installation method, the 
  
     conda activate pycresta
- 
+
  command needs to exectuted each time a new terminal window is opened.    
+
 ----------------------------------------------------------------------------------------------------------------------------
 
 After installation, then 'cd' to the pycresta directory, run:
