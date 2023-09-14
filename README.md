@@ -70,7 +70,12 @@ Method B: Installation via conda. Install conda, see https://docs.conda.io/proje
 	pip install ffpyplayer kivy kivy-examples kiwisolver
 	
 	pip install pandas scipy scikit-image scikit-spatial mrcfile starfile matplotlib
-
+ 
+ Note: when using this installation method, the 
+ 
+    conda activate pycresta
+ 
+ command needs to be executed each time a new terminal window is opened.    
 ----------------------------------------------------------------------------------------------------------------------------
 
 After installation, then 'cd' to the pycresta directory, run:
