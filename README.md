@@ -63,7 +63,7 @@ Pip installs:
 ----------------------------------------------------------------------------------------------------------------------------
 Method B: Installation via conda. Install conda, see https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
-	conda create -n pycresta python=3.11.5
+	conda create -n pycresta
 	
 	conda activate pycresta
 	
