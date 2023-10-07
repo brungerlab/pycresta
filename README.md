@@ -63,6 +63,8 @@ Pip installs:
 ----------------------------------------------------------------------------------------------------------------------------
 Method B: Installation via conda. Install conda, see https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
+	conda install pip
+	
 	conda create -n pycresta
 	
 	conda activate pycresta
@@ -75,7 +77,10 @@ Method B: Installation via conda. Install conda, see https://docs.conda.io/proje
  
     conda activate pycresta
 
- command needs to exectuted each time a new terminal window is opened.    
+ command needs to exectuted each time a new terminal window is opened.  
+ 
+ Note: for updates use 
+	 conda update -n base -c defaults conda  
 
 ----------------------------------------------------------------------------------------------------------------------------
 
