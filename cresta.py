@@ -552,14 +552,14 @@ class Tabs(TabbedPanel):
 				line = line.strip()
 				pos = []
 				pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
-				# convert coordinates to integers
-				x = int(pos[0])
-				y = int(pos[1])
-				z = int(pos[2])
-				# shift coordinates to top left corner of the boxsize for extraction
-				x = x - boxsize/2
-				y = y - boxsize/2
-				z = z - boxsize/2
+				# ATB: convert coordinates to integers, Jan 22, 2024
+				xpos = int(pos[0])
+				ypos = int(pos[1])
+				zpos = int(pos[2])
+				# calculate top left corner of boxsize for extraction
+				x = xpos - boxsize/2
+				y = ypos - boxsize/2
+				z = zpos - boxsize/2
 				# calculate bounds
 				bound = np.zeros(3)
 				bound[0] = z + boxsize - 1
@@ -585,7 +585,7 @@ class Tabs(TabbedPanel):
 					mrcfile.new(name, out, overwrite=True)
 					#
 					# ATB: print extracted coordinate position. Jan 21, 2024
-					print('Extracted subtomogram ' + name + ' at position ',x,y,z)
+					print('Extracted subtomogram ' + name + ' at position ',xpos,ypos,zpos)
 					# change pixel size
 					with mrcfile.open(name, 'r+') as mrc:
 						mrc.voxel_size = angpix
@@ -1220,7 +1220,7 @@ class Tabs(TabbedPanel):
 											zmid = re.search(' z="(.*)" r=', line)
 											z_coord = float(zmid.group(1)) / angpix
 											cmmZ = round(boxsize[2]/2 - z_coord)
-											# calculate final x, y, z coordinates
+											# calculate final x, y, z coordinates. 
 											finalx = str(round(xCor) - int(cmmX))
 											finaly = str(round(yCor) - int(cmmY))
 											finalz = str(round(zCor) - int(cmmZ))
@@ -1232,10 +1232,13 @@ class Tabs(TabbedPanel):
 											subtomoFolder = '/'.join((direct + subtomo).split('/')[:-1])
 											if os.path.isdir(subtomoFolder) == False:
 												os.makedirs(subtomoFolder)
-											# convert coordinates to integers
-											x = int(finalx) - boxsize[0]/2
-											y = int(finaly) - boxsize[1]/2
-											z = int(finalz) - boxsize[2]/2
+											# ATB: convert to integers and calculate top left corner of box. Jan 22, 2023
+											xpos=int(finalx)
+											ypos=int(finaly)
+											zpos=int(finalz)
+											x = xpos - boxsize[0]/2
+											y = ypos - boxsize[1]/2
+											z = zpos - boxsize[2]/2
 											# calculate bounds
 											bound = np.zeros(3)
 											bound[0] = z + boxsize[2] - 1
@@ -1274,7 +1277,7 @@ class Tabs(TabbedPanel):
 													with mrcfile.open(direct + subtomo, 'r+') as mrc:
 														mrc.voxel_size = angpix
 												# ATB: print extracted coordinate position. Jan 21, 2024
-												print('Re-extracted subtomogram ' + direct + subtomo + ' at position ',x,y,z)
+												print('Re-extracted subtomogram ' + direct + subtomo + ' at position ',xpos,ypos,zpos)
 												#                                                
 												# create .coords file
 												subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')
