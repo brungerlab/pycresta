@@ -528,8 +528,7 @@ class Tabs(TabbedPanel):
 		tomogram = mrcfile.mmap(tomogram)
 		#
 		# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
-		from numpy import array
-		a=array(tomogram.data)
+		a=np.array(tomogram.data)
 		TomogramSize=a.shape
 		#
 		boxsize = float(self.ids.px1.text)
@@ -1200,8 +1199,7 @@ class Tabs(TabbedPanel):
 											tomogram = mrcfile.mmap(tomogram)
 											#
 											# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
-											from numpy import array
-											a=array(tomogram.data)
+											a=np.array(tomogram.data)
 											TomogramSize=a.shape
 											#                                            
 											# get boxsize from subtomogram
