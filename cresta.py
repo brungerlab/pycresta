@@ -526,6 +526,12 @@ class Tabs(TabbedPanel):
 		directory = direct + subdirect
 		# memory map the tomogram
 		tomogram = mrcfile.mmap(tomogram)
+		#
+		# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
+		from numpy import array
+		a=array(tomogram.data)
+		TomogramSize=a.shape
+		#
 		boxsize = float(self.ids.px1.text)
 		angpix = float(self.ids.A1.text)
 		if os.path.isdir(directory) == False:
@@ -544,14 +550,12 @@ class Tabs(TabbedPanel):
 				# access coordinates from coords file
 				line = coord[i]
 				line = line.strip()
+				pos = []
 				pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
 				# convert coordinates to integers
 				x = int(pos[0])
 				y = int(pos[1])
 				z = int(pos[2])
-				# create and append star file rows for subtomogram
-				row = [micrograph, x, y, z, starName, wedge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-				data.append(row)
 				# shift coordinates to top left corner of the boxsize for extraction
 				x = x - boxsize/2
 				y = y - boxsize/2
@@ -566,18 +570,27 @@ class Tabs(TabbedPanel):
 				z = np.round(z).astype(int)
 				y = np.round(y).astype(int)
 				x = np.round(x).astype(int)
-				# cut the tomogram
-				out = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
-				# invert subtomograms if selected
-				if self.ids.extractInvert.active == True:
-					out = out * -1
-				# create subtomogram
-				mrcfile.new(name, out, overwrite=True)
-				print('Extracted ' + name)
-				# change pixel size
-				with mrcfile.open(name, 'r+') as mrc:
-					mrc.voxel_size = angpix
-
+				# 
+				# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
+				if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
+					# create and append star file rows for subtomogram
+					row = [micrograph, x, y, z, starName, wedge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+					data.append(row)
+					# cut the tomogram
+					out = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
+					# invert subtomograms if selected
+					if self.ids.extractInvert.active == True:
+						out = out * -1
+					# create subtomogram
+					mrcfile.new(name, out, overwrite=True)
+					#
+					# ATB: print extracted coordinate position. Jan 21, 2024
+					print('Extracted subtomogram ' + name + ' at position ',x,y,z)
+					# change pixel size
+					with mrcfile.open(name, 'r+') as mrc:
+						mrc.voxel_size = angpix
+				else:
+					print ('Extraction with specified box size exceeds tomogram borders. Not extracted ' + name)                                 
 			# thread in batches to optimize runtime
 			threads = []
 			batch_size = int(self.ids.CPU.text)
@@ -1185,6 +1198,12 @@ class Tabs(TabbedPanel):
 											# get the tomogram name from star file and memory map it
 											tomogram = direct + row['rlnMicrographName'].iloc[0]
 											tomogram = mrcfile.mmap(tomogram)
+											#
+											# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
+											from numpy import array
+											a=array(tomogram.data)
+											TomogramSize=a.shape
+											#                                            
 											# get boxsize from subtomogram
 											boxsize = []
 											with mrcfile.open(direct + row['rlnImageName'].iloc[0], 'r+') as mrc:
@@ -1227,35 +1246,41 @@ class Tabs(TabbedPanel):
 											z = np.round(z).astype(int)
 											y = np.round(y).astype(int)
 											x = np.round(x).astype(int)
-											# cut the tomogram
-											subby = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
-											# invert contrast if selected
-											if self.ids.reextractInvert.active == True:
-												subby = subby * -1
-											# add new coords to dictionary
-											if name in imgToCmmCor.keys(): #checks duplicate filename
-												imgToCmmCor[name + count*"!"] = [x_coord, y_coord, z_coord, cmmX, cmmY, cmmZ, finalx, finaly, finalz, subtomo]
-												count += 1
-											else:
-												imgToCmmCor[name] = [x_coord, y_coord, z_coord, cmmX, cmmY, cmmZ, finalx, finaly, finalz, subtomo]
-											# create subtomograms
-											if count > 1: #account for duplicates
-												num = str(count - 1)
-												subtomo = subtomo.replace('.mrc', '_' + num + '.mrc')
-												mrcfile.new(direct + subtomo, subby, overwrite=True)
-												with mrcfile.open(direct + subtomo, 'r+') as mrc:
-													mrc.voxel_size = angpix
-											else:
-												subtomo = subtomo.replace('.mrc', '_0.mrc')
-												mrcfile.new(direct + subtomo, subby, overwrite=True)
-												with mrcfile.open(direct + subtomo, 'r+') as mrc:
-													mrc.voxel_size = angpix
-											print('Re-extracted ' + direct + subtomo)
-											# create .coords file
-											subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')
-											file_opt = open(folder + '/' + subName + '.coords', 'a')
-											file_opt.writelines(str(int(x_coord)) + ' ' + str(int(y_coord)) + ' ' + str(int(z_coord)) + '\n')
-											file_opt.close()
+ 											# 
+											# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
+											if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
+												#
+												# cut the tomogram
+												subby = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
+												# invert contrast if selected
+												if self.ids.reextractInvert.active == True:
+													subby = subby * -1
+												# add new coords to dictionary
+												if name in imgToCmmCor.keys(): #checks duplicate filename
+													imgToCmmCor[name + count*"!"] = [x_coord, y_coord, z_coord, cmmX, cmmY, cmmZ, finalx, finaly, finalz, subtomo]
+													count += 1
+												else:
+													imgToCmmCor[name] = [x_coord, y_coord, z_coord, cmmX, cmmY, cmmZ, finalx, finaly, finalz, subtomo]
+												# create subtomograms
+												if count > 1: #account for duplicates
+													num = str(count - 1)
+													subtomo = subtomo.replace('.mrc', '_' + num + '.mrc')
+													mrcfile.new(direct + subtomo, subby, overwrite=True)
+													with mrcfile.open(direct + subtomo, 'r+') as mrc:
+														mrc.voxel_size = angpix
+												else:
+													subtomo = subtomo.replace('.mrc', '_0.mrc')
+													mrcfile.new(direct + subtomo, subby, overwrite=True)
+													with mrcfile.open(direct + subtomo, 'r+') as mrc:
+														mrc.voxel_size = angpix
+												# ATB: print extracted coordinate position. Jan 21, 2024
+												print('Re-extracted subtomogram ' + direct + subtomo + ' at position ',x,y,z)
+												#                                                
+												# create .coords file
+												subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')
+												file_opt = open(folder + '/' + subName + '.coords', 'a')
+												file_opt.writelines(str(int(x_coord)) + ' ' + str(int(y_coord)) + ' ' + str(int(z_coord)) + '\n')
+												file_opt.close()
 		
 		# add new information to intermediate star file
 		star_data = starfile.read(starf)
@@ -1805,16 +1830,21 @@ class Tabs(TabbedPanel):
 	def saveVisual(self):
 		index = int(self.ids.visind1.text) - 1
 		self.indexToVal[index + 1] = "accepted"
+		#
+		# ATB
 		starf = self.ids.mainstarfilt.text # filtered star file 
 		starUnf = self.ids.mainstar.text # unfiltered star file
 		subtomodir = self.ids.mainsubtomo.text
-		# create empty _accepted.star (filtered) if does not exist 
-		if not(os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")):
-			starAF = starfile.read(starf)
-			df = pd.DataFrame.from_dict(starAF["particles"])
-			df = df.drop(df.index)
-			starAF["particles"] = df
-			starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# create empty _accepted.star (filtered) if does not exist 
+			if not(os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")):
+				starAF = starfile.read(starf)
+				df = pd.DataFrame.from_dict(starAF["particles"])
+				df = df.drop(df.index)
+				starAF["particles"] = df
+				starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
 		# create empty _accepted.star (unfiltered) if does not exist 
 		if not(os.path.exists(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")):
 			starAU = starfile.read(starUnf)
@@ -1822,36 +1852,45 @@ class Tabs(TabbedPanel):
 			dfUnf = dfUnf.drop(dfUnf.index)
 			starAU["particles"] = dfUnf
 			starfile.write(starAU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")
-		# isolate current index image name and row (filtered)
-		row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
-		starAF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
-		df = pd.DataFrame.from_dict(starAF["particles"]).dropna(how="all")
-		nameF = row["rlnImageName"].values[0]
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# isolate current index image name and row (filtered)
+			row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
+			starAF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
+			df = pd.DataFrame.from_dict(starAF["particles"]).dropna(how="all")
+			nameF = row["rlnImageName"].values[0]
 		# isolate current index image name and row (unfiltered)
 		rowUnf = pd.DataFrame.from_dict(starfile.read(starUnf)["particles"]).iloc[[index]]
 		starAU = starfile.read(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")
 		dfUnf = pd.DataFrame.from_dict(starAU["particles"]).dropna(how="all")
 		nameUnf = rowUnf["rlnImageName"].values[0]
-		# add row to accepted folder and add row to _accepted.star (filtered)
-		if df[df["rlnImageName"] == nameF].shape[0] == 0:
-			df = pd.concat([df, row])
-			starAF["particles"] = df
-			starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# add row to accepted folder and add row to _accepted.star (filtered)
+			if df[df["rlnImageName"] == nameF].shape[0] == 0:
+				df = pd.concat([df, row])
+				starAF["particles"] = df
+				starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
 		# add row to _accepted.star (unfiltered)
 		if dfUnf[dfUnf["rlnImageName"] == nameUnf].shape[0] == 0:
 			dfUnf = pd.concat([dfUnf, rowUnf])
 			starAU["particles"] = dfUnf
 			starfile.write(starAU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
-		# remove .mrc files from _rejected.star (filtered)
-		starRF_path = subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star"
-		if os.path.exists(starRF_path):
-			row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
-			starRF = starfile.read(starRF_path)
-			df = pd.DataFrame.from_dict(starRF["particles"]).dropna(how="all")
-			nameF = row["rlnImageName"].values[0]
-			df = df[df["rlnImageName"] != nameF]
-			starRF["particles"] = df
-			starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# remove .mrc files from _rejected.star (filtered)
+			starRF_path = subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star"
+			if os.path.exists(starRF_path):
+				row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
+				starRF = starfile.read(starRF_path)
+				df = pd.DataFrame.from_dict(starRF["particles"]).dropna(how="all")
+				nameF = row["rlnImageName"].values[0]
+				df = df[df["rlnImageName"] != nameF]
+				starRF["particles"] = df
+				starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
 		# remove .mrc files from _rejected.star (unfiltered)
 		starRU_path = subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star"
 		if os.path.exists(starRU_path):
@@ -1872,13 +1911,16 @@ class Tabs(TabbedPanel):
 		starf = self.ids.mainstarfilt.text
 		starUnf = self.ids.mainstar.text
 		subtomodir = self.ids.mainsubtomo.text
-		# create _rejected.star (filtered) if it does not exist 
-		if not(os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")):
-			starRF = starfile.read(starf)
-			df = pd.DataFrame.from_dict(starRF["particles"])
-			df = df.drop(df.index)
-			starRF["particles"] = df
-			starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# create _rejected.star (filtered) if it does not exist 
+			if not(os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")):
+				starRF = starfile.read(starf)
+				df = pd.DataFrame.from_dict(starRF["particles"])
+				df = df.drop(df.index)
+				starRF["particles"] = df
+				starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")
 		# create _rejected.star (unfiltered) if it does not exist 
 		if not(os.path.exists(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star")):
 			starRU = starfile.read(starUnf)
@@ -1886,34 +1928,43 @@ class Tabs(TabbedPanel):
 			dfUnf = dfUnf.drop(dfUnf.index)
 			starRU["particles"] = dfUnf 
 			starfile.write(starRU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star")
-		# isolate current index image name and row (filtered)
-		row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
-		starRF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")
-		df = pd.DataFrame.from_dict(starRF["particles"]).dropna(how="all")
-		nameF = row["rlnImageName"].values[0]
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# isolate current index image name and row (filtered)
+			row = pd.DataFrame.from_dict(starfile.read(starf)["particles"]).iloc[[index]]
+			starRF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star")
+			df = pd.DataFrame.from_dict(starRF["particles"]).dropna(how="all")
+			nameF = row["rlnImageName"].values[0]
 		# isolate current index image name and row (unfiltered)
 		rowUnf = pd.DataFrame.from_dict(starfile.read(starUnf)["particles"]).iloc[[index]]
 		starRU = starfile.read(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star")
 		dfUnf = pd.DataFrame.from_dict(starRU["particles"]).dropna(how="all")
 		nameUnf = rowUnf["rlnImageName"].values[0]
-		# add mrc file path to _rejected.star (filtered)
-		if df[df["rlnImageName"] == nameF].shape[0] == 0: # if file not in _rejected.star
-			df = pd.concat([df, row])
-			starRF["particles"] = df
-			starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# add mrc file path to _rejected.star (filtered)
+			if df[df["rlnImageName"] == nameF].shape[0] == 0: # if file not in _rejected.star
+				df = pd.concat([df, row])
+				starRF["particles"] = df
+				starfile.write(starRF, subtomodir + starf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
 		# add mrc file path to _rejected.star (unfiltered)
 		if dfUnf[dfUnf["rlnImageName"] == nameUnf].shape[0] == 0: # if file not in _rejected.star
 			dfUnf = pd.concat([dfUnf, rowUnf])
 			starRU["particles"] = dfUnf
 			starfile.write(starRU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
-		# check if _accepted.star (filtered) exists and remove row
-		if os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star"):
-			starAF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
-			df = pd.DataFrame.from_dict(starAF["particles"]).dropna(how="all")
-			if df[df["rlnImageName"] == nameF].shape[0] == 1:
-				df = df[df["rlnImageName"] != nameF]
-				starAF["particles"] = df
-				starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
+		#
+		# ATB. Check if filtered flag is set. Jan 21 2024
+		if self.ids.visualizeFiltered.active == True:
+			# check if _accepted.star (filtered) exists and remove row
+			if os.path.exists(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star"):
+				starAF = starfile.read(subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star")
+				df = pd.DataFrame.from_dict(starAF["particles"]).dropna(how="all")
+				if df[df["rlnImageName"] == nameF].shape[0] == 1:
+					df = df[df["rlnImageName"] != nameF]
+					starAF["particles"] = df
+					starfile.write(starAF, subtomodir + starf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
 		# check if _accepted.star (unfiltered) exists and remove row
 		if os.path.exists(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star"):
 			starAU = starfile.read(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")
