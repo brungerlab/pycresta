@@ -205,16 +205,25 @@ class Tabs(TabbedPanel):
 			self.ids.mainmrc.text = 'Choose Mrc Directory'
 		self.dismiss_popup()
 
-	# change extraction appearance if user selected automated extraction
+	# change extraction appearance if the user selected automated extraction
+	# ATB: included definitions for vectorStart and vectorEnd text boxes and buttons, Jan. 24, 2024
 	def updateExtract(self):
 		if self.ids.tomoFolder.active == True:
-			self.ids.tomo.text = 'Choose Directory with Tomogram Folders'
+			self.ids.tomo.text = 'Choose Directory with Tomogram Folders. Each folder should contain a tomogram (.mrc) and, optionally, coordinate files (.coords, .coordsM, .coordsC)'
 			self.ids.tomocoords.text = ''
 			self.ids.tomocoordbutton.background_color = (1, 1, 1, .5)
+			self.ids.vectorStart.text = ''
+			self.ids.vectorStartButton.background_color = (1, 1, 1, .5)
+			self.ids.vectorEnd.text = ''
+			self.ids.vectorEndButton.background_color = (1, 1, 1, .5)
 		else:
 			self.ids.tomo.text = 'Choose Tomogram Path'
-			self.ids.tomocoords.text = 'Choose Coords Path'
+			self.ids.tomocoords.text = 'Choose Coords Path .coords'
 			self.ids.tomocoordbutton.background_color = (0, 1.2, 2, .5)
+			self.ids.vectorStart.text = 'Choose Vector Start Coords .coordsM(leave blank is not available)'
+			self.ids.vectorStartButton.background_color = (0, 1.2, 2, .5)
+			self.ids.vectorEnd.text = 'Choose Vector End Coords .coordsC(leave blank if not available)'
+			self.ids.vectorEndButton.background_color = (0, 1.2, 2, .5)
 
 	# tomogram path save
 	def show_tomo(self):
@@ -489,11 +498,21 @@ class Tabs(TabbedPanel):
 					# Get tomogram and coordsfile from tomogram folder
 					tomogram = ''
 					coordfile = ''
+					# 
+					# ATB: added optional vectorStart and vectorEnd fields, Jan. 25 2024
+					coordStart = ''
+					coordEnd = ''
 					for file in os.listdir(tomoFolder):
 						if file.endswith('.mrc'):
 							tomogram = os.path.join(tomoFolder, file)
 						if file.endswith('.coords'):
 							coordfile = os.path.join(tomoFolder, file)
+						# 
+						# ATB: added optional vectorStart and vectorEnd fields, Jan. 25 2024
+						if file.endswith('.coordsM'):
+							coordStart = os.path.join(tomoFolder, file)
+						if file.endswith('.coordsC'):
+							coordEnd = os.path.join(tomoFolder, file)
 					if tomogram == '':
 						print('Tomogram File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
@@ -501,13 +520,20 @@ class Tabs(TabbedPanel):
 						print('Coordinate File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
 					# Perform extraction
-					self.extract_helper(tomogram, coordfile)	
+					# 
+					# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
+					self.extract_helper(tomogram, coordfile, coordStart, coordEnd)	
 		else:
 			tomogram = self.ids.tomo.text
 			coordfile = self.ids.tomocoords.text
-			self.extract_helper(tomogram, coordfile)
-
-	def extract_helper(self, tomogram, coordfile):
+			# 
+			# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
+			coordStart = self.ids.vectorStart.text
+			coordEnd = self.ids.vectorEnd.text            
+			self.extract_helper(tomogram, coordfile, coordStart, coordEnd)
+	# 
+	# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
+	def extract_helper(self, tomogram, coordfile, coordStart, coordEnd):
 		# tomogram path
 		direct = '/'.join(tomogram.split('/')[:-3]) + '/'
 		# tomogram date and name
@@ -528,121 +554,125 @@ class Tabs(TabbedPanel):
 		tomogram = mrcfile.mmap(tomogram)
 		#
 		# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
-		a=np.array(tomogram.data)
-		TomogramSize=a.shape
+		TomogramSize=tomogram.data.shape
 		#
 		boxsize = float(self.ids.px1.text)
 		angpix = float(self.ids.A1.text)
 		if os.path.isdir(directory) == False:
 			os.makedirs(directory)
+		#
+		# ATB: create array of center positions, Jan 24, 2024
+		icoor=0
 		with open(coordfile, 'r') as coord:
 			coord = coord.readlines()
-			# create an empty data list for the rows
+			coordnumber = len(coord)
+			xposarray=np.zeros(coordnumber)
+			yposarray=np.zeros(coordnumber)
+			zposarray=np.zeros(coordnumber)
+			newangs=np.zeros((coordnumber,3))
+			for line in coord:
+				# access center positions from coords file
+				if line != '':
+					line = line.strip()
+					pos = []
+					pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
+					xposarray[icoor] = int(pos[0])
+					yposarray[icoor] = int(pos[1])
+					zposarray[icoor] = int(pos[2])
+					icoor=icoor+1
+		#
+		# ATB: optionally read the vector start / end positions and calculate angles, Jan 24, 2024
+		if os.path.isfile(coordStart) and os.path.isfile(coordEnd):
 			data = []
-			def extractLoop(i):
-				# create subtomogram file name
-				number = '000000' + str(i)
-				number = number[-6:]
-				name = directory + tomogName + number + '.mrc'
-				# create imageName for star file
-				starName = subdirect + tomogName + number + '.mrc'
-				# access coordinates from coords file
-				line = coord[i]
-				line = line.strip()
-				pos = []
-				pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
-				# ATB: convert coordinates to integers, Jan 22, 2024
-				xpos = int(pos[0])
-				ypos = int(pos[1])
-				zpos = int(pos[2])
-				# calculate top left corner of boxsize for extraction
-				x = xpos - boxsize/2
-				y = ypos - boxsize/2
-				z = zpos - boxsize/2
-				# calculate bounds
-				bound = np.zeros(3)
-				bound[0] = z + boxsize - 1
-				bound[1] = y + boxsize - 1
-				bound[2] = x + boxsize - 1
-				# rounding
-				bound = np.round(bound).astype(int)
-				z = np.round(z).astype(int)
-				y = np.round(y).astype(int)
-				x = np.round(x).astype(int)
-				# 
-				# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
-				if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
-					# create and append star file rows for subtomogram
-					row = [micrograph, x, y, z, starName, wedge, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-					data.append(row)
-					# cut the tomogram
-					out = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
-					# invert subtomograms if selected
-					if self.ids.extractInvert.active == True:
-						out = out * -1
-					# create subtomogram
-					mrcfile.new(name, out, overwrite=True)
-					#
-					# ATB: print extracted coordinate position. Jan 21, 2024
-					print('Extracted subtomogram ' + name + ' at position ',xpos,ypos,zpos)
-					# change pixel size
-					with mrcfile.open(name, 'r+') as mrc:
-						mrc.voxel_size = angpix
-				else:
-					print ('Extraction with specified box size exceeds tomogram borders. Not extracted ' + name)                                 
-			# thread in batches to optimize runtime
-			threads = []
-			batch_size = int(self.ids.CPU.text)
-			lenCoord = len(coord)
-			fileLen = range(lenCoord)
-			batches = [fileLen[i:i+batch_size] for i in range(0, lenCoord, batch_size)]
-			for batch in batches:
-				for i in batch:
-					threads.append(Thread(target = extractLoop, args = (i,)))
-					threads[i].start()
-				for i in batch:
-					threads[i].join()
-			for thread in threads:
-				thread.join()
-			# create data frame for star file
-			columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
-			df = pd.DataFrame(data, columns=columns)
-			extractStar = {"optics": pd.DataFrame(), "particles": df}
-			starfile.write(extractStar, direct + tomogName + '.star', overwrite=True)
-			print('Extraction Complete')
-			print('New Star File Created: ' + direct + tomogName + '.star\n')
-			self.ids.mainstar.text = direct + tomogName + '.star'
-			self.ids.mainsubtomo.text = direct
-
-	# calculate subtomogram angles
-	def calculateAngles(self):
-		# read coord files and unfiltered star file
-		coordStart = self.ids.vectorStart.text
-		coordEnd = self.ids.vectorEnd.text
-		starf = self.ids.mainstar.text
-		starf = starfile.read(starf)
-		# initialize data list
+			iangle=0
+			with open(coordStart, 'r') as mem, open(coordEnd, 'r') as cen:
+				for lineM, lineC in zip(mem, cen):
+					if lineM != '' and lineC != '':
+						lineM = lineM.strip()
+						lineC = lineC.strip()
+						posM = re.split(r'[,\.;:\s]+', lineM) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
+						posC = re.split(r'[,\.;:\s]+', lineC) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
+						# append the x,y,z from each coord file to row
+						row = [posM[0], posM[1], posM[2], posC[0], posC[1], posC[2]]
+						data.append(row)
+						iangle=iangle+1
+			columns = ['Xmem', 'Ymem', 'Zmem', 'Xcen', 'Ycen', 'Zcen']
+			# convert data to dataframe
+			dataframe = pd.DataFrame(data, columns=columns)
+			# call calcangles function from tom.py
+			newangs = tom.calcangles(dataframe)
+			if icoor != iangle:
+				print ('Error: the length of vector start/end files do not match the length of coordinate file')
+				return
+		print (newangs)
+		#
+		# create an empty data list for the rows
 		data = []
-		# open and loop through the vector start and end files
-		with open(coordStart, 'r') as mem, open(coordEnd, 'r') as cen:
-			for lineM, lineC in zip(mem, cen):
-				lineM = lineM.strip()
-				lineC = lineC.strip()
-				posM = lineM.split(' ')
-				posC = lineC.split(' ')
-				# append the x,y,z from each coord file to row
-				row = [posM[0], posM[1], posM[2], posC[0], posC[1], posC[2]]
+		def extractLoop(i):
+			# create subtomogram file name
+			number = '000000' + str(i)
+			number = number[-6:]
+			name = directory + tomogName + number + '.mrc'
+			# create imageName for star file
+			starName = subdirect + tomogName + number + '.mrc'
+			# calculate top left corner of boxsize for extraction
+			x = xposarray[i] - boxsize/2
+			y = yposarray[i] - boxsize/2
+			z = zposarray[i] - boxsize/2
+			# calculate bounds
+			bound = np.zeros(3)
+			bound[0] = z + boxsize - 1
+			bound[1] = y + boxsize - 1
+			bound[2] = x + boxsize - 1
+			# rounding
+			bound = np.round(bound).astype(int)
+			z = np.round(z).astype(int)
+			y = np.round(y).astype(int)
+			x = np.round(x).astype(int)
+			# 
+			# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
+			if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
+				# create and append star file rows for subtomogram
+				row = [micrograph, x, y, z, starName, wedge, 0, 0, newangs[i,0], newangs[i,1], newangs[i,2], 0, 0, 0, 0, 0, 0, 0]
 				data.append(row)
-		columns = ['Xmem', 'Ymem', 'Zmem', 'Xcen', 'Ycen', 'Zcen']
-		# convert data to dataframe
-		dataframe = pd.DataFrame(data, columns=columns)
-		# call calcangles function from tom.py
-		newangs = tom.calcangles(dataframe)
-		# insert the angles into the star file
-		star_data = pd.DataFrame.from_dict(starf['particles'])
-		star_data.loc[:, ['rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi']] = newangs
-		starf['particles'] = star_data
-		starfile.write(starf, self.ids.mainstar.text, overwrite=True)
+				# cut the tomogram
+				out = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
+				# invert subtomograms if selected
+				if self.ids.extractInvert.active == True:
+					out = out * -1
+				# create subtomogram
+				mrcfile.new(name, out, overwrite=True)
+				#
+				# ATB: print extracted coordinate position. Jan 21, 2024
+				print('Extracted subtomogram ' + name + ' at center position ',xposarray[i],yposarray[i],zposarray[i])
+				# change pixel size
+				with mrcfile.open(name, 'r+') as mrc:
+					mrc.voxel_size = angpix
+			else:
+				print ('Extraction with specified box size exceeds tomogram borders. Not extracted: ' + name + ' at center position ',xposarray[i],yposarray[i],zposarray[i] )                
+		# thread in batches to optimize runtime
+		threads = []
+		batch_size = int(self.ids.CPU.text)
+		lenCoord = len(xposarray)
+		fileLen = range(lenCoord)
+		batches = [fileLen[i:i+batch_size] for i in range(0, lenCoord, batch_size)]
+		for batch in batches:
+			for i in batch:
+				threads.append(Thread(target = extractLoop, args = (i,)))
+				threads[i].start()
+			for i in batch:
+				threads[i].join()
+		for thread in threads:
+			thread.join()
+		# create data frame for star file
+		columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
+		df = pd.DataFrame(data, columns=columns)
+		extractStar = {"optics": pd.DataFrame(), "particles": df}
+		starfile.write(extractStar, direct + tomogName + '.star', overwrite=True)
+		print('Extraction Complete')
+		print('New Star File Created: ' + direct + tomogName + '.star\n')
+		self.ids.mainstar.text = direct + tomogName + '.star'
+		self.ids.mainsubtomo.text = direct
 	
 	def mrcWords(self):
 		if self.ids.mrcfilter.active == True:
@@ -1198,9 +1228,8 @@ class Tabs(TabbedPanel):
 											tomogram = direct + row['rlnMicrographName'].iloc[0]
 											tomogram = mrcfile.mmap(tomogram)
 											#
-											# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
-											a=np.array(tomogram.data)
-											TomogramSize=a.shape
+											# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
+											TomogramSize=tomogram.data.shape
 											#                                            
 											# get boxsize from subtomogram
 											boxsize = []
@@ -1274,8 +1303,8 @@ class Tabs(TabbedPanel):
 													mrcfile.new(direct + subtomo, subby, overwrite=True)
 													with mrcfile.open(direct + subtomo, 'r+') as mrc:
 														mrc.voxel_size = angpix
-												# ATB: print extracted coordinate position. Jan 21, 2024
-												print('Re-extracted subtomogram ' + direct + subtomo + ' at position ',xpos,ypos,zpos)
+												# ATB: print extracted coordinate position. Jan 24, 2024
+												print('Re-extracted subtomogram ' + direct + subtomo + ' at center position ',xpos,ypos,zpos)
 												#                                                
 												# create .coords file
 												subName = row['rlnMicrographName'].iloc[0].split('/')[-1].replace('.mrc','')

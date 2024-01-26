@@ -878,7 +878,7 @@
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						TextInput:
-							text: 'Choose Coords Path'
+							text: 'Choose Coords Path .coords'
 							size_hint: .9, .75
 							font_size: 25
 							halign: 'center'
@@ -896,6 +896,48 @@
 							id: tomocoordbutton
 							text: 'Choose Coords'
 							on_release: root.show_tomocoords()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						TextInput:
+							text: 'Choose Vector Start Coords .coordsM (leave blank is not available)'
+							size_hint: .9, .7
+							font_size: 25
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: vectorStart
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							id: vectorStartButton
+							text: 'Choose Start Path'
+							on_release: root.show_startvec()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						TextInput:
+							text: 'Choose Vector End (center) Coords .coordsC (leave blank if not available)'
+							size_hint: .9, .7
+							font_size: 25
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: vectorEnd
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							id: vectorEndButton
+							text: 'Choose End Path'
+							on_release: root.show_endvec()
 							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
@@ -920,91 +962,7 @@
 							size_hint_y: .2
 					Label:
 						size_hint_y: .025
-				BoxLayout:
-					orientation: 'vertical'
-					Label:
-						size_hint_y: .025
-					BoxLayout:
-						orientation: 'vertical'
-						size_hint_x: .75
-						pos_hint: {'center_x': .5}
-						canvas:
-							Color:
-								rgba: .5, .5, .5, 0.4
-							Rectangle:
-								pos: self.pos
-								size: self.size
-						spacing: 15
-						Label:
-							text: 'Calculate Angles'
-							color: (0,0,0,1)
-							font_size: 35
-							pos_hint: {'center_x': .12}
-							size_hint_y: .5
-							bold: True
-						Button:
-							text: 'information'
-							background_color: 0, 1.2, 2, .5
-							on_release: Factory.CalcAnglesInfo().open()
-							size_hint: .15, .45
-							pos_hint: {'center_x': .5, 'center_y': .5}	
-						Label:
-							text: 'Vector Start and End Points'
-							bold: True
-							color: (0,0,0,1)
-							font: 30
-							size_hint_y: .6
-						TextInput:
-							text: 'Choose Vector Start Coords'
-							size_hint: .9, .7
-							font_size: 25
-							halign: 'center'
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							id: vectorStart
-							multiline: True
-							readonly: True
-							cursor_blink: False
-							foreground_color: (0,0,.6,1)
-							background_color: (1,1,1,0)
-							cursor_color: (1,1,1,0)
-							selection_color: (1,1,1,0)
-						Button:
-							background_color: 0, 1.2, 2, .5
-							text: 'Choose Start Path'
-							on_release: root.show_startvec()
-							size_hint: .3, .6
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						TextInput:
-							text: 'Choose Vector End Coords'
-							size_hint: .9, .7
-							font_size: 25
-							halign: 'center'
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							id: vectorEnd
-							multiline: True
-							readonly: True
-							cursor_blink: False
-							foreground_color: (0,0,.6,1)
-							background_color: (1,1,1,0)
-							cursor_color: (1,1,1,0)
-							selection_color: (1,1,1,0)
-						Button:
-							background_color: 0, 1.2, 2, .5
-							text: 'Choose End Path'
-							on_release: root.show_endvec()
-							size_hint: .3, .6
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Button:
-							background_color: 0.2, 0.6, 0.2, .55
-							text: 'Calculate Angles'
-							on_release: root.calculateAngles()
-							size_hint_x: .4
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: ' '
-							size_hint_y: .2
-					Label:
-						size_hint_y: .1
+
 
 	TabbedPanelItem:
 		text: 'Re-Extraction'
