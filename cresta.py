@@ -209,7 +209,7 @@ class Tabs(TabbedPanel):
 	# ATB: included definitions for vectorStart and vectorEnd text boxes and buttons, Jan. 24, 2024
 	def updateExtract(self):
 		if self.ids.tomoFolder.active == True:
-			self.ids.tomo.text = 'Choose Directory with Tomogram Folders. Each folder should contain a tomogram (.mrc) and, optionally, coordinate files (.coords, .coordsM, .coordsC)'
+			self.ids.tomo.text = 'Choose Directory with Tomogram Folders (or Data Collection Folders with Tomogram Folders). Each Tomogram Folder should contain a tomogram (.mrc) and corresponding coordinate file (.coords) (and optionally .coordsM, .coordsC files)'
 			self.ids.tomocoords.text = ''
 			self.ids.tomocoordbutton.background_color = (1, 1, 1, .5)
 			self.ids.vectorStart.text = ''
