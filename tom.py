@@ -13,6 +13,7 @@ from skimage.morphology import remove_small_objects
 import matplotlib.pyplot as plt
 import starfile
 import mrcfile
+plt.set_loglevel("info")
 
 # import C-file
 import ctypes

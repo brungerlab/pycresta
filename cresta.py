@@ -604,7 +604,6 @@ class Tabs(TabbedPanel):
 			if icoor != iangle:
 				print ('Error: the length of vector start/end files do not match the length of coordinate file')
 				return
-		print (newangs)
 		#
 		# create an empty data list for the rows
 		data = []
