@@ -491,10 +491,15 @@ class Tabs(TabbedPanel):
 		if self.ids.tomoFolder.active:
 			folder = self.ids.tomo.text
 			# Iterate over the files in the directory
-			for f in os.listdir(folder):
-				# Get the full path of each tomogram folder in the data folder
-				tomoFolder = os.path.join(folder, f)
-				if os.path.isdir(tomoFolder) == True:
+			# ATB: changed listdir to walk for a recursive walk. Jan 27, 2024
+			#for f in os.listdir(folder):
+			for root, dirs, files in os.walk(folder):
+				for name in dirs:
+					tomoFolder = os.path.join(root,name)
+					#for f in os.listdir(folder):
+					#	# Get the full path of each tomogram folder in the data folder
+					#	tomoFolder = os.path.join(folder, f)
+					#	if os.path.isdir(tomoFolder) == True:
 					# Get tomogram and coordsfile from tomogram folder
 					tomogram = ''
 					coordfile = ''
@@ -513,11 +518,13 @@ class Tabs(TabbedPanel):
 							coordStart = os.path.join(tomoFolder, file)
 						if file.endswith('.coordsC'):
 							coordEnd = os.path.join(tomoFolder, file)
+					#
+					# ATB: if there is no .mrc and no .coord file in that directory do not perform the extraction. Silent exit. January 27, 2024
 					if tomogram == '':
-						print('Tomogram File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
+						#print('Tomogram File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
 					if coordfile == '':
-						print('Coordinate File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
+						#print('Coordinate File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
 					# Perform extraction
 					# 
@@ -667,10 +674,11 @@ class Tabs(TabbedPanel):
 		columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
 		df = pd.DataFrame(data, columns=columns)
 		extractStar = {"optics": pd.DataFrame(), "particles": df}
-		starfile.write(extractStar, direct + tomogName + '.star', overwrite=True)
-		print('Extraction Complete')
-		print('New Star File Created: ' + direct + tomogName + '.star\n')
-		self.ids.mainstar.text = direct + tomogName + '.star'
+		# ATB: include the tomDate directory in the filename of the star file, January 27, 2024
+		starfile.write(extractStar, direct + tomDate + '_' + tomogName + '.star', overwrite=True)
+		#print('Extraction Complete')
+		print('New Star File Created: ' + direct + tomDate + '_' + tomogName + '.star\n')
+		self.ids.mainstar.text = direct + tomDate + '_' + tomogName + '.star'
 		self.ids.mainsubtomo.text = direct
 	
 	def mrcWords(self):
