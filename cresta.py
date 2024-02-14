@@ -2103,9 +2103,10 @@ class Tabs(TabbedPanel):
 				mrc.voxel_size = angpix
 #
 # ATB: changed from nxstart, nystart, nzstart to origin.x, origin.y, origin.z since that works more reliably in Chimera.
-				mrc.header.origin.x = (coords[0] - bxsz / 2) * angpix
-				mrc.header.origin.y = (coords[1] - bxsz / 2) * angpix
-				mrc.header.origin.z = (coords[2] - bxsz / 2) * angpix
+# ATB: removed box size shift, Feb. 13, 2024
+				mrc.header.origin.x = (coords[0]) * angpix
+				mrc.header.origin.y = (coords[1]) * angpix
+				mrc.header.origin.z = (coords[2]) * angpix
 #
 # ATB: added print statement
 			print('Plot-back rotation/shift complete for ' + mrcName)
