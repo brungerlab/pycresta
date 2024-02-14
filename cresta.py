@@ -2028,6 +2028,7 @@ class Tabs(TabbedPanel):
 		# get models in class that matches basename
 		folder = os.listdir(classPath)
 		classes = [file for file in folder if classBasename in file]
+		print (classes)
 		# read starfile as dataframe
 		star_data = starfile.read(starf)["particles"]
 		# iterate through each row of dataframe
@@ -2036,12 +2037,14 @@ class Tabs(TabbedPanel):
 		for row in star_data.itertuples(index=False):
 			imgName = row.rlnImageName
             
-# ATB to do: uncomment the following line and test
-			# classNum = row.rlnClassNumber (use this when class number is starfile is accurate)
-			classNum = str(random.randint(1, 3))
+# ATB uncommented the following line, Feb. 13, 2024
+			classNum = str(row.rlnClassNumber)
+			print (classNum)
+			# classNum = str(random.randint(1, 3))
 
-			# get model associated with class num
+			# get model associated with class num ! this only works for classes 0,1,...,9 !
 			model = classPath + [file for file in classes if "00" + classNum in file][0]
+			print (model)
 			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
 			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
 #

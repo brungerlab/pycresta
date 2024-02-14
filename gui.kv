@@ -467,7 +467,7 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Generates rotated and translated maps using translation and rotation information in star file.\n\nStar file must be specified in the master key.\nThe rotated and translated maps are stored in 'plotback' folder.\nRef Path: path of the folder containing the maps.\n\nRef Basename: if the map name is run_it50_class001.mrc, then the basename is 'run_it50'.\n\n For displaying the results, open the full tomogram and the rotated/translated maps in Chimera. \nIMPORTANT: for proper translations, the Origin of the full tomogram must be 0,0,0. "
+			text: "Generates rotated and translated maps using translation, rotation, and class information in star file.\n\nStar file must be specified in the master key.\nThe rotated and translated maps are stored in 'plotback' folder.\nRef Path: path of the folder containing the maps.\n\nRef Basename: if the map name is run_it50_class001.mrc, then the basename is 'run_it50'.\n For each class, it will look for the number of the class in the filename.\n\n For displaying the results, open the full tomogram and the rotated/translated maps in Chimera. \nIMPORTANT: for proper translations, the Origin of the full tomogram must be 0,0,0. "
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
