@@ -1,4 +1,4 @@
-# Matlab TOM Toolbox functions converted into Python
+# Matlab TOM Toolbox functions converted into Python - helper functions for cresta.py
 
 # import python packages
 import os

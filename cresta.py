@@ -1,3 +1,4 @@
+# Main file for CrESTA
 
 #kivy needed for app
 import kivy
@@ -20,6 +21,7 @@ import random
 import mrcfile
 import starfile
 from scipy.spatial.transform import Rotation as R
+import xml.etree.ElementTree as ET
 
 #import tom.py
 import tom
@@ -38,7 +40,7 @@ from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.textinput import TextInput
 from kivy.core.window import Window
-Window.size = (900,800)
+Window.size = (900,900)
 
 #importing kivy file
 Builder.load_file(os.getcwd() + '/gui.kv')
@@ -362,9 +364,6 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('SDThresh:' + '\t' + self.ids.sdrange.text + '\n')
 			file_opt.writelines('SDShift:' + '\t' + self.ids.sdshift.text + '\n')
 			file_opt.writelines('MaskBlur:' + '\t' + self.ids.blurrate.text + '\n')
-			# file_opt.writelines('CCCVolone:' + '\t' + self.ids.cccvolone.text + '\n')
-			# file_opt.writelines('CCCVoltwo:' + '\t' + self.ids.cccvoltwo.text + '\n')
-			# file_opt.writelines('CCCWedge:' + '\t' + self.ids.cccwedge.text + '\n')
 			file_opt.writelines('Volvol:' + '\t' + self.ids.volvol.text + '\n')
 			file_opt.writelines('RefPath:' + '\t' + self.ids.refPath.text + '\n')
 			file_opt.writelines('RefBasename:' + '\t' + self.ids.refBasename.text + '\n')
@@ -444,12 +443,6 @@ class Tabs(TabbedPanel):
 						self.ids.sdshift.text = yank	
 					if re.search('MaskBlur', line):
 						self.ids.blurrate.text = yank	
-					# if re.search('CCCVolone', line):
-					# 	self.ids.cccvolone.text = yank
-					# if re.search('CCCVoltwo', line):
-					# 	self.ids.cccvoltwo.text = yank
-					# if re.search('CCCWedge', line):
-					# 	self.ids.cccwedge.text = yank
 					if re.search('Volvol', line):
 						self.ids.volvol.text = yank
 					if re.search('RefPath', line):
@@ -488,22 +481,17 @@ class Tabs(TabbedPanel):
 	
 	# tomogram extraction
 	def extract(self):
+		# Recursive Batch Extraction
 		if self.ids.tomoFolder.active:
 			folder = self.ids.tomo.text
 			# Iterate over the files in the directory
 			# ATB: changed listdir to walk for a recursive walk. Jan 27, 2024
-			#for f in os.listdir(folder):
 			for root, dirs, files in os.walk(folder):
 				for name in dirs:
 					tomoFolder = os.path.join(root,name)
-					#for f in os.listdir(folder):
-					#	# Get the full path of each tomogram folder in the data folder
-					#	tomoFolder = os.path.join(folder, f)
-					#	if os.path.isdir(tomoFolder) == True:
 					# Get tomogram and coordsfile from tomogram folder
 					tomogram = ''
 					coordfile = ''
-					# 
 					# ATB: added optional vectorStart and vectorEnd fields, Jan. 25 2024
 					coordStart = ''
 					coordEnd = ''
@@ -512,34 +500,28 @@ class Tabs(TabbedPanel):
 							tomogram = os.path.join(tomoFolder, file)
 						if file.endswith('.coords'):
 							coordfile = os.path.join(tomoFolder, file)
-						# 
 						# ATB: added optional vectorStart and vectorEnd fields, Jan. 25 2024
 						if file.endswith('.coordsM'):
 							coordStart = os.path.join(tomoFolder, file)
 						if file.endswith('.coordsC'):
 							coordEnd = os.path.join(tomoFolder, file)
-					#
 					# ATB: if there is no .mrc and no .coord file in that directory do not perform the extraction. Silent exit. January 27, 2024
 					if tomogram == '':
-						#print('Tomogram File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
 					if coordfile == '':
-						#print('Coordinate File Not Found — Extraction Cancelled for ' + tomoFolder + '\n')
 						continue
 					# Perform extraction
-					# 
-					# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
-					self.extract_helper(tomogram, coordfile, coordStart, coordEnd)	
+					self.extract_helper(tomogram, coordfile, coordStart, coordEnd)
+		# Regular Extraction
 		else:
 			tomogram = self.ids.tomo.text
 			coordfile = self.ids.tomocoords.text
-			# 
 			# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
 			coordStart = self.ids.vectorStart.text
 			coordEnd = self.ids.vectorEnd.text            
 			self.extract_helper(tomogram, coordfile, coordStart, coordEnd)
-	# 
-	# ATB: added vectorStart and vectorEnd fields, Jan. 25 2024
+
+	# extraction helper function
 	def extract_helper(self, tomogram, coordfile, coordStart, coordEnd):
 		# tomogram path
 		direct = '/'.join(tomogram.split('/')[:-3]) + '/'
@@ -559,35 +541,32 @@ class Tabs(TabbedPanel):
 		directory = direct + subdirect
 		# memory map the tomogram
 		tomogram = mrcfile.mmap(tomogram)
-		#
 		# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
-		TomogramSize=tomogram.data.shape
-		#
+		TomogramSize = tomogram.data.shape
 		boxsize = float(self.ids.px1.text)
 		angpix = float(self.ids.A1.text)
 		if os.path.isdir(directory) == False:
 			os.makedirs(directory)
-		#
 		# ATB: create array of center positions, Jan 24, 2024
 		icoor=0
 		with open(coordfile, 'r') as coord:
 			coord = coord.readlines()
 			coordnumber = len(coord)
-			xposarray=np.zeros(coordnumber)
-			yposarray=np.zeros(coordnumber)
-			zposarray=np.zeros(coordnumber)
-			newangs=np.zeros((coordnumber,3))
+			xposarray = np.zeros(coordnumber)
+			yposarray = np.zeros(coordnumber)
+			zposarray = np.zeros(coordnumber)
+			newangs = np.zeros((coordnumber,3))
 			for line in coord:
 				# access center positions from coords file
 				if line != '':
 					line = line.strip()
 					pos = []
 					pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
-					xposarray[icoor] = int(pos[0])
-					yposarray[icoor] = int(pos[1])
-					zposarray[icoor] = int(pos[2])
+					# append the x,y,z from each coord file to row (converted to float)
+					xposarray[icoor] = float(pos[0])
+					yposarray[icoor] = float(pos[1])
+					zposarray[icoor] = float(pos[2])
 					icoor=icoor+1
-		#
 		# ATB: optionally read the vector start / end positions and calculate angles, Jan 24, 2024
 		if os.path.isfile(coordStart) and os.path.isfile(coordEnd):
 			data = []
@@ -611,7 +590,7 @@ class Tabs(TabbedPanel):
 			if icoor != iangle:
 				print ('Error: the length of vector start/end files do not match the length of coordinate file')
 				return
-		#
+	
 		# create an empty data list for the rows
 		data = []
 		def extractLoop(i):
@@ -635,7 +614,6 @@ class Tabs(TabbedPanel):
 			z = np.round(z).astype(int)
 			y = np.round(y).astype(int)
 			x = np.round(x).astype(int)
-			# 
 			# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
 			if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
 				# create and append star file rows for subtomogram
@@ -648,14 +626,14 @@ class Tabs(TabbedPanel):
 					out = out * -1
 				# create subtomogram
 				mrcfile.new(name, out, overwrite=True)
-				#
 				# ATB: print extracted coordinate position. Jan 21, 2024
 				print('Extracted subtomogram ' + name + ' at center position ',xposarray[i],yposarray[i],zposarray[i])
 				# change pixel size
 				with mrcfile.open(name, 'r+') as mrc:
 					mrc.voxel_size = angpix
 			else:
-				print ('Extraction with specified box size exceeds tomogram borders. Not extracted: ' + name + ' at center position ',xposarray[i],yposarray[i],zposarray[i] )                
+				print ('Extraction with specified box size exceeds tomogram borders. Not extracted: ' + name + ' at center position ', xposarray[i],yposarray[i],zposarray[i]) 
+
 		# thread in batches to optimize runtime
 		threads = []
 		batch_size = int(self.ids.CPU.text)
@@ -670,6 +648,7 @@ class Tabs(TabbedPanel):
 				threads[i].join()
 		for thread in threads:
 			thread.join()
+
 		# create data frame for star file
 		columns=['rlnMicrographName', 'rlnCoordinateX', 'rlnCoordinateY', 'rlnCoordinateZ', 'rlnImageName', 'rlnCtfImage', 'rlnGroupNumber', 'rlnOpticsGroup', 'rlnAngleRot', 'rlnAngleTilt', 'rlnAnglePsi', 'rlnAngleTiltPrior', 'rlnAnglePsiPrior', 'rlnOriginXAngst', 'rlnOriginYAngst', 'rlnOriginZAngst', 'rlnClassNumber', 'rlnNormCorrection']
 		df = pd.DataFrame(data, columns=columns)
@@ -681,13 +660,16 @@ class Tabs(TabbedPanel):
 		self.ids.mainstar.text = direct + tomDate + '_' + tomogName + '.star'
 		self.ids.mainsubtomo.text = direct
 	
+	# check if mrc filter is active
 	def mrcWords(self):
 		if self.ids.mrcfilter.active == True:
 			self.ids.mainmrc.foreground_color = (0,0,.6,1)
 		else:
 			self.ids.mainmrc.foreground_color = (0,0,.6,0)
+
 	# graph for wiener function
 	plt.ion()
+
 	# wiener and gaussian filtering
 	def filter_vol(self):
 		try:
@@ -1222,6 +1204,7 @@ class Tabs(TabbedPanel):
 								with open(folder + '/' + filename) as ftomo:
 									count = 1
 									for line in ftomo:
+										## NEW CODE AREA
 										# finding selected .cmm coordinates and shifting based on box size
 										if re.search('x', line):
 											# read star file and extract original x, y, z coordinates
@@ -1244,6 +1227,7 @@ class Tabs(TabbedPanel):
 												boxsize.append(float(mrc.header.nx))
 												boxsize.append(float(mrc.header.ny))
 												boxsize.append(float(mrc.header.nz))
+											# START OLD CODE
 											# find selected x, y, z coordinates from .cmm file
 											xmid = re.search(' x="(.*)" y', line)
 											x_coord = float(xmid.group(1)) / angpix
@@ -1258,6 +1242,7 @@ class Tabs(TabbedPanel):
 											finalx = str(round(xCor) - int(cmmX))
 											finaly = str(round(yCor) - int(cmmY))
 											finalz = str(round(zCor) - int(cmmZ))
+											# END OLD CODE
 											# create a folder for each subtomogram
 											subtomoName = row['rlnImageName'].iloc[0]
 											subtomo = subtomoName.replace('_wiener', '')
@@ -1606,8 +1591,10 @@ class Tabs(TabbedPanel):
 			rotDir = mrcDirec + '/rottrans/'
 			print('Now rotating ' + mrcName)
 			if len(ownAngs) != 3:
+				# star file rotation
 				outH1 = tom.processParticler(fileNames[i], angles[:,i].conj().transpose() * -1, boxsize, shifts[:,i].conj().transpose() * -1, shifton)
 			else:
+				# manual rotation
 				outH1 = tom.processParticler(fileNames[i], ownAngs * -1, boxsize, shifts[:,i].conj().transpose() * -1, shifton)
 			outH1 = outH1.astype(np.float32)
 			if os.path.isdir(rotDir) == False:

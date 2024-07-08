@@ -1121,8 +1121,11 @@
 						Label:
 							halign: 'center'
 							color: (0,0,0,1)
-							text: 'Click “Pick Coordinates” to open ChimeraX.\nNavigate to the “Markers” menu, select a mode\nin the Place markers submenu (for example, Surface),\nand then Right Click to place a coordinate.\nSelect “Move” to adjust the location of the coordinate.\nKeep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using\ncommand "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save\ninformation after exiting each subtomogram.\n\nPress the right arrow to progress; choose\n"Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks,\npress the "Re-extraction" button\nto perform the re-extractions.\n\nAfter completion of the picking of coordinates, \nthe coordinates are stored in subcoord_files/ \ndirectories as .cmm files.\nAfter "Re-extraction" they are additionally \nstored as .coord files.'
+							text: 'Click “Pick Coordinates” to open ChimeraX. Navigate to the “Markers” menu, select a mode in the Place markers submenu (for example, Surface), and then Right Click to place a coordinate. Select “Move” to adjust the location of the coordinate. Keep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using command "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save information after exiting each subtomogram.\n\nPress the right arrow to progress; choose "Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks, press the "Re-extraction" button to perform the re-extractions.\n\nAfter completion of the picking of coordinates, the coordinates are stored in subcoord_files/directories as .cmm files. After "Re-extraction" they are additionally stored as .coord files.'
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							text_size: self.width, None
+							size: self.texture_size
+							font_size: 28
 					Label:
 						text: ' '
 						size_hint_x: .03
