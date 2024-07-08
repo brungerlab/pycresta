@@ -1615,7 +1615,7 @@ class Tabs(TabbedPanel):
 			mrcfile.write(rotDir + mrcName, outH1, True)
 			with mrcfile.open(rotDir + mrcName, 'r+') as mrc:
 				mrc.voxel_size = pxsz
-# ATB: changed print statement: both rotations and shifts are applied
+			# ATB: changed print statement: both rotations and shifts are applied
 			print('Rotation/shift complete for ' + mrcName)
 		# thread in batches to optimize runtime
 		threads = []

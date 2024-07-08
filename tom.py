@@ -751,11 +751,10 @@ def tom_filter(im, radius, boxsize, center=None, flag='circ'):
 # rotate subtomogram functions
 def processParticler(filename, tmpAng, boxsize, shifts, shifton):
     volTmp = mrcfile.read(filename)
-#
-# ATB: note that processParticler swaps values in tmpAng indexes 0 and 1, but processParticle (used for masking) does not
 
-#
-# ATB todo: please add test for consistency of pixels and size of the volume with definitions in Master Key. Pixel mismatch gives warning message, size mismatch stops program.
+    # ATB: note that processParticler swaps values in tmpAng indexes 0 and 1, but processParticle (used for masking) does not
+
+    # ATB todo: please add test for consistency of pixels and size of the volume with definitions in Master Key. Pixel mismatch gives warning message, size mismatch stops program.
     storey = tmpAng[1]
     tmpAng[1] = tmpAng[0]
     tmpAng[0] = storey
@@ -764,9 +763,9 @@ def processParticler(filename, tmpAng, boxsize, shifts, shifton):
     else:
         outH1 = rotate(volTmp, tmpAng, boxsize, 'l')
 
-#ATB    
-# I commented out this call to cut_out. It makes the box smaller of there are values < 1. Does not make much sense and causes the subtomograms to get smaller!
-#    outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
+    #ATB    
+    # I commented out this call to cut_out. It makes the box smaller of there are values < 1. Does not make much sense and causes the subtomograms to get smaller!
+    #   outH1 = cut_out(outH1, np.array([0, 0, 0]), boxsize)
     return outH1
     
 # CCC Calculations
