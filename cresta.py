@@ -1531,6 +1531,7 @@ class Tabs(TabbedPanel):
 			t2 = str(timedelta(seconds = bb-aa)).split(":")
 			print(f'Total masking time: {t2[1]} minutes and {t2[2]} seconds')
 			print('New starfile created: ' + new_star_name + '\n')
+			self.ids.mainstar.text = new_star_name
 
 		cut_part_and_movefunc(mask, starf, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg)
 		return
