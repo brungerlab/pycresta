@@ -1706,7 +1706,9 @@ class Tabs(TabbedPanel):
 
 		new_star_name = self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
 		print('Rotation by Star File Complete')
-		print('New Star File Created: ' + new_star_name + '\n')
+		print('New Star File Created: ' + new_star_name)
+		self.ids.mainstar.text = new_star_name
+		print('Note: new star file now populates the main star file field in Master Key\n')
 		
 		return
 	
@@ -1753,7 +1755,9 @@ class Tabs(TabbedPanel):
 		
 		new_star_name = self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
 		print('Manual Rotation Complete')
-		print('New Star File Created: ' + new_star_name + '\n')
+		print('New Star File Created: ' + new_star_name)
+		self.ids.mainstar.text = new_star_name
+		print('Note: new star file now populates the main star file field in Master Key\n')
 
 	# used to store a subtomogram's accepted/rejected status
 	indexToVal = {}
