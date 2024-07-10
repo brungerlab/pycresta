@@ -2,6 +2,7 @@
 
 # import python packages
 import os
+from datetime import datetime
 import shutil
 import subprocess
 import numpy as np
@@ -149,6 +150,7 @@ def readList(listName, pxsz, extstar, angles):
         star_data = starfile.read(listName)["particles"]
         list_length = len(star_data)
 
+        # create a new star file with the new name
         new_star = starfile.read(listName)
         def replaceName(s):
             s = s.split("/")
@@ -158,23 +160,24 @@ def readList(listName, pxsz, extstar, angles):
         df = pd.DataFrame.from_dict(new_star["particles"])
         df.loc[:, "rlnImageName"] = df.loc[:, "rlnImageName"].apply(lambda x: replaceName(x))
 
-        # modifies starfile according to rotation type
-        if angles != []:
-            if len(angles) == 0: # star
-                zeros = np.zeros(df.loc[:, "rlnAngleRot":"rlnOriginZAngst" ].shape)
-                df.loc[:, "rlnAngleRot":"rlnOriginZAngst" ] = zeros
-            
-            if len(angles) == 3: # manual
-                if angles[0] == 0 and angles[1] == 0: # X-axis  corresponds to  phi=0   psi=0   theta=alpha
-                    df.loc[:, "rlnAngleRot"] += angles[2]
-                if angles[0] == 270 and angles[1] == 90: # Y-axis  corresponds to  phi=270   psi=90  theta=alpha
-                    df.loc[:, "rlnAngleTilt"] += angles[2]  
-                if angles[1] == 0 and angles[2] == 0: # Z-axis  corresponds to  phi=alpha   psi=0   theta=0
-                    df.loc[:, "rlnAnglePsi"] += angles[0]
-            
-        new_star["particles"] = df
-        starfile.write(new_star, _ + exstar + ".star", overwrite=True)
-        new_star_name = _ + exstar + ".star"
+        # making a new star file if rotation is occuring
+        if angles != None:
+            # set all angles and shifts to zero
+            zeros = np.zeros(df.loc[:, "rlnAngleRot":"rlnOriginZAngst" ].shape)
+            df.loc[:, "rlnAngleRot":"rlnOriginZAngst" ] = zeros
+
+            # write new star file
+            now = datetime.now()
+            dt_string = now.strftime("_%d-%m-%Y_%H.%M.%S")
+            new_star["particles"] = df
+            new_star_name = _ + exstar + dt_string + ".star"
+            starfile.write(new_star, new_star_name, overwrite=True)
+
+        # write new star file if no rotation is occuring
+        else:
+            new_star["particles"] = df
+            starfile.write(new_star, _ + exstar + ".star", overwrite=True)
+            new_star_name = _ + exstar + ".star"
 
         Align = allocAlign(list_length)
         fileNames = []

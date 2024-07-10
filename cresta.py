@@ -16,7 +16,7 @@ import starfile
 import mrcfile
 import matplotlib.pyplot as plt
 import weakref
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 import mrcfile
 import starfile
@@ -65,6 +65,11 @@ class StarFiltFinder(FloatLayout):
     
 class SubtomoFinder(FloatLayout):
     subtomodsave = ObjectProperty(None)
+    text_input = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+class CMMFinder(FloatLayout):
+    cmmdsave = ObjectProperty(None)
     text_input = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
@@ -175,6 +180,21 @@ class Tabs(TabbedPanel):
 			self.ids.mainsubtomo.text = subtomopath + '/'
 		elif len(subtomopath) == 0:
 			self.ids.mainsubtomo.text = 'Choose Subtomogram Directory'
+		self.dismiss_popup()
+
+	# cmm file directory save
+	def show_cmm(self):
+		content = CMMFinder(cmmdsave=self.cmmsave, cancel=self.dismiss_popup)
+		self._popup = Popup(title="Save CMM Files Directory", content=content,
+                            size_hint=(0.9, 0.9))
+		self._popup.open()
+
+	def cmmsave(self, path, filename):
+		cmmpath = path.strip()
+		if len(cmmpath) != 0:
+			self.ids.maincmm.text = cmmpath + '/'
+		elif len(cmmpath) == 0:
+			self.ids.maincmm.text = 'Choose CMM Files Directory'
 		self.dismiss_popup()
 
 	# wedge file save
@@ -339,6 +359,7 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('StarFileUnfilt:' + '\t' + self.ids.mainstar.text + '\n')
 			file_opt.writelines('StarFileFilt:' + '\t' + self.ids.mainstarfilt.text + '\n')
 			file_opt.writelines('SubtomoPath:' + '\t' + self.ids.mainsubtomo.text + '\n')
+			file_opt.writelines('CMMPath:' + '\t' + self.ids.maincmm.text + '\n')
 			file_opt.writelines('WedgePath:' + '\t' + self.ids.mainwedge.text + '\n')
 			file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
 			file_opt.writelines('BoxSize:' + '\t' + self.ids.px1.text + '\n')
@@ -384,7 +405,8 @@ class Tabs(TabbedPanel):
 				for line in pull:
 					pinfo = line.split()
 					try:
-						yank = pinfo[1]
+						# get all elements from pinfo after the first element
+						yank = ' '.join(pinfo[1:])
 					except IndexError:
 						yank = ''
 					if re.search('StarFileUnfilt', line):
@@ -393,6 +415,8 @@ class Tabs(TabbedPanel):
 						self.ids.mainstarfilt.text = yank
 					if re.search('SubtomoPath', line):
 						self.ids.mainsubtomo.text = yank
+					if re.search('CMMPath', line):
+						self.ids.maincmm.text = yank
 					if re.search('WedgePath', line):
 						self.ids.mainwedge.text = yank
 					if re.search('MrcPath', line):
@@ -533,12 +557,17 @@ class Tabs(TabbedPanel):
 		micrograph = tomDate + '/' + tomName + '/' + tomogram.split('/')[-1]
 		subdirect = tomDate + '/' + tomName + '/sub/'
 		# set wedge file name
-		if self.ids.mainwedge.text == 'Choose Wedge File':
+		# check if Choose Wedge File or the word Choose is contained in the text input
+		if self.ids.mainwedge.text == 'Choose Wedge File' or 'Choose' in self.ids.mainwedge.text:
 			wedge = 'NA'
 		else:
 			wedge = (self.ids.mainwedge.text).replace(direct, '')
 		# use for full path containing subtomograms
 		directory = direct + subdirect
+		# check that the tomogram path exists
+		if os.path.isfile(tomogram) == False:
+			print('Error: Tomogram path does not exist')
+			return
 		# memory map the tomogram
 		tomogram = mrcfile.mmap(tomogram)
 		# ATB: calculate the size of 3D tomogram volume. Jan 21, 2024
@@ -555,13 +584,13 @@ class Tabs(TabbedPanel):
 			xposarray = np.zeros(coordnumber)
 			yposarray = np.zeros(coordnumber)
 			zposarray = np.zeros(coordnumber)
-			newangs = np.zeros((coordnumber,3))
+			newangs = np.zeros((coordnumber, 3))
 			for line in coord:
 				# access center positions from coords file
 				if line != '':
 					line = line.strip()
 					pos = []
-					pos = re.split(r'[,\.;:\s]+', line) # splits line by delimiters including one or more whitespaces, commas, periods, colons, and semi-colons
+					pos = line.split() # splits line by whitespace
 					# append the x,y,z from each coord file to row (converted to float)
 					xposarray[icoor] = float(pos[0])
 					yposarray[icoor] = float(pos[1])
@@ -977,9 +1006,14 @@ class Tabs(TabbedPanel):
 				listName = self.ids.mainstarfilt.text
 			else:
 				listName = self.ids.mainstar.text
+			# subtomo directory
 			direct = self.ids.mainsubtomo.text
 			if self.ids.mainsubtomo.text[-1] != '/':
 				direct = self.ids.mainsubtomo.text + '/'
+			# cmm directory
+			cmm_direct = self.ids.maincmm.text
+			if self.ids.maincmm.text[-1] != '/':
+				cmm_direct = self.ids.maincmm.text + '/'
 			pxsz = float(self.ids.A1.text)
 			curindex = int(self.ids.index.text)
 			self.ids.pickcoordtext.text = 'Please wait. Opening ChimeraX.'
@@ -988,17 +1022,14 @@ class Tabs(TabbedPanel):
 			folderNames = starfile.read(listName)["particles"]["rlnMicrographName"]
 			starfinal = imageNames[curindex - 1]
 			tomoName = folderNames[curindex - 1]
-			tomoName = tomoName.split('/')[0] + '/' + tomoName.split('/')[1]
+			tomoName = tomoName.split('/')[0] # + '/' + tomoName.split('/')[1]
 			# set total index value
 			self.ids.index2.text = str(len(imageNames))
-
-			# create subcoord_files folder inside subtomogram directory specified on master key
-			cmmdir = direct + 'subcoord_files'
-			if os.path.isdir(cmmdir) == False:
-				os.mkdir(cmmdir)
-
+			# ensure that the user-specified cmm files directory exists
+			if os.path.isdir(cmm_direct) == False:
+				os.mkdir(cmm_direct)
 			# create and run python script to open ChimeraX
-			chim3 = direct + 'chimcoord.py'
+			chim3 = cmm_direct + 'chimcoord.py'
 			tmpflnam = direct + starfinal
 			# invert subtomogram if active
 			if self.ids.pickcoordInvert.active == True:
@@ -1007,7 +1038,7 @@ class Tabs(TabbedPanel):
 				mrcfile.write(tmpflnam, mrc, overwrite=True)
 			# run ChimeraX
 			file_opt = open(chim3, 'w')
-			file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + cmmdir + "\")" + "\n" + "run(session, \"open " + tmpflnam + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
+			file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"cd " + cmm_direct + "\")" + "\n" + "run(session, \"open " + tmpflnam + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
 			file_opt.close()
 			print(subprocess.getstatusoutput(ChimeraX_dir + '/chimerax ' + chim3))
 			# revert subtomogram to original state if necessary
@@ -1020,15 +1051,15 @@ class Tabs(TabbedPanel):
 			endfile = os.path.split(cmmflip)
 			endcmm = endfile[1]
 			self.ids.filenameget.text = starfinal
-			if os.path.exists(cmmdir + '/' + tomoName) == False:
-				os.makedirs(cmmdir + '/' + tomoName)
-			if os.path.exists(cmmdir + '/coord.cmm') == True:
+			if os.path.exists(cmm_direct + '/' + tomoName) == False:
+				os.makedirs(cmm_direct + '/' + tomoName)
+			if os.path.exists(cmm_direct + '/coord.cmm') == True:
 				# check if cmm file will be overwritten
-				if os.path.exists(cmmdir + '/' + tomoName + '/' + endcmm) == True:
+				if os.path.exists(cmm_direct + '/' + tomoName + '/' + endcmm) == True:
 					statstat = 2
 				else:
 					statstat = 1
-				shutil.move(cmmdir + '/coord.cmm', (cmmdir + '/' + tomoName + '/' + endcmm))
+				shutil.move(cmm_direct + '/coord.cmm', (cmm_direct + '/' + tomoName + '/' + endcmm))
 			# no coordinates saved
 			else:
 				statstat = 0
@@ -1175,18 +1206,60 @@ class Tabs(TabbedPanel):
 		# initialize variables
 		starf = self.ids.mainstarfilt.text
 		direct = self.ids.mainsubtomo.text
+		cmm_direct = self.ids.maincmm.text
 		angpix = float(self.ids.A1.text)
 		imgToCmmCor = {}
 		if self.ids.mainsubtomo.text[-1] != '/':
 				direct = self.ids.mainsubtomo.text + '/'
 
 		# set directory path
+		# directory = cmm_direct
 		directory = direct + 'subcoord_files/'
-
-		# check that /subcoord_files/ folder exists
+		# check that the folder exists
 		if os.path.exists(directory) == False:
 			print(directory + ' does not exist. Please save coordinates first.')
 			return
+
+		# # import the starfile as star_data
+		# star_data = starfile.read(starf)
+		# # create a pandas dataframe from the particles (removes header)
+		# df = pd.DataFrame.from_dict(star_data['particles'])
+		# # create a new panda dataframe that will hold the new shifted file
+		# newDF = pd.DataFrame([])
+		# boxsize = 256
+
+		# cmshift = []
+		# for root, dirs, files in os.walk(cmm_direct, topdown=False):
+		# 	for filename in os.listdir(root):
+		# 			cf = os.path.join(root, filename)
+		# 			if os.path.isfile(cf) and filename.endswith('.cmm'):
+		# 				# get the original micrographname and coordinates
+		# 				opd = os.path.basename(os.path.normpath(root))
+		# 				opf = filename.replace('.cmm', '.mrc') 
+		# 				mgName = df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnMicrographName']
+		# 				if mgName.shape[0] == 0:
+		# 					print('Could not find original coordinates for tomogram:' + opf)
+		# 					continue
+		# 				else:
+		# 					print('found ' + cf + opd + opf)
+		# 					opXYZ = np.array([int((df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateX'])), int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateY'])), int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateZ']))])
+		# 					print('processed')
+		# 					######### FOR RELION4/5 INCLUDE THE OTHER COLUMNS AS WELL And we'll need a checkbox to togel RELION4/5 vs RELION 3 file creation ########### 
+		# 					# This is for getting the cmm files together
+		# 					print(cf)
+		# 					with open(cf, 'r') as cfile:
+		# 						tree = ET.parse(cf)
+		# 						cmroot = tree.getroot()
+		# 						for child in cmroot:
+		# 							cms = np.array([[int(float(child.attrib['x'])), int(float(child.attrib['y'])), int(float(child.attrib['z']))]])
+		# 							cms = np.reshape(cms, (3,))
+		# 							cms = boxsize*.5 - cms
+		# 							new_shift = [e - cms[c] for c,e in enumerate(opXYZ)]
+							
+		# 							# Concats new dataframe
+		# 							row = {'cmmfile': filename, 'rlnMicrographName': mgName.to_string(index=False), 'rlnCoordinateX': new_shift[0], 'rlnCoordinateY': new_shift[1], 'rlnCoordinateZ': new_shift[2], 'Original_x': opXYZ[0], 'Original_Y': opXYZ[1], 'Original_Z': opXYZ[2], 'cmm_shiftX': cms[0], 'cmm_shiftY': cms[1], 'cmm_shiftZ': cms[2], }
+		# 							newDF = pd.concat([newDF, pd.DataFrame([row])])
+		# 							newDF.to_csv('Allout.csv', index=False)
 
 		# iterate through each folder in directory
 		for file1 in os.listdir(directory):
@@ -1469,7 +1542,7 @@ class Tabs(TabbedPanel):
 		
 		def cut_part_and_movefunc(maskname, listName, direc, pxsz, filter, grow, normalizeit, sdrange, sdshift, blackdust, whitedust, shiftfil, randfilt, permutebg):
 			offSetCenter = [0, 0 ,0]
-			fileNames, angles, shifts, list_length, pickPos, new_star_name = tom.readList(listName, pxsz, 'masked', [])
+			fileNames, angles, shifts, list_length, pickPos, new_star_name = tom.readList(listName, pxsz, 'masked', None)
 			fileNames = [direc + name for name in fileNames]
 			maskh1 = mrcfile.read(maskname)
 			posNew = []
@@ -1617,8 +1690,8 @@ class Tabs(TabbedPanel):
 				threads[i].join()
 		for thread in threads:
 			thread.join()
-		return
-	
+		return new_star_name
+
 	# rotate by star file
 	def rotate(self):
 		starf = self.ids.mainstar.text
@@ -1631,8 +1704,10 @@ class Tabs(TabbedPanel):
 		shifton = self.ids.applyTranslations.active
 		ownAngs = []
 
-		self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
-		print('Rotation by Star File Complete\n')
+		new_star_name = self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
+		print('Rotation by Star File Complete')
+		print('New Star File Created: ' + new_star_name + '\n')
+		
 		return
 	
 	# rotate by manual angle/axis
@@ -1649,7 +1724,12 @@ class Tabs(TabbedPanel):
 		xaxis = self.ids.xaxis.active
 		yaxis = self.ids.yaxis.active
 		zaxis = self.ids.zaxis.active
-		anglerotate = float(self.ids.anglerotation.text)
+		# get angle of rotation
+		try:
+			anglerotate = float(self.ids.anglerotation.text)
+		except ValueError:
+			self.ids.noaxis.text = "Angle not specified"
+			return
 
 		# X-axis  corresponds to  phi=0     psi=0   theta=alpha
         # Y-axis  corresponds to  phi=270   psi=90  theta=alpha
@@ -1671,8 +1751,9 @@ class Tabs(TabbedPanel):
 			self.ids.noaxis.text = "Axis of rotation not specified"
 			return
 		
-		self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
-		print('Manual Rotation Complete\n')
+		new_star_name = self.rotate_subtomos(starf, dir, pxsz, boxsize, shifton, ownAngs)
+		print('Manual Rotation Complete')
+		print('New Star File Created: ' + new_star_name + '\n')
 
 	# used to store a subtomogram's accepted/rejected status
 	indexToVal = {}

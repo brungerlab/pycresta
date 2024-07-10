@@ -90,6 +90,36 @@
                 text: "Save"
                 on_release: root.subtomodsave(filechooser.path, text_input.text)
 
+<CMMFinder>:
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser 
+            on_selection: text_input.text = self.selection and self.selection[0] or self.path
+			size_hint_y: .9
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 0
+            multiline: False
+			size_hint_y: 0
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+			size_hint_y: .1
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Save"
+                on_release: root.cmmdsave(filechooser.path, text_input.text)
+
 <WedgeFinder>:
     text_input: text_input
     BoxLayout:
@@ -614,7 +644,7 @@
 								pos: self.pos
 								size: self.size
 						Label:
-							text: 'Subtomogram directory'
+							text: 'Subtomogram Directory'
 							color: (0,0,0,1)
 							font_size: 30
 							bold: True
@@ -642,6 +672,48 @@
 							background_color: 0, 1.2, 2, .5
 							text: 'Choose Subtomogram Path'
 							on_release: root.show_subtomo()
+							size_hint: .45, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_y: .6
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'CMM Files Directory'
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+							size_hint: .6, .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose CMM Files Directory'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: maincmm
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose CMM Files Path'
+							on_release: root.show_cmm()
 							size_hint: .45, .12
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
