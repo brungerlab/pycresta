@@ -1220,47 +1220,6 @@ class Tabs(TabbedPanel):
 			print(directory + ' does not exist. Please save coordinates first.')
 			return
 
-		# # import the starfile as star_data
-		# star_data = starfile.read(starf)
-		# # create a pandas dataframe from the particles (removes header)
-		# df = pd.DataFrame.from_dict(star_data['particles'])
-		# # create a new panda dataframe that will hold the new shifted file
-		# newDF = pd.DataFrame([])
-		# boxsize = 256
-
-		# cmshift = []
-		# for root, dirs, files in os.walk(cmm_direct, topdown=False):
-		# 	for filename in os.listdir(root):
-		# 			cf = os.path.join(root, filename)
-		# 			if os.path.isfile(cf) and filename.endswith('.cmm'):
-		# 				# get the original micrographname and coordinates
-		# 				opd = os.path.basename(os.path.normpath(root))
-		# 				opf = filename.replace('.cmm', '.mrc') 
-		# 				mgName = df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnMicrographName']
-		# 				if mgName.shape[0] == 0:
-		# 					print('Could not find original coordinates for tomogram:' + opf)
-		# 					continue
-		# 				else:
-		# 					print('found ' + cf + opd + opf)
-		# 					opXYZ = np.array([int((df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateX'])), int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateY'])), int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateZ']))])
-		# 					print('processed')
-		# 					######### FOR RELION4/5 INCLUDE THE OTHER COLUMNS AS WELL And we'll need a checkbox to togel RELION4/5 vs RELION 3 file creation ########### 
-		# 					# This is for getting the cmm files together
-		# 					print(cf)
-		# 					with open(cf, 'r') as cfile:
-		# 						tree = ET.parse(cf)
-		# 						cmroot = tree.getroot()
-		# 						for child in cmroot:
-		# 							cms = np.array([[int(float(child.attrib['x'])), int(float(child.attrib['y'])), int(float(child.attrib['z']))]])
-		# 							cms = np.reshape(cms, (3,))
-		# 							cms = boxsize*.5 - cms
-		# 							new_shift = [e - cms[c] for c,e in enumerate(opXYZ)]
-							
-		# 							# Concats new dataframe
-		# 							row = {'cmmfile': filename, 'rlnMicrographName': mgName.to_string(index=False), 'rlnCoordinateX': new_shift[0], 'rlnCoordinateY': new_shift[1], 'rlnCoordinateZ': new_shift[2], 'Original_x': opXYZ[0], 'Original_Y': opXYZ[1], 'Original_Z': opXYZ[2], 'cmm_shiftX': cms[0], 'cmm_shiftY': cms[1], 'cmm_shiftZ': cms[2], }
-		# 							newDF = pd.concat([newDF, pd.DataFrame([row])])
-		# 							newDF.to_csv('Allout.csv', index=False)
-
 		# iterate through each folder in directory
 		for file1 in os.listdir(directory):
 			folder1 = directory + file1

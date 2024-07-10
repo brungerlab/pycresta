@@ -406,7 +406,7 @@
 		orientation: 'vertical'
 		Label:
 			halign: 'center'
-			text: "Requires 'Filtered Star File', subtomogram directory,\nChimeraX path, and Px size (A) to be chosen/entered on 'Master Key.'\n\nFollow the provided directions while using ChimeraX to ensure a smooth process."
+			text: "Requires 'Filtered Star File', Subtomogram Directory, CMM Files Directory,\nChimeraX path, and Px size (A) to be chosen/entered on 'Master Key.'\n\nFollow the provided directions while using ChimeraX to ensure a smooth process."
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -1193,7 +1193,7 @@
 						Label:
 							halign: 'center'
 							color: (0,0,0,1)
-							text: 'Click “Pick Coordinates” to open ChimeraX. Navigate to the “Markers” menu, select a mode in the Place markers submenu (for example, Surface), and then Right Click to place a coordinate. Select “Move” to adjust the location of the coordinate. Keep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using command "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save information after exiting each subtomogram.\n\nPress the right arrow to progress; choose "Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks, press the "Re-extraction" button to perform the re-extractions.\n\nAfter completion of the picking of coordinates, the coordinates are stored in subcoord_files/directories as .cmm files. After "Re-extraction" they are additionally stored as .coord files.'
+							text: 'Click “Pick Coordinates” to open ChimeraX. Navigate to the “Markers” menu, select a mode in the Place markers submenu (for example, Surface), and then Right Click to place a coordinate. Select “Move” to adjust the location of the coordinate. Keep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using command "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save information after exiting each subtomogram.\n\nPress the right arrow to progress; choose "Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks, press the "Re-extraction" button to perform the re-extractions.\n\nAfter completion of the picking of coordinates, the coordinates are stored in the Master Key "CMM Files Directory" as .cmm files. After "Re-extraction" they are additionally stored as .coord files.'
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text_size: self.width, None
 							size: self.texture_size
