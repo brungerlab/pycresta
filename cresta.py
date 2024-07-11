@@ -23,6 +23,7 @@ import mrcfile
 import starfile
 from scipy.spatial.transform import Rotation as R
 import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 #import tom.py
 import tom
@@ -1232,6 +1233,38 @@ class Tabs(TabbedPanel):
 			if series.shape[0] > 0:
 				return series.iloc[0]
 			return None
+
+		# function to add a comment to a cmm file
+		def add_comment_to_cmm(input_path, output_path, boxsize, pixelsize):
+			try:
+				with open(input_path, 'r') as file:
+					content = file.read().strip()
+					if not content:
+						raise ValueError("The file is empty.")
+				
+				# parse the XML file
+				tree = ET.ElementTree(ET.fromstring(content))
+				root = tree.getroot()
+
+				# create a comment element
+				box_comment = ET.Comment(boxsize)
+				box_comment.tail = '\n'
+
+				# create a second comment element
+				px_comment = ET.Comment(pixelsize)
+				px_comment.tail = '\n'
+
+				# add the comment to the root
+				root.insert(0, box_comment)
+				root.insert(1, px_comment)
+
+				# write the new XML file
+				tree.write(output_path, encoding='utf-8')
+
+			except ET.ParseError as e:
+				print(f"Error parsing XML file {input_path}: {e}")
+			except ValueError as e:
+				print(f"Error reading file {input_path}: {e}")
 		
 		# global counter and lock
 		global_counter = defaultdict(lambda: 1)
@@ -1270,19 +1303,27 @@ class Tabs(TabbedPanel):
 								# just have [micro image xyz], 
 								# set [all columns to 0 (with new xyz) while keeping all columns],
 								# ***retain all the original star file info (except new xyz)***
+
 						# get the cmm files together
 						with open(cmmfile, 'r') as cmmfile:
+
 							# parse the cmm file
 							tree = ET.parse(cmmfile)
 							cmroot = tree.getroot()
-							for child in cmroot:
 
-								# get boxsize from subtomogram
-								boxsize = []
-								with mrcfile.open(direct + imgName, 'r+') as mrc:
-									boxsize.append(float(mrc.header.nx))
-									boxsize.append(float(mrc.header.ny))
-									boxsize.append(float(mrc.header.nz))
+							# get boxsize from subtomogram
+							boxsize = []
+							pixelsize = []
+							with mrcfile.open(direct + imgName, 'r+') as mrc:
+								boxsize.append(float(mrc.header.nx))
+								boxsize.append(float(mrc.header.ny))
+								boxsize.append(float(mrc.header.nz))
+								pixelsize.append(round(float(mrc.voxel_size.x), 2))
+								pixelsize.append(round(float(mrc.voxel_size.y), 2))
+								pixelsize.append(round(float(mrc.voxel_size.z), 2))
+
+							# iterate through each set of coordinates in the cmm file
+							for child in cmroot:
 
 								# get the coordinates from the cmm file
 								cms = np.array([
@@ -1292,7 +1333,7 @@ class Tabs(TabbedPanel):
 								])
 
 								# # divide cms by angpix to get the shift in pixels
-								# cms = cms / angpix
+								# cms = cms / pixelsize[0]
 
 								# get the center of mass shift
 								cms = np.array(boxsize)/2 - cms
@@ -1341,7 +1382,7 @@ class Tabs(TabbedPanel):
 									prefix = opf  # Fallback in case the regex doesn't match
 
 								# get the incremented filename
-								subtomo = get_incremented_filename(opf, prefix)
+								subtomo= get_incremented_filename(opf, prefix)
 
 								# set the output file path
 								output_file = os.path.join(root, subtomo)
@@ -1365,39 +1406,52 @@ class Tabs(TabbedPanel):
 								# get the tomogram name from star file
 								tomogram = direct + row['rlnMicrographName']
 								# check if the tomogram file exists
-								if os.path.exists(tomogram):
-									# open and memory map the tomogram
-									tomogram = mrcfile.mmap(tomogram)
-									# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
-									TomogramSize = np.array(tomogram.data).shape
-								else:
-									print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
-									return
+								with counter_lock:
+									if os.path.exists(tomogram):
+										# open and memory map the tomogram
+										tomogram = mrcfile.mmap(tomogram)
+										# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
+										TomogramSize = np.array(tomogram.data).shape
+									else:
+										print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
+										return
 								
-								# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
-								if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
-									# cut the tomogram
-									subby = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
-									# invert contrast if selected
-									if self.ids.reextractInvert.active == True:
-										subby = subby * -1
-
-									# write the new subtomogram
-									mrcfile.new(output_file, subby, overwrite=True)
-									with mrcfile.open(output_file, 'r+') as mrc:
-										mrc.voxel_size = angpix
-
-								# print extracted coordinate position
-								print('Re-extracted subtomogram ' + output_file + ' at center position ', xpos, ypos, zpos)
+								# check if subtomogram is within tomogram bounds
+								if (z>=0 and y>=0 and x>=0 and bound[0] + 1 <= TomogramSize[0] and bound[1] + 1 <= TomogramSize[1] and bound[2] + 1 <=TomogramSize[2]):
+									with counter_lock:
+										# cut the tomogram
+										subby = tomogram.data[z:(bound[0] + 1), y:(bound[1] + 1), x:(bound[2] + 1)]
+										# invert contrast if selected
+										if self.ids.reextractInvert.active == True:
+											subby = subby * -1
+										# write the new subtomogram
+										mrcfile.new(output_file, subby, overwrite=True)
+										with mrcfile.open(output_file, 'r+') as mrc:
+											mrc.voxel_size = pixelsize[0]
 
 								# add the row to the new dataframe
-								newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
-													
-								# create .coords file
+								with counter_lock:
+									newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
+
+								# save the coordinates for the .coords file			
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
-								file_opt = open(directory + '/' + subName + '.coords', 'a')
-								file_opt.writelines(str(xpos) + ' ' + str(ypos) + ' ' + str(zpos) + '\n')
-								file_opt.close()
+								with counter_lock:
+									with open(directory + '/' + subName + '.coords', 'a') as file_opt:
+										file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
+
+								# print extracted coordinate position
+								print(f'Re-extracted subtomogram {output_file} at center position {xpos}, {ypos}, {zpos}')
+							
+							# add the boxsize to the cmm file as a comment (once per cmm file)
+							boxsize_comment = f'boxsize: {boxsize}'
+							pixelsize_comment = f'pixel_size: {pixelsize}'
+							cmm_file_path = os.path.join(root, filename)
+							# check if boxsize and pixelsize comments are already present, ignore call for add_comment_to_cmm if they are
+							with open(cmm_file_path, 'r') as file:
+								content = file.read()
+								if 'boxsize' in content and 'pixel_size' in content:
+									return
+							add_comment_to_cmm(cmm_file_path, cmm_file_path, boxsize_comment, pixelsize_comment)
 		
 			# parallelization: thread in batches to optimize runtime
 			threads = []
