@@ -8,6 +8,7 @@ kivy.require('2.1.0')
 import os, subprocess
 from threading import Thread, Lock
 import re
+from collections import defaultdict
 import shutil
 import time
 import pandas as pd
@@ -1231,7 +1232,7 @@ class Tabs(TabbedPanel):
 			return None
 		
 		# Global counter and lock
-		global_counter = [0]
+		global_counter = defaultdict(lambda: 1)
 		counter_lock = Lock()
 
 		# iterate through each folder in directory
@@ -1334,20 +1335,30 @@ class Tabs(TabbedPanel):
 								# add the row to the new dataframe
 								newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
 
-								# increment the global counter
-								with counter_lock:
-									current_count = global_counter[0]
-									global_counter[0] += 1
-
 								# set the output subtomogram name using the original subtomogram name with the counter
-								counter_str = str(current_count).zfill(6)
+								def get_incremented_filename(opf, prefix):
+									with counter_lock:
+										current_count = global_counter[prefix]
+										global_counter[prefix] += 1
+										counter_str = str(current_count).zfill(6)
+									
+									# Replace the last six digits while preserving preceding digits
+									def replace_last_six_digits(match):
+										preceding_digits = match.group(1)
+										return preceding_digits + counter_str
+									
+									subtomo = re.sub(r'(\d{0,})(\d{6})(?!.*\d{6})', replace_last_six_digits, opf)
+									return subtomo
 
-								def replace_last_six_digits(match):
-									preceding_digits = match.group(1)
-									return preceding_digits + counter_str
+								# Extract the prefix of the filename (before the last 6 digits)
+								prefix_match = re.match(r'(.+?)(\d{6})(?=\D*$)', opf)
+								if prefix_match:
+									prefix = prefix_match.group(1)
+								else:
+									prefix = opf  # Fallback in case the regex doesn't match
 
-								# Use regex to find the pattern and replace the last six digits
-								subtomo = re.sub(r'(\d{0,})(\d{6})(?!.*\d{6})', replace_last_six_digits, opf)
+								# Get the incremented filename
+								subtomo = get_incremented_filename(opf, prefix)
 
 								# set the output file path
 								output_file = os.path.join(root, subtomo)
