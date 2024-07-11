@@ -2072,15 +2072,14 @@ class Tabs(TabbedPanel):
 			row = star_data.iloc[i]
 			imgName = row.rlnImageName
             
-			# get class number for the subtomogram
-			classNum = str(row.rlnClassNumber)
+			# get class number for the subtomogram and pad with zeros to left so that it is 3 digits
+			classNum = str(row.rlnClassNumber).zfill(3)
 
 			# testing for patrick:
-			# classNum = str(random.randint(1, 3))
+			# classNum = str(random.randint(1, 3)).zfill(3)
 
 			# get model associated with class num 
-			# !! this only works for classes 0,1,...,9 !!
-			model = classPath + [file for file in classes if "00" + classNum in file][0]
+			model = classPath + [file for file in classes if classNum in file][0]
 			# print(model)
 			# create arrays for coords, angles, and shifts
 			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
