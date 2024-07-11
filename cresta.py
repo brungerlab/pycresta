@@ -2058,70 +2058,62 @@ class Tabs(TabbedPanel):
 		angpix = float(self.ids.A1.text)
 		bxsz = float(self.ids.px1.text)
 		boxsize = [bxsz, bxsz, bxsz]
-		# get models in class that matches basename
+
+		# get the models in the class that match basename
 		folder = os.listdir(classPath)
 		classes = [file for file in folder if classBasename in file]
-		print (classes)
+
 		# read starfile as dataframe
 		star_data = starfile.read(starf)["particles"]
-		# iterate through each row of dataframe
 
-# ATB to do: please parallelize this loop
-		for row in star_data.itertuples(index=False):
+		# parallelized loop — iterate through each row of dataframe
+		def plotBackLoop(i):
+			# get row data from star file for the subtomogram
+			row = star_data.iloc[i]
 			imgName = row.rlnImageName
             
-# ATB uncommented the following line, Feb. 13, 2024
+			# get class number for the subtomogram
 			classNum = str(row.rlnClassNumber)
-			print (classNum)
+
+			# testing for patrick:
 			# classNum = str(random.randint(1, 3))
 
-			# get model associated with class num ! this only works for classes 0,1,...,9 !
+			# get model associated with class num 
+			# !! this only works for classes 0,1,...,9 !!
 			model = classPath + [file for file in classes if "00" + classNum in file][0]
-			print (model)
+			# print(model)
+			# create arrays for coords, angles, and shifts
 			coords = np.array([int(row.rlnCoordinateX), int(row.rlnCoordinateY), int(row.rlnCoordinateZ)])
 			angles = np.array([float(row.rlnAngleRot), float(row.rlnAngleTilt), float(row.rlnAnglePsi)])
-#
-# ATB: call eulerconvert_xmipp (similar to using tom.readList which is used in both the Rotate and Masking tasks),
-# but here we do not use readList to read the star file lines.
-#
-# ATB: eulerconvert_xmipp converts Relion Euler rot, tilt, psi angles to the TOM Euler angle convention phi, psi, theta. 
-# TOM Euler angles are stored in the angles array in the order (phi,psi,theta) rather than the more customary
-# (phi,theta,psi). So to invert the TOM Euler angles, (-psi,-phi,-theta) should be used.
-#
-
-# ATB: debug print statement:
-#			print(angles)
-            
-			euler_angles = tom.eulerconvert_xmipp(angles[0], angles[1], angles[2])
-			angles = euler_angles
-            
-# ATB: debug print statement:
-#			print(angles)
-#
-# ATB: divide shifts by pixel sizes to get pixel positions (similar to what is done in readList) since it calls the tom.shift() function which operates in pixel space
+			# ATB: divide shifts by pixel sizes to get pixel positions (similar to what is done in readList) since it calls the tom.shift() function which operates in pixel space
 			shifts = np.array([float(row.rlnOriginXAngst) / angpix, float(row.rlnOriginYAngst) / angpix, float(row.rlnOriginZAngst) / angpix])
 
-#
-# ATB: removed original code:
-#			angs = np.flip(angles.conj().transpose())
-#			transformed = tom.processParticler(model, angs, boxsize, shifts.conj().transpose() * -1, shifton=False)
+			# ATB: call eulerconvert_xmipp (similar to using tom.readList which is used in both the Rotate and Masking tasks),
+			# but here we do not use readList to read the star file lines.
+
+			# ATB: eulerconvert_xmipp converts Relion Euler rot, tilt, psi angles to the TOM Euler angle convention phi, psi, theta. 
+			# TOM Euler angles are stored in the angles array in the order (phi,psi,theta) rather than the more customary
+			# (phi,theta,psi). So to invert the TOM Euler angles, (-psi,-phi,-theta) should be used.
+						
+			euler_angles = tom.eulerconvert_xmipp(angles[0], angles[1], angles[2])
+			angles = euler_angles
+
+			# ATB: removed original code:
+			# angs = np.flip(angles.conj().transpose())
+			# transformed = tom.processParticler(model, angs, boxsize, shifts.conj().transpose() * -1, shifton=False)
             
-# ATB: this swaps values in tmpAng indexes 0 and 1 since they are swapped again processParticle
-# since angles are not negated, this effectively means that we apply the inverted rotation matrix to the model (similar to what is 
-# done when rotating masks which uses processParticle, not processPartiler)
+			# ATB: this swaps values in tmpAng indexes 0 and 1 since they are swapped again processParticle
+			# since angles are not negated, this effectively means that we apply the inverted rotation matrix to the model (similar to what is 
+			# done when rotating masks which uses processParticle, not processPartiler)
 			storey = angles[1]
 			angles[1] = angles[0]
 			angles[0] = storey
-            
-# ATB: debug print statement:
-#			print(angles)
-#			print(shifts)
 
-# ATB: note that we do not negate angles and shifts here (unlike in the Rotate task)!
+			# ATB: note that we do not negate angles and shifts here (unlike in the Rotate task)!
 
 			# transform corresponding model by inversed angles and shifts specified in starfile
 			transformed = tom.processParticler(model, angles, boxsize, shifts.conj().transpose(), shifton=True)
-#
+
 			# X-axis  corresponds to  phi=0     psi=0   theta=alpha
         	# Y-axis  corresponds to  phi=270   psi=90  theta=alpha
         	# Z-axis  corresponds to  phi=alpha psi=0   theta=0
@@ -2137,16 +2129,33 @@ class Tabs(TabbedPanel):
 			# shift model to coords specified in star file
 			with mrcfile.open(folderPath + mrcName, 'r+') as mrc:
 				mrc.voxel_size = angpix
-#
-# ATB: changed from nxstart, nystart, nzstart to origin.x, origin.y, origin.z since that works more reliably in Chimera.
-# ATB: removed box size shift, Feb. 13, 2024
+				# ATB: changed from nxstart, nystart, nzstart to origin.x, origin.y, origin.z since that works more reliably in Chimera.
+				# ATB: removed box size shift, Feb. 13, 2024
 				mrc.header.origin.x = (coords[0]) * angpix
 				mrc.header.origin.y = (coords[1]) * angpix
 				mrc.header.origin.z = (coords[2]) * angpix
-#
-# ATB: added print statement
-			print('Plot-back rotation/shift complete for ' + mrcName)
+
+			# print that plot-back is complete for this subtomogram
+			print(f'Plot-back rotation/shift complete for {mrcName}')
             
+		# parallelization: thread in batches to optimize runtime
+		threads = []
+		batch_size = int(self.ids.CPU.text)
+		fileLen = range(len(star_data))
+		batches = [fileLen[i:i+batch_size] for i in range(0, len(star_data), batch_size)]
+		for batch in batches:
+			for i in batch:
+				threads.append(Thread(target = plotBackLoop, args = (i,)))
+				threads[i].start()
+			for i in batch:
+				threads[i].join()
+		for thread in threads:
+			thread.join()
+		threads.clear()
+
+		# print that plot-back is complete
+		print('Plot-back complete')
+
 		return
 
 	pass
