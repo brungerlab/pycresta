@@ -6,7 +6,7 @@ kivy.require('2.1.0')
 
 #python packages
 import os, subprocess
-from threading import Thread
+from threading import Thread, Lock
 import re
 import shutil
 import time
@@ -656,7 +656,7 @@ class Tabs(TabbedPanel):
 				# create subtomogram
 				mrcfile.new(name, out, overwrite=True)
 				# ATB: print extracted coordinate position. Jan 21, 2024
-				print('Extracted subtomogram ' + name + ' at center position ',xposarray[i],yposarray[i],zposarray[i])
+				print('Extracted subtomogram ' + name + ' at center position ', xposarray[i], yposarray[i], zposarray[i])
 				# change pixel size
 				with mrcfile.open(name, 'r+') as mrc:
 					mrc.voxel_size = angpix
@@ -1208,7 +1208,6 @@ class Tabs(TabbedPanel):
 		direct = self.ids.mainsubtomo.text
 		cmm_direct = self.ids.maincmm.text
 		angpix = float(self.ids.A1.text)
-		imgToCmmCor = {}
 		if self.ids.mainsubtomo.text[-1] != '/':
 				direct = self.ids.mainsubtomo.text + '/'
 
@@ -1224,155 +1223,184 @@ class Tabs(TabbedPanel):
 		# create a pandas dataframe from the particles (removes header)
 		df = pd.DataFrame.from_dict(star_data['particles'])
 		# create a new panda dataframe that will hold the new shifted file
-		newDF = pd.DataFrame([])
+		newDF = {'data': pd.DataFrame([])}  # Use a dictionary to encapsulate newDF
 
 		def get_first(series):
 			if series.shape[0] > 0:
 				return series.iloc[0]
 			return None
+		
+		# Global counter and lock
+		global_counter = [0]
+		counter_lock = Lock()
 
-		# start a counter for each set of coordinates that are iterated
-		counter = 0
 		# iterate through each folder in directory
 		for root, dirs, files in os.walk(directory, topdown=False):
-			for filename in os.listdir(root):
-					cmmfile = os.path.join(root, filename)
-					if os.path.isfile(cmmfile) and filename.endswith('.cmm'):
-						# get the original micrographname, imagename, and coordinates
-						opd = os.path.basename(os.path.normpath(root))
-						opf = filename.replace('.cmm', '.mrc') 
-						# micrograph name
-						mgName = get_first(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnMicrographName'])
-						# image name
-						imgName = get_first(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnImageName'])
-						if mgName is None:
-							print(f'Could not find original coordinates for tomogram: {opf}')
-							continue
-						else:
-							print(f'Found {cmmfile}')
-							opXYZ = np.array([
-								int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateX'])), 
-								int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateY'])), 
-								int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateZ']))
-							])
-							######### FOR RELION4/5 INCLUDE THE OTHER COLUMNS AS WELL And we'll need a checkbox to togel RELION4/5 vs RELION 3 file creation ########### 
-								# FLAG either 
-									# just have [micro image xyz], 
-									# set [all columns to 0 (with new xyz) while keeping all columns],
-									# ***retain all the original star file info (except new xyz)***
-							# get the cmm files together
-							with open(cmmfile, 'r') as cmmfile:
-								# parse the cmm file
-								tree = ET.parse(cmmfile)
-								cmroot = tree.getroot()
-								for child in cmroot:
+			# create a function to parallelize the re-extraction
+			def reextractLoop(i, newDF, global_counter, counter_lock):
+				# iterate through each file in the folder
+				filename = files[i]
+				cmmfile = os.path.join(root, filename)
+				# check if the file is a cmm file
+				if os.path.isfile(cmmfile) and filename.endswith('.cmm'):
+					# get the original micrographname, imagename, and coordinates
+					opd = os.path.basename(os.path.normpath(root))
+					opf = filename.replace('.cmm', '.mrc') 
+					# micrograph name
+					mgName = get_first(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnMicrographName'])
+					# image name
+					imgName = get_first(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnImageName'])
+					# check if the original coordinates exist
+					if mgName is None:
+						print(f'Could not find original coordinates for tomogram: {opf}')
+						return
+					else:
+						# cycle through the dataframe to get the original coordinates
+						print(f'Found {cmmfile}')
+						opXYZ = np.array([
+							int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateX'])), 
+							int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateY'])), 
+							int(float(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnCoordinateZ']))
+						])
+						######### FOR RELION4/5 INCLUDE THE OTHER COLUMNS AS WELL And we'll need a checkbox to togel RELION4/5 vs RELION 3 file creation ########### 
+							# FLAG either 
+								# just have [micro image xyz], 
+								# set [all columns to 0 (with new xyz) while keeping all columns],
+								# ***retain all the original star file info (except new xyz)***
+						# get the cmm files together
+						with open(cmmfile, 'r') as cmmfile:
+							# parse the cmm file
+							tree = ET.parse(cmmfile)
+							cmroot = tree.getroot()
+							for child in cmroot:
 
-									# get boxsize from subtomogram
-									boxsize = []
-									with mrcfile.open(direct + imgName, 'r+') as mrc:
-										boxsize.append(float(mrc.header.nx))
-										boxsize.append(float(mrc.header.ny))
-										boxsize.append(float(mrc.header.nz))
+								# get boxsize from subtomogram
+								boxsize = []
+								with mrcfile.open(direct + imgName, 'r+') as mrc:
+									boxsize.append(float(mrc.header.nx))
+									boxsize.append(float(mrc.header.ny))
+									boxsize.append(float(mrc.header.nz))
 
-									# get the coordinates from the cmm file
-									cms = np.array([
-										int(float(child.attrib['x'])), 
-		   								int(float(child.attrib['y'])), 
-										int(float(child.attrib['z']))
-									])
+								# get the coordinates from the cmm file
+								cms = np.array([
+									int(float(child.attrib['x'])), 
+									int(float(child.attrib['y'])), 
+									int(float(child.attrib['z']))
+								])
 
-									# # divide cms by angpix to get the shift in pixels
-									# cms = cms / angpix
+								# # divide cms by angpix to get the shift in pixels
+								# cms = cms / angpix
 
-									# get the center of mass shift
-									cms = np.array(boxsize)/2 - cms
+								# get the center of mass shift
+								cms = np.array(boxsize)/2 - cms
 
-									# calculate the new shift
-									new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
+								# calculate the new shift
+								new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
 
-									# ATB: convert to integers and calculate top left corner of box. Jan 22, 2023
-									xpos = int(new_shift[0])
-									ypos = int(new_shift[1])
-									zpos = int(new_shift[2])
-									x = xpos - boxsize[0]/2
-									y = ypos - boxsize[1]/2
-									z = zpos - boxsize[2]/2
-									# calculate bounds
-									bound = np.zeros(3)
-									bound[0] = z + boxsize[2] - 1
-									bound[1] = y + boxsize[1] - 1
-									bound[2] = x + boxsize[0] - 1
-									# rounding
-									bound = np.round(bound).astype(int)
-									z = np.round(z).astype(int)
-									y = np.round(y).astype(int)
-									x = np.round(x).astype(int)
+								# ATB: convert to integers and calculate top left corner of box. Jan 22, 2023
+								xpos = int(new_shift[0])
+								ypos = int(new_shift[1])
+								zpos = int(new_shift[2])
+								x = xpos - boxsize[0]/2
+								y = ypos - boxsize[1]/2
+								z = zpos - boxsize[2]/2
+								# calculate bounds
+								bound = np.zeros(3)
+								bound[0] = z + boxsize[2] - 1
+								bound[1] = y + boxsize[1] - 1
+								bound[2] = x + boxsize[0] - 1
+								# rounding
+								bound = np.round(bound).astype(int)
+								z = np.round(z).astype(int)
+								y = np.round(y).astype(int)
+								x = np.round(x).astype(int)
 
-									# concat the new dataframe
-									row = {
-										'cmmfile': filename, 
-										'rlnMicrographName': mgName, 
-										'rlnImageName': imgName, 
-										'rlnCoordinateX': new_shift[0], 
-										'rlnCoordinateY': new_shift[1], 
-										'rlnCoordinateZ': new_shift[2], 
-										'Original_x': opXYZ[0], 
-										'Original_Y': opXYZ[1], 
-										'Original_Z': opXYZ[2], 
-										'cmm_shiftX': cms[0], 
-										'cmm_shiftY': cms[1], 
-										'cmm_shiftZ': cms[2], 
-									}
+								# concat the new dataframe
+								row = {
+									'cmmfile': filename, 
+									'rlnMicrographName': mgName, 
+									'rlnImageName': imgName, 
+									'rlnCoordinateX': new_shift[0], 
+									'rlnCoordinateY': new_shift[1], 
+									'rlnCoordinateZ': new_shift[2], 
+									'Original_x': opXYZ[0], 
+									'Original_Y': opXYZ[1], 
+									'Original_Z': opXYZ[2], 
+									'cmm_shiftX': cms[0], 
+									'cmm_shiftY': cms[1], 
+									'cmm_shiftZ': cms[2], 
+								}
 
-									# add the row to the new dataframe
-									newDF = pd.concat([newDF, pd.DataFrame([row])])
+								# add the row to the new dataframe
+								newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
 
-									# get the tomogram name from star file and memory map it
-									tomogram = direct + row['rlnMicrographName']
-									tomogram = mrcfile.mmap(tomogram)
-									# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
-									TomogramSize = np.array(tomogram.data).shape
-									
-									# set the output subtomogram name using the original subtomogram name with the counter
-									counter_str = str(counter).zfill(6)
-									# find the rightmost occurrence of the pattern in opf and replace
-									subtomo = re.sub(r'\d{6}(?!.*\d{6})', counter_str, opf)
-									# set the output file path
-									output_file = os.path.join(root, subtomo)
-									
-									# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
-									if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
-										# cut the tomogram
-										subby = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
-										# invert contrast if selected
-										if self.ids.reextractInvert.active == True:
-											subby = subby * -1
+								# increment the global counter
+								with counter_lock:
+									current_count = global_counter[0]
+									global_counter[0] += 1
 
-										# write the new subtomogram
-										mrcfile.new(output_file, subby, overwrite=True)
-										with mrcfile.open(output_file, 'r+') as mrc:
-											mrc.voxel_size = angpix
+								# set the output subtomogram name using the original subtomogram name with the counter
+								counter_str = str(current_count).zfill(6)
 
-									# ATB: print extracted coordinate position. Jan 24, 2024
-									print('Re-extracted subtomogram ' + output_file + ' at center position ', xpos, ypos, zpos)
-																					
-									# create .coords file
-									subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
-									file_opt = open(directory + '/' + subName + '.coords', 'a')
-									file_opt.writelines(str(xpos) + ' ' + str(ypos) + ' ' + str(zpos) + '\n')
-									file_opt.close()
+								def replace_last_six_digits(match):
+									preceding_digits = match.group(1)
+									return preceding_digits + counter_str
 
-									# iterate counter
-									counter += 1
+								# Use regex to find the pattern and replace the last six digits
+								subtomo = re.sub(r'(\d{0,})(\d{6})(?!.*\d{6})', replace_last_six_digits, opf)
+
+								# set the output file path
+								output_file = os.path.join(root, subtomo)
+
+								# get the tomogram name from star file and memory map it
+								tomogram = direct + row['rlnMicrographName']
+								tomogram = mrcfile.mmap(tomogram)
+								# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
+								TomogramSize = np.array(tomogram.data).shape
+								
+								# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
+								if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
+									# cut the tomogram
+									subby = tomogram.data[z:(bound[0]+1), y:(bound[1]+1), x:(bound[2]+1)]
+									# invert contrast if selected
+									if self.ids.reextractInvert.active == True:
+										subby = subby * -1
+
+									# write the new subtomogram
+									mrcfile.new(output_file, subby, overwrite=True)
+									with mrcfile.open(output_file, 'r+') as mrc:
+										mrc.voxel_size = angpix
+
+								# print extracted coordinate position
+								print('Re-extracted subtomogram ' + output_file + ' at center position ', xpos, ypos, zpos)
+													
+								# create .coords file
+								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
+								file_opt = open(directory + '/' + subName + '.coords', 'a')
+								file_opt.writelines(str(xpos) + ' ' + str(ypos) + ' ' + str(zpos) + '\n')
+								file_opt.close()
+		
+			# parallelization: thread in batches to optimize runtime
+			threads = []
+			batch_size = int(self.ids.CPU.text)
+			fileLen = range(len(files))
+			batches = [fileLen[i:i+batch_size] for i in range(0, len(files), batch_size)]
+			for batch in batches:
+				for i in batch:
+					threads.append(Thread(target = reextractLoop, args = (i, newDF, global_counter, counter_lock)))
+					threads[-1].start()
+				for thread in threads:
+					thread.join()
+				threads.clear()
 		
 		# write the newDF log file to a csv — output into subtomogram directory **with timestamp**
 		current_time = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
-		newDF.to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
+		newDF['data'].to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
 
 		# create a new empty dataframe
 		starDF = pd.DataFrame([])
 		# Go through newDF and grab the imagename, and x y z and compare to original star file and then make new rows from that where every other column is the same
-		for index, row in newDF.iterrows():
+		for index, row in newDF['data'].iterrows():
 			# Get the original row index
 			original_index = df[df['rlnImageName'] == row['rlnImageName']].index
 
