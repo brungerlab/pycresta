@@ -1023,7 +1023,7 @@ class Tabs(TabbedPanel):
 			folderNames = starfile.read(listName)["particles"]["rlnMicrographName"]
 			starfinal = imageNames[curindex - 1]
 			tomoName = folderNames[curindex - 1]
-			tomoName = tomoName.split('/')[0] # + '/' + tomoName.split('/')[1]
+			tomoName = tomoName.split('/')[0]
 			# set total index value
 			self.ids.index2.text = str(len(imageNames))
 			# ensure that the user-specified cmm files directory exists
@@ -1072,6 +1072,7 @@ class Tabs(TabbedPanel):
 			else:
 				self.ids.pickcoordtext.text = 'No coords selected.'
 
+			# reset coordinate picker note and remove temporary chim3 file
 			self.ids.notecoord.text = ""
 			self.ids.notesave.text = ""
 			os.remove(chim3)
@@ -1226,12 +1227,13 @@ class Tabs(TabbedPanel):
 		# create a new panda dataframe that will hold the new shifted file
 		newDF = {'data': pd.DataFrame([])}  # Use a dictionary to encapsulate newDF
 
+		# function to get the first element of a series
 		def get_first(series):
 			if series.shape[0] > 0:
 				return series.iloc[0]
 			return None
 		
-		# Global counter and lock
+		# global counter and lock
 		global_counter = defaultdict(lambda: 1)
 		counter_lock = Lock()
 
@@ -1253,7 +1255,7 @@ class Tabs(TabbedPanel):
 					imgName = get_first(df[df['rlnImageName'].str.contains(opd) & df['rlnImageName'].str.contains(opf)]['rlnImageName'])
 					# check if the original coordinates exist
 					if mgName is None:
-						print(f'Could not find original coordinates for tomogram: {opf}')
+						print(f'Could not find original coordinates for subtomogram: {opf}')
 						return
 					else:
 						# cycle through the dataframe to get the original coordinates
@@ -1298,7 +1300,7 @@ class Tabs(TabbedPanel):
 								# calculate the new shift
 								new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
 
-								# ATB: convert to integers and calculate top left corner of box. Jan 22, 2023
+								# convert to integers and calculate top left corner of box
 								xpos = int(new_shift[0])
 								ypos = int(new_shift[1])
 								zpos = int(new_shift[2])
@@ -1316,6 +1318,34 @@ class Tabs(TabbedPanel):
 								y = np.round(y).astype(int)
 								x = np.round(x).astype(int)
 
+								# set the output subtomogram name using the original subtomogram name with the counter
+								def get_incremented_filename(opf, prefix):
+									with counter_lock:
+										current_count = global_counter[prefix]
+										global_counter[prefix] += 1
+										counter_str = str(current_count).zfill(6)
+									
+									# replace the last six digits while preserving preceding digits
+									def replace_last_six_digits(match):
+										preceding_digits = match.group(1)
+										return preceding_digits + counter_str
+									
+									subtomo = re.sub(r'(\d{0,})(\d{6})(?!.*\d{6})', replace_last_six_digits, opf)
+									return subtomo
+
+								# extract the prefix of the filename (before the last 6 digits)
+								prefix_match = re.match(r'(.+?)(\d{6})(?=\D*$)', opf)
+								if prefix_match:
+									prefix = prefix_match.group(1)
+								else:
+									prefix = opf  # Fallback in case the regex doesn't match
+
+								# get the incremented filename
+								subtomo = get_incremented_filename(opf, prefix)
+
+								# set the output file path
+								output_file = os.path.join(root, subtomo)
+
 								# concat the new dataframe
 								row = {
 									'cmmfile': filename, 
@@ -1332,42 +1362,17 @@ class Tabs(TabbedPanel):
 									'cmm_shiftZ': cms[2], 
 								}
 
-								# add the row to the new dataframe
-								newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
-
-								# set the output subtomogram name using the original subtomogram name with the counter
-								def get_incremented_filename(opf, prefix):
-									with counter_lock:
-										current_count = global_counter[prefix]
-										global_counter[prefix] += 1
-										counter_str = str(current_count).zfill(6)
-									
-									# Replace the last six digits while preserving preceding digits
-									def replace_last_six_digits(match):
-										preceding_digits = match.group(1)
-										return preceding_digits + counter_str
-									
-									subtomo = re.sub(r'(\d{0,})(\d{6})(?!.*\d{6})', replace_last_six_digits, opf)
-									return subtomo
-
-								# Extract the prefix of the filename (before the last 6 digits)
-								prefix_match = re.match(r'(.+?)(\d{6})(?=\D*$)', opf)
-								if prefix_match:
-									prefix = prefix_match.group(1)
-								else:
-									prefix = opf  # Fallback in case the regex doesn't match
-
-								# Get the incremented filename
-								subtomo = get_incremented_filename(opf, prefix)
-
-								# set the output file path
-								output_file = os.path.join(root, subtomo)
-
-								# get the tomogram name from star file and memory map it
+								# get the tomogram name from star file
 								tomogram = direct + row['rlnMicrographName']
-								tomogram = mrcfile.mmap(tomogram)
-								# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
-								TomogramSize = np.array(tomogram.data).shape
+								# check if the tomogram file exists
+								if os.path.exists(tomogram):
+									# open and memory map the tomogram
+									tomogram = mrcfile.mmap(tomogram)
+									# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
+									TomogramSize = np.array(tomogram.data).shape
+								else:
+									print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
+									return
 								
 								# ATB: check if subtomogram is within tomogram bounds. Jan 21, 2024
 								if (z>=0 and y>=0 and x>=0 and bound[0]+1<=TomogramSize[0] and bound[1]+1<=TomogramSize[1] and bound[2]+1<=TomogramSize[2]):
@@ -1384,6 +1389,9 @@ class Tabs(TabbedPanel):
 
 								# print extracted coordinate position
 								print('Re-extracted subtomogram ' + output_file + ' at center position ', xpos, ypos, zpos)
+
+								# add the row to the new dataframe
+								newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
 													
 								# create .coords file
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
@@ -1404,30 +1412,36 @@ class Tabs(TabbedPanel):
 					thread.join()
 				threads.clear()
 		
-		# write the newDF log file to a csv — output into subtomogram directory **with timestamp**
+		# check if newDF is empty
+		if newDF['data'].empty:
+			print('\nNo coordinates were extracted. Exiting re-extraction.')
+			return
+		
+		# get the current time
 		current_time = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+		# write the newDF to a csv
 		newDF['data'].to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
 
 		# create a new empty dataframe
 		starDF = pd.DataFrame([])
-		# Go through newDF and grab the imagename, and x y z and compare to original star file and then make new rows from that where every other column is the same
+		# go through newDF and grab the imagename, and x y z and compare to original star file and then make new rows from that where every other column is the same
 		for index, row in newDF['data'].iterrows():
-			# Get the original row index
+			# get the original row index
 			original_index = df[df['rlnImageName'] == row['rlnImageName']].index
 
-			# Check if original_index is empty
+			# check if original_index is empty
 			if original_index.empty:
 				continue
 
-			# Replace the coordinates with the new ones using .loc
+			# replace the coordinates with the new ones
 			df.loc[original_index, 'rlnCoordinateX'] = row['rlnCoordinateX']
 			df.loc[original_index, 'rlnCoordinateY'] = row['rlnCoordinateY']
 			df.loc[original_index, 'rlnCoordinateZ'] = row['rlnCoordinateZ']
 
-			# Append the modified row to the new dataframe
+			# append the modified row to the new dataframe
 			starDF = pd.concat([starDF, df.loc[original_index]])
 
-		# Reset index for the new dataframe if needed
+		# reset index for the new dataframe
 		starDF.reset_index(drop=True, inplace=True)
 
 		# write the new dataframe to a star file
@@ -1436,7 +1450,7 @@ class Tabs(TabbedPanel):
 		starfile.write(star_data, direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star', overwrite=True)
 		
 		# print that the re-extraction is complete
-		print('Re-extraction complete')
+		print('\nRe-extraction complete')
 		print('New Star File Created: ' + direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star\n')
 		return
 
@@ -1900,12 +1914,12 @@ class Tabs(TabbedPanel):
 	def saveVisual(self):
 		index = int(self.ids.visind1.text) - 1
 		self.indexToVal[index + 1] = "accepted"
-		#
+
 		# ATB
 		starf = self.ids.mainstarfilt.text # filtered star file 
 		starUnf = self.ids.mainstar.text # unfiltered star file
 		subtomodir = self.ids.mainsubtomo.text
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# create empty _accepted.star (filtered) if does not exist 
@@ -1922,7 +1936,7 @@ class Tabs(TabbedPanel):
 			dfUnf = dfUnf.drop(dfUnf.index)
 			starAU["particles"] = dfUnf
 			starfile.write(starAU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# isolate current index image name and row (filtered)
@@ -1935,7 +1949,7 @@ class Tabs(TabbedPanel):
 		starAU = starfile.read(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star")
 		dfUnf = pd.DataFrame.from_dict(starAU["particles"]).dropna(how="all")
 		nameUnf = rowUnf["rlnImageName"].values[0]
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# add row to accepted folder and add row to _accepted.star (filtered)
@@ -1948,7 +1962,7 @@ class Tabs(TabbedPanel):
 			dfUnf = pd.concat([dfUnf, rowUnf])
 			starAU["particles"] = dfUnf
 			starfile.write(starAU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_accepted.star", overwrite=True)
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# remove .mrc files from _rejected.star (filtered)
@@ -1981,7 +1995,7 @@ class Tabs(TabbedPanel):
 		starf = self.ids.mainstarfilt.text
 		starUnf = self.ids.mainstar.text
 		subtomodir = self.ids.mainsubtomo.text
-		#
+	
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# create _rejected.star (filtered) if it does not exist 
@@ -1998,7 +2012,7 @@ class Tabs(TabbedPanel):
 			dfUnf = dfUnf.drop(dfUnf.index)
 			starRU["particles"] = dfUnf 
 			starfile.write(starRU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star")
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# isolate current index image name and row (filtered)
@@ -2011,7 +2025,7 @@ class Tabs(TabbedPanel):
 		starRU = starfile.read(subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star")
 		dfUnf = pd.DataFrame.from_dict(starRU["particles"]).dropna(how="all")
 		nameUnf = rowUnf["rlnImageName"].values[0]
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# add mrc file path to _rejected.star (filtered)
@@ -2024,7 +2038,7 @@ class Tabs(TabbedPanel):
 			dfUnf = pd.concat([dfUnf, rowUnf])
 			starRU["particles"] = dfUnf
 			starfile.write(starRU, subtomodir + starUnf.split("/")[-1].split(".")[0] + "_rejected.star", overwrite=True)
-		#
+
 		# ATB. Check if filtered flag is set. Jan 21 2024
 		if self.ids.visualizeFiltered.active == True:
 			# check if _accepted.star (filtered) exists and remove row
