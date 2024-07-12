@@ -1270,6 +1270,9 @@ class Tabs(TabbedPanel):
 		global_counter = defaultdict(lambda: 1)
 		counter_lock = Lock()
 
+		# coords files timestamp
+		coords_timestamp = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+
 		# iterate through each folder in directory
 		for root, dirs, files in os.walk(directory, topdown=False):
 			# create a function to parallelize the re-extraction
@@ -1436,7 +1439,7 @@ class Tabs(TabbedPanel):
 								# save the coordinates for the .coords file			
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
 								with counter_lock:
-									with open(directory + '/' + subName + '.coords', 'a') as file_opt:
+									with open(directory + '/' + subName + '_' + coords_timestamp + '_.coords', 'a') as file_opt:
 										file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
 
 								# print extracted coordinate position
