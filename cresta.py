@@ -1317,13 +1317,14 @@ class Tabs(TabbedPanel):
 							# get boxsize from subtomogram
 							boxsize = []
 							pixelsize = []
-							with mrcfile.open(direct + imgName, 'r+') as mrc:
-								boxsize.append(float(mrc.header.nx))
-								boxsize.append(float(mrc.header.ny))
-								boxsize.append(float(mrc.header.nz))
-								pixelsize.append(round(float(mrc.voxel_size.x), 2))
-								pixelsize.append(round(float(mrc.voxel_size.y), 2))
-								pixelsize.append(round(float(mrc.voxel_size.z), 2))
+							with counter_lock:
+								with mrcfile.open(direct + imgName, 'r+') as mrc:
+									boxsize.append(float(mrc.header.nx))
+									boxsize.append(float(mrc.header.ny))
+									boxsize.append(float(mrc.header.nz))
+									pixelsize.append(round(float(mrc.voxel_size.x), 2))
+									pixelsize.append(round(float(mrc.voxel_size.y), 2))
+									pixelsize.append(round(float(mrc.voxel_size.z), 2))
 
 							# iterate through each set of coordinates in the cmm file
 							for child in cmroot:
