@@ -1318,7 +1318,7 @@ class Tabs(TabbedPanel):
 							boxsize = []
 							pixelsize = []
 							with counter_lock:
-								with mrcfile.open(direct + imgName, permissive=True) as mrc:
+								with mrcfile.open(direct + imgName, 'r+', permissive=True) as mrc:
 									boxsize.append(float(mrc.header.nx))
 									boxsize.append(float(mrc.header.ny))
 									boxsize.append(float(mrc.header.nz))
