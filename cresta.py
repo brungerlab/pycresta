@@ -1386,16 +1386,22 @@ class Tabs(TabbedPanel):
 									prefix = opf  # Fallback in case the regex doesn't match
 
 								# get the incremented filename
-								subtomo= get_incremented_filename(opf, prefix)
+								subtomo = get_incremented_filename(opf, prefix)
 
 								# set the output file path
 								output_file = os.path.join(root, subtomo)
+
+								# change the imagename so that the last portion is the new subtomo
+								new_imgName = imgName.split('/')
+								new_imgName[-1] = subtomo
+								new_imgName = '/'.join(new_imgName)
 
 								# concat the new dataframe
 								row = {
 									'cmmfile': filename, 
 									'rlnMicrographName': mgName, 
 									'rlnImageName': imgName, 
+									'newImageName': new_imgName,
 									'rlnCoordinateX': new_shift[0], 
 									'rlnCoordinateY': new_shift[1], 
 									'rlnCoordinateZ': new_shift[2], 
@@ -1407,31 +1413,33 @@ class Tabs(TabbedPanel):
 									'cmm_shiftZ': cms[2], 
 								}
 
-								# get the tomogram name from star file
-								tomogram = direct + row['rlnMicrographName']
-								# check if the tomogram file exists
-								with counter_lock:
-									if os.path.exists(tomogram):
-										# open and memory map the tomogram
-										tomogram = mrcfile.mmap(tomogram)
-										# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
-										TomogramSize = np.array(tomogram.data).shape
-									else:
-										print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
-										return
-								
-								# check if subtomogram is within tomogram bounds
-								if (z>=0 and y>=0 and x>=0 and bound[0] + 1 <= TomogramSize[0] and bound[1] + 1 <= TomogramSize[1] and bound[2] + 1 <=TomogramSize[2]):
+								# check if 'star file only' is unchecked
+								if self.ids.reextractStar.active == False:
+									# get the tomogram name from star file
+									tomogram = direct + row['rlnMicrographName']
+									# check if the tomogram file exists
 									with counter_lock:
-										# cut the tomogram
-										subby = tomogram.data[z:(bound[0] + 1), y:(bound[1] + 1), x:(bound[2] + 1)]
-										# invert contrast if selected
-										if self.ids.reextractInvert.active == True:
-											subby = subby * -1
-										# write the new subtomogram
-										mrcfile.new(output_file, subby, overwrite=True)
-										with mrcfile.open(output_file, 'r+') as mrc:
-											mrc.voxel_size = pixelsize[0]
+										if os.path.exists(tomogram):
+											# open and memory map the tomogram
+											tomogram = mrcfile.mmap(tomogram)
+											# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
+											TomogramSize = np.array(tomogram.data).shape
+										else:
+											print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
+											return
+									
+									# check if subtomogram is within tomogram bounds
+									if (z>=0 and y>=0 and x>=0 and bound[0] + 1 <= TomogramSize[0] and bound[1] + 1 <= TomogramSize[1] and bound[2] + 1 <=TomogramSize[2]):
+										with counter_lock:
+											# cut the tomogram
+											subby = tomogram.data[z:(bound[0] + 1), y:(bound[1] + 1), x:(bound[2] + 1)]
+											# invert contrast if selected
+											if self.ids.reextractInvert.active == True:
+												subby = subby * -1
+											# write the new subtomogram
+											mrcfile.new(output_file, subby, overwrite=True)
+											with mrcfile.open(output_file, 'r+') as mrc:
+												mrc.voxel_size = pixelsize[0]
 
 								# add the row to the new dataframe
 								with counter_lock:

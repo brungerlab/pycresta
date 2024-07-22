@@ -1213,7 +1213,7 @@
 						color: (0, 0, 1, 1)
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .85, .3
+					size_hint: .85, .25
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					BoxLayout:
 						orientation: 'vertical'
@@ -1237,13 +1237,24 @@
 						id: notecoord
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .2, .15
+					size_hint: .2, .1
 					pos_hint: {'center_x': .475, 'center_y': .5}
 					CheckBox:
 						state: 'down'
 						id: reextractInvert
 					Label:
 						text: 'Invert Contrast'
+						bold: True
+						color: (0,0,0,1)
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .2, .1
+					pos_hint: {'center_x': .475, 'center_y': .5}
+					CheckBox:
+						state: 'down'
+						id: reextractStar
+					Label:
+						text: 'Star File Only'
 						bold: True
 						color: (0,0,0,1)
 				BoxLayout:
