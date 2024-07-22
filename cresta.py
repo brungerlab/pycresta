@@ -1483,27 +1483,37 @@ class Tabs(TabbedPanel):
 			print('\nNo coordinates were extracted. Exiting re-extraction.')
 			return
 		
+		# function to extract the number at the end of the newImageName
+		def extract_number(image_name):
+			match = re.search(r'(\d+)\D*$', image_name)
+			return int(match.group(1)) if match else float('inf')
+
+		# apply the function to create a new column with the extracted numbers
+		newDF['data']['extracted_number'] = newDF['data']['newImageName'].apply(extract_number)
+		# group by rlnMicrographName and sort within each group by the extracted number
+		newDF['data'] = newDF['data'].sort_values(by=['rlnMicrographName', 'extracted_number'])
+		# drop the temporary extracted_number column as it's no longer needed
+		newDF['data'] = newDF['data'].drop(columns=['extracted_number'])
+		
 		# write the newDF to a csv
 		newDF['data'].to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
 
 		# create a new empty dataframe
 		starDF = pd.DataFrame([])
-		# go through newDF and grab the imagename, and x y z and compare to original star file and then make new rows from that where every other column is the same
-		for index, row in newDF['data'].iterrows():
-			# get the original row index
-			original_index = df[df['rlnImageName'] == row['rlnImageName']].index
+		# go through newDF and grab the imagename and x y z and compare to original star file and then make new rows from that where every other column is the same
+		for row in newDF['data'].iterrows():
+			# get the original row from the original star file
+			orig_row = df[df['rlnImageName'] == row[1]['rlnImageName']]
+			
+			# create a new row with the original row and the new xyz coordinates
+			new_row = orig_row.copy()
+			new_row['rlnCoordinateX'] = row[1]['rlnCoordinateX']
+			new_row['rlnCoordinateY'] = row[1]['rlnCoordinateY']
+			new_row['rlnCoordinateZ'] = row[1]['rlnCoordinateZ']
+			new_row['rlnImageName'] = row[1]['newImageName']
 
-			# check if original_index is empty
-			if original_index.empty:
-				continue
-
-			# replace the coordinates with the new ones
-			df.loc[original_index, 'rlnCoordinateX'] = row['rlnCoordinateX']
-			df.loc[original_index, 'rlnCoordinateY'] = row['rlnCoordinateY']
-			df.loc[original_index, 'rlnCoordinateZ'] = row['rlnCoordinateZ']
-
-			# append the modified row to the new dataframe
-			starDF = pd.concat([starDF, df.loc[original_index]])
+			# add the new row to the new dataframe
+			starDF = pd.concat([starDF, new_row])
 
 		# reset index for the new dataframe
 		starDF.reset_index(drop=True, inplace=True)
@@ -1511,7 +1521,7 @@ class Tabs(TabbedPanel):
 		# write the new dataframe to a star file
 		star_data['particles'] = starDF
 		# write the new star file
-		starfile.write(star_data, direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star', overwrite=True)
+		starfile.write(star_data, direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star', sep='\t', overwrite=True)
 		
 		# print that the re-extraction is complete
 		print('\nRe-extraction complete')
