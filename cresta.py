@@ -1011,9 +1011,40 @@ class Tabs(TabbedPanel):
 		except FileNotFoundError:
 			print("This directory does not exist")
 
+	# function to check if the index is within the bounds of the star file
+	def check_index(self):
+		status = 0
+		if self.ids.pickcoordFiltered.active == True:
+			starf = self.ids.mainstarfilt.text
+		else:
+			starf = self.ids.mainstar.text
+		try:
+			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
+			self.ids.index2.text = str(len(imageNames))
+			if int(self.ids.index.text) > int(self.ids.index2.text):
+				self.ids.index.text = self.ids.index2.text
+				print("Index out of bounds")
+				self.ids.pickcoordtext.text = 'Index out of bounds - try again'
+				status = 1
+				return status
+			if int(self.ids.index.text) < 1:
+				self.ids.index.text = '1'
+				print("Index out of bounds")
+				self.ids.pickcoordtext.text = 'Index out of bounds - try again'
+				status = 1
+				return status
+		except FileNotFoundError:
+			print("This star file does not exist")
+			self.ids.pickcoordtext.text = 'Star file does not exist - try again'
+			status = 1
+			return status
+		
 	# coordinate picker
 	def pick_coord(self):
 		try:
+			ind_check = self.check_index()
+			if ind_check == 1:
+				return
 			# initialize variables
 			ChimeraX_dir = self.ids.chimera_path.text
 			if self.ids.pickcoordFiltered.active == True:
@@ -1098,6 +1129,9 @@ class Tabs(TabbedPanel):
 
 	# next subtomogram
 	def right_pick(self):
+		ind_check = self.check_index()
+		if ind_check == 1:
+			return
 		if self.ids.pickcoordFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
 		else:
@@ -1112,6 +1146,7 @@ class Tabs(TabbedPanel):
 		# increase index by one
 		if int(self.ids.index.text) == int(self.ids.index2.text):
 			print('Outside of index bounds')
+			self.ids.pickcoordtext.text = 'Index out of bounds - try again'
 			return
 		self.ids.index.text = str((int(self.ids.index.text) + 1))
 		try:
@@ -1121,12 +1156,15 @@ class Tabs(TabbedPanel):
 		except FileNotFoundError:
 			print("This star file does not exist")
 			self.ids.index.text = str((int(self.ids.index.text) - 1))
-			self.ids.pickcoordtext.text = 'Click above to begin.'
+			self.ids.pickcoordtext.text = 'Star file does not exist - try again'
 			return
 		return
 	
 	# next subtomogram * 10
 	def fastright_pick(self):
+		ind_check = self.check_index()
+		if ind_check == 1:
+			return
 		if self.ids.pickcoordFiltered.active == True:
 			starf = self.ids.mainstarfilt.text
 		else:
@@ -1150,12 +1188,15 @@ class Tabs(TabbedPanel):
 		except FileNotFoundError:
 			print("This star file does not exist")
 			self.ids.index.text = str((int(self.ids.index.text) - 1))
-			self.ids.pickcoordtext.text = 'Click above to begin.'
+			self.ids.pickcoordtext.text = 'Star file does not exist - try again'
 			return
 		return
 
 	# previous subtomogram
 	def left_pick(self):
+		ind_check = self.check_index()
+		if ind_check == 1:
+			return
 		try:
 			if self.ids.pickcoordFiltered.active == True:
 				starf = self.ids.mainstarfilt.text
@@ -1165,7 +1206,7 @@ class Tabs(TabbedPanel):
 			# decrease index by one
 			if int(self.ids.index.text) == 1:
 				print('Outside of index bounds')
-				self.ids.pickcoordtext.text = 'Click above to begin.'
+				self.ids.pickcoordtext.text = 'Index out of bounds - try again'
 				return
 			self.ids.index.text = str((int(self.ids.index.text) - 1))
 			imageNames = starfile.read(starf)["particles"]["rlnImageName"]
@@ -1174,11 +1215,14 @@ class Tabs(TabbedPanel):
 		except FileNotFoundError:
 			print("This star file does not exist")
 			self.ids.index.text = str((int(self.ids.index.text) + 1))
-			self.ids.pickcoordtext.text = 'Click above to begin.'
+			self.ids.pickcoordtext.text = 'Star file does not exist - try again'
 		return
 	
 	# previous subtomogram * 10
 	def fastleft_pick(self):
+		ind_check = self.check_index()
+		if ind_check == 1:
+			return
 		try:
 			if self.ids.pickcoordFiltered.active == True:
 				starf = self.ids.mainstarfilt.text
@@ -1195,6 +1239,7 @@ class Tabs(TabbedPanel):
 			self.ids.filenameget.text = starfinal
 		except FileNotFoundError:
 			print("This star file does not exist")
+			self.ids.pickcoordtext.text = 'Star file does not exist - try again'
 		return
 
 	# add coord picker note
