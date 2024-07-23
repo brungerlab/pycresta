@@ -425,19 +425,6 @@
 			pos_hint: {'center_x': .5}
 			text: 'Close'
 			on_release: root.dismiss()
-<RandomInfo@Popup>
-	size_hint: .75, .5
-	title: 'Random 180 Degree Flip Star File'
-	BoxLayout:
-		orientation: 'vertical'
-		Label:
-			halign: 'center'
-			text: "Applies a 180 degree flip around the specified axis\nto a random subset of subtomograms in master key unfiltered star file.\n\nA new star file with an additional column is produced:\n1 if the particular subtomogram has been flipped,\nor 0 if kept in the original orientation.\n\nAs an example, if a contacting vesicle pair is oriented such that\nthe axis between the centers of the vesicles points in the z direction,\na flip around the x or the y axis will change the orientation\nof the vesicle pair by 180 degrees."
-		Button:
-			size_hint: .5, .22
-			pos_hint: {'center_x': .5}
-			text: 'Close'
-			on_release: root.dismiss()
 <VolumeStar@Popup>
 	size_hint: .75, .4
 	title: 'Volume & Star File'
@@ -498,6 +485,19 @@
 		Label:
 			halign: 'center'
 			text: "Generates rotated and translated maps using translation, rotation, and class information in star file.\n\nStar file must be specified in the master key.\nThe rotated and translated maps are stored in 'plotback' folder.\nRef Path: path of the folder containing the maps.\n\nRef Basename: if the map name is run_it50_class001.mrc, then the basename is 'run_it50'.\n For each class, it will look for the number of the class in the filename.\n\n For displaying the results, open the full tomogram and the rotated/translated maps in Chimera. \nIMPORTANT: for proper translations, the Origin of the full tomogram must be 0,0,0. "
+		Button:
+			size_hint: .5, .25
+			pos_hint: {'center_x': .5}
+			text: 'Close'
+			on_release: root.dismiss()
+<SubPlotBackInfo@Popup>
+	size_hint: .75, .45
+	title: 'Plot Back Tomograms'
+	BoxLayout:
+		orientation: 'vertical'
+		Label:
+			halign: 'center'
+			text: "Enter new subtomogram name from Sub-extraction, as well as\nthe log csv file created in sub-extraction.\nAlso enter ref path and basename information.\n\nStar file and Chimera path must be specified in the master key.\n\nRef Path: path of the folder containing the maps.\n\nRef Basename: if the map name is run_it50_class001.mrc, then the basename is 'run_it50'.\nFor each class, it will look for the number of the class in the filename.\n\n Chimera will be opened with the original subtomogram, new subtomogram, and the mask file;\nthe last two will be shifted using cmm coords from the csv file. "
 		Button:
 			size_hint: .5, .25
 			pos_hint: {'center_x': .5}
@@ -1037,7 +1037,7 @@
 
 
 	TabbedPanelItem:
-		text: 'Re-Extraction'
+		text: 'Sub-Extraction'
 		BoxLayout:
 			spacing: 10
 			canvas:
@@ -1193,7 +1193,7 @@
 						Label:
 							halign: 'center'
 							color: (0,0,0,1)
-							text: 'Click “Pick Coordinates” to open ChimeraX. Navigate to the “Markers” menu, select a mode in the Place markers submenu (for example, Surface), and then Right Click to place a coordinate. Select “Move” to adjust the location of the coordinate. Keep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using command "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save information after exiting each subtomogram.\n\nPress the right arrow to progress; choose "Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks, press the "Re-extraction" button to perform the re-extractions.\n\nAfter completion of the picking of coordinates, the coordinates are stored in the Master Key "CMM Files Directory" as .cmm files. After "Re-extraction" they are additionally stored as .coord files.'
+							text: 'Click “Pick Coordinates” to open ChimeraX. Navigate to the “Markers” menu, select a mode in the Place markers submenu (for example, Surface), and then Right Click to place a coordinate. Select “Move” to adjust the location of the coordinate. Keep Right Clicking for additional coordinates.\n\nWhen finished, save the coord file using command "save coord.cmm". Then exit Chimera.\n\nOptionally, enter text and press "Add Note" to save information after exiting each subtomogram.\n\nPress the right arrow to progress; choose "Pick Coordinates" to open that subtomogram.\n\nWhen you are done with all of your picks, press the "Sub-extraction" button to perform the sub-extractions.\n\nAfter completion of the picking of coordinates, the coordinates are stored in the Master Key "CMM Files Directory" as .cmm files. After "Sub-extraction" they are additionally stored as .coord files.'
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text_size: self.width, None
 							size: self.texture_size
@@ -1263,7 +1263,7 @@
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					Button:
 						background_color: 0, 0, 1, .7
-						text: 'Re-extraction'
+						text: 'Sub-extraction'
 						on_release: root.reextraction()
 				Label:
 					text: ' '
@@ -2034,7 +2034,7 @@
 				size_hint_y: .1
 
 	TabbedPanelItem:
-		text: 'Visualize'
+		text: 'Plot Back'
 		BoxLayout:
 			spacing: 10
 			orientation: 'vertical'
@@ -2055,12 +2055,184 @@
 						size: self.size
 				BoxLayout:
 					orientation: 'vertical'
+					size_hint_y: 1
+					Label:
+						size_hint_y: .1
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .75
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Tomogram Plot Back'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .15}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.PlotBackInfo().open()
+							size_hint: .2, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, 1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Ref Path'
+								size_hint: 1.5, 1
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: refPath
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Ref Path'
+							on_release: root.show_refpath()
+							size_hint: .35, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: 'Ref Basename'
+						TextInput:
+							text: ''
+							size_hint_x: .45
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: refBasename
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Plot Back'
+							on_release: root.plotBack()
+							size_hint_x: .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .04
+					Label:
+						size_hint_y: .1
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_y: 1
+					Label:
+						size_hint_y: .025
+					BoxLayout:
+						orientation: 'vertical'
+						size_hint_x: .75
+						pos_hint: {'center_x': .5}
+						canvas:
+							Color:
+								rgba: .5, .5, .5, 0.4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						spacing: 15
+						Label:
+							text: 'Subtomogram Plot Back'
+							color: (0,0,0,1)
+							font_size: 35
+							pos_hint: {'center_x': .17}
+							bold: True
+						Button:
+							text: 'information'
+							background_color: 0, 1.2, 2, .5
+							on_release: Factory.SubPlotBackInfo().open()
+							size_hint: .2, .8
+							pos_hint: {'center_x': .5, 'center_y': .5}	
+						Label:
+							size_hint_y: .1
+						Label:
+							text: 'New Subtomogram Name'
+							size_hint_y: .1
+						TextInput:
+							text: ''
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: newSubtomoName
+						Label:
+							text: 'Sub-Extraction CSV File'
+							size_hint_y: .1
+						TextInput:
+							text: ''
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: subCsvFile
+						Label:
+							text: 'Ref Path'
+							size_hint_y: .1
+						TextInput:
+							text: ''
+							size_hint_x: .9
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: subRefPath
+						Label:
+							text: 'Ref Basename'
+							size_hint_y: .1
+						TextInput:
+							text: ''
+							size_hint_x: .4
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							multiline: False
+							id: subRefBasename
+						Label:
+							size_hint_y: .1
+						Button:
+							background_color: 0.2, 0.6, 0.2, .55
+							text: 'Plot Back'
+							on_release: root.subPlotBack()
+							size_hint_x: .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							text: ' '
+							size_hint_y: .04
+					Label:
+						size_hint_y: .1
+
+	TabbedPanelItem:
+		text: 'Validation'
+		GridLayout:
+			rows: 1
+			canvas:
+				Color:
+					rgba: 1, 1, 1, .6
+				Rectangle:
+					pos: self.pos
+					size: self.size
+			BoxLayout:
+				spacing: 10
+				canvas:
+					Color:
+						rgba: 1, 1, 1, .2
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				orientation: 'vertical'
+				Label:
+					size_hint_y: .01
+				BoxLayout:
+					orientation: 'vertical'
 					pos_hint: {'center_x': .5}
 					Label:
 						size_hint_y: .05
 					BoxLayout:
 						orientation: 'vertical'
-						size_hint: .65, .4
+						size_hint: .65, .5
 						pos_hint: {'center_x': .5}
 						canvas:
 							Color:
@@ -2205,210 +2377,13 @@
 							size_hint_y: .2
 					Label:
 						size_hint_y: .025
-				BoxLayout:
-					orientation: 'vertical'
-					size_hint_y: 1
-					Label:
-						size_hint_y: .025
-					BoxLayout:
-						orientation: 'vertical'
-						size_hint_x: .75
-						pos_hint: {'center_x': .5}
-						canvas:
-							Color:
-								rgba: .5, .5, .5, 0.4
-							Rectangle:
-								pos: self.pos
-								size: self.size
-						spacing: 15
-						Label:
-							text: 'Tomogram Plot Back'
-							color: (0,0,0,1)
-							font_size: 35
-							pos_hint: {'center_x': .15}
-							bold: True
-						Button:
-							text: 'information'
-							background_color: 0, 1.2, 2, .5
-							on_release: Factory.PlotBackInfo().open()
-							size_hint: .2, .8
-							pos_hint: {'center_x': .5, 'center_y': .5}	
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .9, 1
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								text: 'Choose Ref Path'
-								size_hint: 1.5, 1
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: refPath
-								multiline: True
-								readonly: True
-								cursor_blink: False
-								foreground_color: (0,0,.6,1)
-								background_color: (1,1,1,0)
-								cursor_color: (1,1,1,0)
-								selection_color: (1,1,1,0)
-						Button:
-							background_color: 0, 1.2, 2, .5
-							text: 'Choose Ref Path'
-							on_release: root.show_refpath()
-							size_hint: .35, .8
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: 'Ref Basename'
-						TextInput:
-							text: ''
-							size_hint_x: .45
-							pos_hint: {'center_x': .5, 'center_y': .5}
-							multiline: False
-							id: refBasename
-						Button:
-							background_color: 0.2, 0.6, 0.2, .55
-							text: 'Plot Back'
-							on_release: root.plotBack()
-							size_hint_x: .4
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: ' '
-							size_hint_y: .04
-					Label:
-						size_hint_y: .1
-
-	TabbedPanelItem:
-		text: 'Validation'
-		GridLayout:
-			rows: 1
-			canvas:
-				Color:
-					rgba: 1, 1, 1, .6
-				Rectangle:
-					pos: self.pos
-					size: self.size
-			BoxLayout:
-				spacing: 10
-				canvas:
-					Color:
-						rgba: 1, 1, 1, .2
-					Rectangle:
-						pos: self.pos
-						size: self.size
-				orientation: 'vertical'
-				Label:
-					size_hint_y: .07
-				BoxLayout:
-					orientation: 'horizontal'
-					Label:
-						size_hint_x: .3
-					BoxLayout:
-						orientation: 'vertical'
-						pos_hint: {'center_x': .5}
-						canvas:
-							Color:
-								rgba: .5, .5, .5, 0.4
-							Rectangle:
-								pos: self.pos
-								size: self.size
-						Label:
-							text: 'Random 180 Degree Flip Star File'
-							color: (0,0,0,1)
-							font_size: 35
-							pos_hint: {'center_x': .37}
-							bold: True
-							size_hint_y: .6
-						Label:
-							size_hint_y: .2
-						Button:
-							text: 'information'
-							background_color: 0, 1.2, 2, .5
-							on_release: Factory.RandomInfo().open()
-							size_hint: .3, .5
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							size_hint_y: .4
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint_y: 1.2
-							BoxLayout:
-								orientation: 'vertical'
-								size_hint_x: .9
-								Label:
-									text: '% of Subtomos Flipped:'
-									pos_hint: {'center_x': .5}
-								TextInput:
-									text: '50'
-									multine: False
-									id: percentflip
-									pos_hint: {'center_x': .5}
-									size_hint_x: .2
-							BoxLayout:
-								orientation: 'vertical'
-								pos_hint: {'center_x': .5}
-								canvas:
-									Color:
-										rgba: .5, .5, .5, 0.7
-									Rectangle:
-										pos: self.pos
-										size: self.size
-								Label:
-									text: 'Axis of Rotation'
-									size_hint_y: .8
-								BoxLayout:
-									pos_hint: {'center_x': .5, 'center_y': .5}
-									size_hint: .6, .7
-									orientation: 'horizontal'
-									BoxLayout:
-										size_hint_x: .5
-										pos_hint: {'center_x': .5}
-										orientation: 'horizontal'
-										CheckBox:
-											group: 'g5'
-											id: xflip
-										Label: 
-											text: 'X'
-									BoxLayout:
-										size_hint_x: .5
-										pos_hint: {'center_x': .5}
-										orientation: 'horizontal'
-										CheckBox:
-											group: 'g5'
-											id: yflip
-										Label: 
-											text: 'Y'
-									BoxLayout:
-										size_hint_x: .5
-										pos_hint: {'center_x': .5}
-										orientation: 'horizontal'
-										CheckBox:
-											group: 'g5'
-											id: zflip
-										Label: 
-											text: 'Z'
-						Label:
-							size_hint_y: .5
-						Button:
-							background_color: 0.2, 0.6, 0.2, .55
-							text: 'Random Flip'
-							on_release: root.randFlip()
-							size_hint: .5, .6
-							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							size_hint_y: .35
-							text: ''
-							id: randaxis
-							color: (.6,0,0,1)
-							fontsize: 25
-					Label:
-						size_hint_x: .3
 
 				Label:
-					size_hint_y: .07
+					size_hint_y: .05
 
 				BoxLayout:
 					orientation: 'vertical'
-					size_hint: .75, 1.2
+					size_hint: .75, 1
 					pos_hint: {'center_x': .5}
 					canvas:
 						Color:

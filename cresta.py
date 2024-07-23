@@ -390,6 +390,10 @@ class Tabs(TabbedPanel):
 			file_opt.writelines('Volvol:' + '\t' + self.ids.volvol.text + '\n')
 			file_opt.writelines('RefPath:' + '\t' + self.ids.refPath.text + '\n')
 			file_opt.writelines('RefBasename:' + '\t' + self.ids.refBasename.text + '\n')
+			file_opt.writelines('NewSubname:' + '\t' + self.ids.newSubtomoName.text + '\n')
+			file_opt.writelines('SubCsvFile:' + '\t' + self.ids.subCsvFile.text + '\n')
+			file_opt.writelines('RefSubPath:' + '\t' + self.ids.subRefPath.text + '\n')
+			file_opt.writelines('RefSubBasename:' + '\t' + self.ids.subRefBasename.text + '\n')
 			file_opt.close()
 			self.ids.pullpath.text = save
 		except IndexError:
@@ -475,6 +479,14 @@ class Tabs(TabbedPanel):
 						self.ids.refPath.text = yank
 					if re.search('RefBasename', line):
 						self.ids.refBasename.text = yank
+					if re.search('NewSubname', line):
+						self.ids.newSubtomoName.text = yank
+					if re.search('SubCsvFile', line):
+						self.ids.subCsvFile.text = yank
+					if re.search('RefSubPath', line):
+						self.ids.subRefPath.text = yank
+					if re.search('RefSubBasename', line):
+						self.ids.subRefBasename.text = yank
 		except FileNotFoundError:
 			print('Enter a file path')
 		except IsADirectoryError:
@@ -1337,7 +1349,7 @@ class Tabs(TabbedPanel):
 								])
 
 								# # divide cms by angpix to get the shift in pixels
-								# cms = cms / pixelsize[0]
+								cms = cms / pixelsize[0]
 
 								# get the center of mass shift
 								cms = np.array(boxsize)/2 - cms
@@ -1483,17 +1495,8 @@ class Tabs(TabbedPanel):
 			print('\nNo coordinates were extracted. Exiting re-extraction.')
 			return
 		
-		# function to extract the number at the end of the newImageName
-		def extract_number(image_name):
-			match = re.search(r'(\d+)\D*$', image_name)
-			return int(match.group(1)) if match else float('inf')
-
-		# apply the function to create a new column with the extracted numbers
-		newDF['data']['extracted_number'] = newDF['data']['newImageName'].apply(extract_number)
-		# group by rlnMicrographName and sort within each group by the extracted number
-		newDF['data'] = newDF['data'].sort_values(by=['rlnMicrographName', 'extracted_number'])
-		# drop the temporary extracted_number column as it's no longer needed
-		newDF['data'] = newDF['data'].drop(columns=['extracted_number'])
+		# group newDF by rlnImage name and then sort within that by rlnCoordinateX in ascending order
+		newDF['data'] = newDF['data'].groupby('rlnImageName').apply(lambda x: x.sort_values('rlnCoordinateX', ascending=True)).reset_index(drop=True)
 		
 		# write the newDF to a csv
 		newDF['data'].to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
@@ -1511,6 +1514,9 @@ class Tabs(TabbedPanel):
 			new_row['rlnCoordinateY'] = row[1]['rlnCoordinateY']
 			new_row['rlnCoordinateZ'] = row[1]['rlnCoordinateZ']
 			new_row['rlnImageName'] = row[1]['newImageName']
+
+			# add a new column 'rlnOGSubtomo' at the end of the row and set it to the original subtomogram name
+			new_row['rlnOGSubtomo'] = row[1]['rlnImageName']
 
 			# add the new row to the new dataframe
 			starDF = pd.concat([starDF, new_row])
@@ -1652,52 +1658,6 @@ class Tabs(TabbedPanel):
 		boxsize = [boxsize, boxsize, boxsize]
 		zoom = float(self.ids.zoomrange.text)
 		tom.ccc_loop(star, volume, cccthresh, boxsize, zoom, wedge)
-		return
-	
-	# flip a random subset of subtomograms by 180 degrees
-	def randFlip(self):
-		self.ids.randaxis.text = ""
-		starf = self.ids.mainstar.text
-		xflip = self.ids.xflip.active
-		yflip = self.ids.yflip.active
-		zflip = self.ids.zflip.active
-		if xflip or yflip or zflip:
-			if xflip == True:
-				axis = 0
-			if yflip == True:
-				axis = 1
-			if zflip == True:
-				axis = 2
-		else:
-			self.ids.randaxis.text = "Axis of rotation not specified"
-			return
-		
-		randPercent = float(self.ids.percentflip.text)
-		_, ext = os.path.splitext(starf)
-		if ext == '.star':
-			star_data = starfile.read(starf)["particles"]
-			new_star = starfile.read(starf)
-			
-			df = pd.DataFrame.from_dict(new_star["particles"])
-			numFiles = len(star_data['rlnImageName'])
-			randIdx = random.sample(range(numFiles), round(numFiles*randPercent/100))
-			if axis == 0:
-				df.loc[randIdx, "rlnAngleRot"] += 180
-			if axis == 1:
-				df.loc[randIdx, "rlnAngleTilt"] += 180
-			if axis == 2:
-				df.loc[randIdx, "rlnAnglePsi"] += 180
-			flipped = np.zeros((numFiles,), dtype=int)
-			for i in range(numFiles):
-				if i in randIdx:
-					flipped[i] = 1
-			df["Flipped"] = flipped
-			new_star["particles"] = df
-			starfile.write(new_star, _ + "_randFlip" + ".star", overwrite=True)
-			print('New Star File Created: ' + _ + "_randFlip" + ".star\n")
-
-		else:
-			raise ValueError("Unsupported file extension.")
 		return
 
 	# subtomogram rotation function
@@ -2242,6 +2202,34 @@ class Tabs(TabbedPanel):
 
 		# print that plot-back is complete
 		print('Plot-back complete')
+
+		return
+	
+	def subPlotBack(self):
+		subtomoDirect = self.ids.mainsubtomo.text
+		starf = self.ids.mainstar.text
+		newSubtomo = self.ids.newSubtomoName.text
+		csvFile = self.ids.subCsvFile.text
+		if self.ids.subRefPath.text[-1] != '/':
+			classPath = self.ids.subRefPath.text + '/'
+		else:
+			classPath = self.ids.subRefPath.text
+		classBasename = self.ids.subRefBasename.text
+		angpix = float(self.ids.A1.text)
+		bxsz = float(self.ids.px1.text)
+		boxsize = [bxsz, bxsz, bxsz]
+
+		# get the models in the class that match basename
+		folder = os.listdir(classPath)
+		classes = [file for file in folder if classBasename in file]
+
+		# read starfile as dataframe
+		star_data = starfile.read(starf)["particles"]
+
+		# read the csv file
+		csv = pd.read_csv(csvFile)
+		# extract the row that contains the newSubtomo name under the newImageName column
+		row = csv.loc[csv['newImageName'] == newSubtomo]
 
 		return
 
