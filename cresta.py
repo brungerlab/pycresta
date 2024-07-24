@@ -1544,7 +1544,7 @@ class Tabs(TabbedPanel):
 		newDF['data'] = newDF['data'].groupby('rlnImageName').apply(lambda x: x.sort_values('rlnCoordinateX', ascending=True)).reset_index(drop=True)
 		
 		# write the newDF to a csv
-		newDF['data'].to_csv(direct + 'reextract_log' + current_time + '.csv', index=False)
+		newDF['data'].to_csv(direct + 'reextract_log_' + current_time + '.csv', index=False)
 
 		# create a new empty dataframe
 		starDF = pd.DataFrame([])
@@ -1572,11 +1572,11 @@ class Tabs(TabbedPanel):
 		# write the new dataframe to a star file
 		star_data['particles'] = starDF
 		# write the new star file
-		starfile.write(star_data, direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star', sep='\t', overwrite=True)
+		starfile.write(star_data, direct + starf.split("/")[-1].split(".")[0] + '_reextracted_' + current_time + '.star', sep='\t', overwrite=True)
 		
 		# print that the re-extraction is complete
 		print('\nRe-extraction complete')
-		print('New Star File Created: ' + direct + starf.split("/")[-1].split(".")[0] + '_reextracted.star\n')
+		print('New Star File Created: ' + direct + starf.split("/")[-1].split(".")[0] + '_reextracted_' + current_time + '.star\n')
 		return
 
 	# create masks
