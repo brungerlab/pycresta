@@ -1462,7 +1462,7 @@ class Tabs(TabbedPanel):
 									'rlnCoordinateX': new_shift[0], 
 									'rlnCoordinateY': new_shift[1], 
 									'rlnCoordinateZ': new_shift[2], 
-									'Original_x': opXYZ[0], 
+									'Original_X': opXYZ[0], 
 									'Original_Y': opXYZ[1], 
 									'Original_Z': opXYZ[2], 
 									'cmm_shiftX': cms[0], 
@@ -2251,18 +2251,17 @@ class Tabs(TabbedPanel):
 		return
 	
 	def subPlotBack(self):
+		# get the necessary variables from the GUI
 		subtomoDirect = self.ids.mainsubtomo.text
-		starf = self.ids.mainstar.text
+		starf = self.ids.mainstarfilt.text
 		newSubtomo = self.ids.newSubtomoName.text
 		csvFile = self.ids.subCsvFile.text
+		chimeraDir = self.ids.chimera_path.text
 		if self.ids.subRefPath.text[-1] != '/':
 			classPath = self.ids.subRefPath.text + '/'
 		else:
 			classPath = self.ids.subRefPath.text
 		classBasename = self.ids.subRefBasename.text
-		angpix = float(self.ids.A1.text)
-		bxsz = float(self.ids.px1.text)
-		boxsize = [bxsz, bxsz, bxsz]
 
 		# get the models in the class that match basename
 		folder = os.listdir(classPath)
@@ -2275,6 +2274,110 @@ class Tabs(TabbedPanel):
 		csv = pd.read_csv(csvFile)
 		# extract the row that contains the newSubtomo name under the newImageName column
 		row = csv.loc[csv['newImageName'] == newSubtomo]
+
+		# get the rlnImageName from the row
+		oldImgName = row['rlnImageName'].values[0]
+		# get the new subtomo name from the row
+		newImgName = row['newImageName'].values[0]
+
+		# create a new folder for the plot back in the folder that the newImgName file exists
+		plotbackFolder = subtomoDirect + '/'.join(newImgName.split('/')[:-1]) + "/plotback/"
+		if not os.path.exists(plotbackFolder):
+			os.makedirs(plotbackFolder)
+
+		# put together the file names
+		oldImgFile = subtomoDirect + oldImgName
+		newImgFile = plotbackFolder + newImgName.split('/')[-1]
+
+		# get the boxsize and pixelsize of the old subtomogram
+		boxsize = []
+		angpix = []
+		with mrcfile.open(oldImgFile, 'r+', permissive=True) as mrc:
+			boxsize.append(float(mrc.header.nx))
+			boxsize.append(float(mrc.header.ny))
+			boxsize.append(float(mrc.header.nz))
+			angpix.append(round(float(mrc.voxel_size.x), 2))
+			angpix.append(round(float(mrc.voxel_size.y), 2))
+			angpix.append(round(float(mrc.voxel_size.z), 2))
+		
+		# ensure that a boxsize and pixel size were found
+		if len(boxsize) == 0:
+			bxsz = self.ids.px1.text
+			boxsize = [bxsz, bxsz, bxsz]
+		
+		if len(angpix) == 0:
+			pxsz = self.ids.A1.text
+			angpix = [pxsz, pxsz, pxsz]
+
+		angpix = angpix[0]
+
+		# pull the class number from the star file for the row with the old image name
+		oldRow = star_data.loc[star_data['rlnImageName'] == oldImgName]
+		classNum = str(oldRow['rlnClassNumber'].values[0]).zfill(3)
+
+		# for patrick testing: classNum = '001'
+
+		# get model associated with class num
+		model = classPath + [file for file in classes if classNum in file][0]
+		# check that model exists
+		if not os.path.exists(model):
+			print('Model does not exist - check the class path and basename')
+			return
+
+		# create arrays for angles and coordinates
+		angles = np.array([float(oldRow['rlnAngleRot']), float(oldRow['rlnAngleTilt']), float(oldRow['rlnAnglePsi'])])
+		og_coords = np.array([float(row['Original_x']) / angpix, float(row['Original_Y']) / angpix, float(row['Original_Z']) / angpix])
+		new_coords = np.array([float(row['rlnCoordinateX']) / angpix, float(row['rlnCoordinateY']) / angpix, float(row['rlnCoordinateZ']) / angpix])
+
+		# converts Relion Euler rot, tilt, psi angles to the TOM Euler angle convention phi, psi, theta
+		euler_angles = tom.eulerconvert_xmipp(angles[0], angles[1], angles[2])
+		angles = euler_angles
+
+		# swap values in tmpAng indexes 0 and 1 since they are swapped again processParticler
+		storey = angles[1]
+		angles[1] = angles[0]
+		angles[0] = storey
+
+		# transform corresponding model by inversed angles specified in starfile
+		transformed_model = tom.processParticler(model, angles, boxsize, new_coords, shifton=False)
+		transformed_model = transformed_model.astype(np.float32)
+		
+		# write the new subtomogram
+		transformed_subtomo = mrcfile.read(oldImgFile)
+		mrcfile.new(newImgFile, transformed_subtomo, overwrite=True)
+		with mrcfile.open(newImgFile, 'r+', permissive=True) as mrc:
+			mrc.voxel_size = angpix
+			mrc.header.origin.x = new_coords[0]
+			mrc.header.origin.y = new_coords[1]
+			mrc.header.origin.z = new_coords[2]
+		
+		# create new mrcfile for the transformed model
+		newModel = subtomoDirect + 'transformed_model.mrc'
+		mrcfile.new(newModel, transformed_model, overwrite=True)
+		# shift model to boxsize specified in mrc file
+		with mrcfile.open(newModel, 'r+', permissive=True) as mrc:
+			mrc.voxel_size = angpix
+			mrc.header.origin.x = new_coords[0]
+			mrc.header.origin.y = new_coords[1]
+			mrc.header.origin.z = new_coords[2]
+
+		# alter the original subtomogram
+		with mrcfile.open(oldImgFile, 'r+', permissive=True) as mrc:
+			mrc.voxel_size = angpix
+			mrc.header.origin.x = og_coords[0]
+			mrc.header.origin.y = og_coords[1]
+			mrc.header.origin.z = og_coords[2]
+
+		# run ChimeraX to visualize the transformed model and subtomogram, as well as the original subtomogram
+		vis = subtomoDirect + 'visualize.py'
+		file_opt = open(vis, 'w')
+		file_opt.writelines(("import subprocess" + "\n" + "from chimerax.core.commands import run" + "\n" + "run(session, \"open " + newImgFile + "\")" + "\n" + "run(session, \"open " + newModel + "\")" + "\n" + "run(session, \"open " + oldImgFile + "\")" + "\n" + "run(session, \"ui mousemode right \'mark point\'\")" + "\n" + "run(session, \"ui tool show \'Side View\'\")"))
+		file_opt.close()
+		print(subprocess.getstatusoutput(chimeraDir + '/chimerax ' + vis))
+		os.remove(vis)
+
+		# print that plot-back is complete
+		print('Subtomogram Plot-back complete')
 
 		return
 

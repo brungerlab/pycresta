@@ -329,10 +329,12 @@ def shift(im, delta):
                        -np.floor(dimy/2):-np.floor(dimy/2)+dimy, 
                        -np.floor(dimz/2):-np.floor(dimz/2)+dimz]
 
+    # shift the sampling points
     indx = np.where([dimx, dimy, dimz] == 1)[0]
     delta[indx] = 0
     delta /= [dimx, dimy, dimz]
     x = delta[0] * x + delta[1] * y + delta[2] * z
+    # interpolate the image
     im = fftn(im)
     im = np.real(ifftn(im * np.exp(-2j * np.pi * ifftshift(x))))
     return im
