@@ -137,7 +137,7 @@ class Tabs(TabbedPanel):
 		starfpath = filename.strip()
 		if len(starfpath) != 0:
 			if starfpath.endswith('.star') == False:
-				self.ids.mainstar.text = 'Not a ".star" file — Choose Unfiltered Star File Path'
+				self.ids.mainstar.hint_text = 'Not a ".star" file — Enter/Choose Unfiltered Star File Path'
 			else:
 				self.ids.mainstar.text = starfpath
 				self.ids.mainsubtomo.text = "/".join(self.ids.mainstar.text.split("/")[:-1]) + '/'
@@ -145,9 +145,9 @@ class Tabs(TabbedPanel):
 				if os.path.isfile(starfilted) == True:
 					self.ids.mainstarfilt.text = starfilted
 				else:
-					self.ids.mainstarfilt.text = 'Choose Filtered Star File Path'
+					self.ids.mainstarfilt.hint_text = 'Enter/Choose Filtered Star File Path'
 		elif len(starfpath) == 0:
-			self.ids.mainstar.text = 'Choose Unfiltered Star File Path'
+			self.ids.mainstar.hint_text = 'Enter/Choose Unfiltered Star File Path'
 		self.dismiss_popup()
 
 	# star file filtered save
@@ -161,12 +161,12 @@ class Tabs(TabbedPanel):
 		starfiltpath = filename.strip()
 		if len(starfiltpath) != 0:
 			if starfiltpath.endswith('.star') == False:
-				self.ids.mainstarfilt.text = 'Not a ".star" file — Choose Unfiltered Star File Path'
+				self.ids.mainstarfilt.hint_text = 'Not a ".star" file — Enter/Choose Unfiltered Star File Path'
 			else:
 				self.ids.mainstarfilt.text = starfiltpath
 				self.ids.mainsubtomo.text = "/".join(self.ids.mainstarfilt.text.split("/")[:-1]) + '/'
 		elif len(starfiltpath) == 0:
-			self.ids.mainstarfilt.text = 'Choose Filtered Star File Path'
+			self.ids.mainstarfilt.hint_text = 'Enter/Choose Filtered Star File Path'
 		self.dismiss_popup()
 
 	# subtomogram directory save
@@ -181,7 +181,7 @@ class Tabs(TabbedPanel):
 		if len(subtomopath) != 0:
 			self.ids.mainsubtomo.text = subtomopath + '/'
 		elif len(subtomopath) == 0:
-			self.ids.mainsubtomo.text = 'Choose Subtomogram Directory'
+			self.ids.mainsubtomo.hint_text = 'Enter/Choose Subtomogram Directory'
 		self.dismiss_popup()
 
 	# cmm file directory save
@@ -196,7 +196,7 @@ class Tabs(TabbedPanel):
 		if len(cmmpath) != 0:
 			self.ids.maincmm.text = cmmpath + '/'
 		elif len(cmmpath) == 0:
-			self.ids.maincmm.text = 'Choose CMM Files Directory'
+			self.ids.maincmm.hint_text = 'Enter/Choose CMM Files Directory'
 		self.dismiss_popup()
 
 	# wedge file save
@@ -211,7 +211,7 @@ class Tabs(TabbedPanel):
 		if len(wedgepath) != 0:
 			self.ids.mainwedge.text = wedgepath
 		elif len(wedgepath) == 0:
-			self.ids.mainwedge.text = 'Choose Wedge File'
+			self.ids.mainwedge.hint_text = 'Enter/Choose Wedge File'
 		self.dismiss_popup()
 
 	# mrc file save
@@ -233,21 +233,38 @@ class Tabs(TabbedPanel):
 	# ATB: included definitions for vectorStart and vectorEnd text boxes and buttons, Jan. 24, 2024
 	def updateExtract(self):
 		if self.ids.tomoFolder.active == True:
-			self.ids.tomo.text = 'Choose Directory with Tomogram Folders (or Data Collection Folders with Tomogram Folders). Each Tomogram Folder should contain a tomogram (.mrc) and corresponding coordinate file (.coords) (and optionally .coordsM, .coordsC files)'
+			self.ids.tomo.text = ''
+			self.ids.tomo.hint_text = 'Choose Directory with Tomogram Folders (or Data Collection Folders with Tomogram Folders).\nEach Tomogram Folder should contain a tomogram (.mrc) and corresponding coordinate file (.coords)\n(and optionally .coordsM, .coordsC files)'
+			self.ids.tomocoords.hint_text = 'Disabled'
 			self.ids.tomocoords.text = ''
+			self.ids.tomocoords.readonly = True
 			self.ids.tomocoordbutton.background_color = (1, 1, 1, .5)
+			self.ids.tomocoordbutton.disabled = True
+			self.ids.vectorStart.hint_text = 'Disabled'
 			self.ids.vectorStart.text = ''
+			self.ids.vectorStart.readonly = True
 			self.ids.vectorStartButton.background_color = (1, 1, 1, .5)
+			self.ids.vectorStartButton.disabled = True
+			self.ids.vectorEnd.hint_text = 'Disabled'
 			self.ids.vectorEnd.text = ''
+			self.ids.vectorEnd.readonly = True
 			self.ids.vectorEndButton.background_color = (1, 1, 1, .5)
+			self.ids.vectorEndButton.disabled = True
 		else:
-			self.ids.tomo.text = 'Choose Tomogram Path'
-			self.ids.tomocoords.text = 'Choose Coords Path .coords'
-			self.ids.tomocoordbutton.background_color = (0, 1.2, 2, .5)
-			self.ids.vectorStart.text = 'Choose Vector Start Coords .coordsM(leave blank is not available)'
-			self.ids.vectorStartButton.background_color = (0, 1.2, 2, .5)
-			self.ids.vectorEnd.text = 'Choose Vector End Coords .coordsC(leave blank if not available)'
-			self.ids.vectorEndButton.background_color = (0, 1.2, 2, .5)
+			self.ids.tomo.text = ''
+			self.ids.tomo.hint_text = 'Enter/Choose Tomogram Path'
+			self.ids.tomocoords.hint_text = 'Enter/Choose Coords Path .coords'
+			self.ids.tomocoords.readonly = False
+			self.ids.tomocoordbutton.background_color = (1, 1, 1, 1)
+			self.ids.tomocoordbutton.disabled = False
+			self.ids.vectorStart.hint_text = 'Enter/Choose Vector Start Coords .coordsM (leave blank if not available)'
+			self.ids.vectorStart.readonly = False
+			self.ids.vectorStartButton.background_color = (1, 1, 1, 1)
+			self.ids.vectorStartButton.disabled = False
+			self.ids.vectorEnd.hint_text = 'Enter/Choose Vector End Coords .coordsC (leave blank if not available)'
+			self.ids.vectorEnd.readonly = False
+			self.ids.vectorEndButton.background_color = (1, 1, 1, 1)
+			self.ids.vectorEndButton.disabled = False
 
 	# tomogram path save
 	def show_tomo(self):
@@ -263,11 +280,11 @@ class Tabs(TabbedPanel):
 			tomopath = path.strip() + '/'
 		if len(tomopath) != 0:
 			if tomopath.endswith('.mrc') == False and self.ids.tomoFolder.active == False:
-				self.ids.tomo.text = 'Not a ".mrc" file — Choose Tomogram Path'
+				self.ids.tomo.hint_text = 'Not a ".mrc" file — Enter/Choose Tomogram Path'
 			else:
 				self.ids.tomo.text = tomopath
 		elif len(tomopath) == 0:
-			self.ids.tomo.text = 'Choose Tomogram Path'
+			self.ids.tomo.hint_text = 'Enter/Choose Tomogram Path'
 		self.dismiss_popup()
 
 	# tomogram coords path save
@@ -282,7 +299,7 @@ class Tabs(TabbedPanel):
 		if len(tomocoordspath) != 0:
 			self.ids.tomocoords.text = tomocoordspath
 		elif len(tomocoordspath) == 0:
-			self.ids.tomocoords.text = 'Choose Coords Path'
+			self.ids.tomocoords.hint_text = 'Enter/Choose Coords Path .coords'
 		self.dismiss_popup()
 
 	# start vector path save
@@ -297,7 +314,7 @@ class Tabs(TabbedPanel):
 		if len(startvecpath) != 0:
 			self.ids.vectorStart.text = startvecpath
 		elif len(startvecpath) == 0:
-			self.ids.vectorStart.text = 'Choose Vector Start Path'
+			self.ids.vectorStart.hint_text = 'Enter/Choose Vector Start Coords .coordsM (leave blank if not available)'
 		self.dismiss_popup()
 
 	# end vector path save
@@ -312,7 +329,7 @@ class Tabs(TabbedPanel):
 		if len(endvecpath) != 0:
 			self.ids.vectorEnd.text = endvecpath
 		elif len(endvecpath) == 0:
-			self.ids.vectorEnd.text = 'Choose Vector End Path'
+			self.ids.vectorEnd.hint_text = 'Enter/Choose Vector End Coords .coordsC (leave blank if not available)'
 		self.dismiss_popup()
 
 	# mask path save
@@ -326,11 +343,11 @@ class Tabs(TabbedPanel):
 		maskpath = filename.strip()
 		if len(maskpath) != 0:
 			if maskpath.endswith('.mrc') == False:
-				self.ids.maskpath.text = 'Not a ".mrc" file — Choose Mask Path'
+				self.ids.maskpath.hint_text = 'Not a ".mrc" file — Enter/Choose Mask Path'
 			else:
 				self.ids.maskpath.text = maskpath
 		elif len(maskpath) == 0:
-			self.ids.maskpath.text = 'Choose Mask Path'
+			self.ids.maskpath.hint_text = 'Enter/Choose Mask Path (mask.mrc)'
 		self.dismiss_popup()
 
 	# ref path save
@@ -572,7 +589,7 @@ class Tabs(TabbedPanel):
 		subdirect = tomDate + '/' + tomName + '/sub/'
 		# set wedge file name
 		# check if Choose Wedge File or the word Choose is contained in the text input
-		if self.ids.mainwedge.text == 'Choose Wedge File' or 'Choose' in self.ids.mainwedge.text:
+		if self.ids.mainwedge.text == 'Choose Wedge File' or 'Choose' or '' in self.ids.mainwedge.text:
 			wedge = 'NA'
 		else:
 			wedge = (self.ids.mainwedge.text).replace(direct, '')

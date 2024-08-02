@@ -534,17 +534,14 @@
 					text: 'Threads/CPU Count'
 				TextInput:
 					id: px1
-					input_filter: 'float'
 					text: '256'
 					multiline: False
 				TextInput:
 					id: A1
-					input_filter: 'float'
 					text: '2.62'
 					multiline: False
 				TextInput:
 					id: CPU
-					input_filter: 'int'
 					text: '10'
 					multiline: False
 			BoxLayout:
@@ -561,7 +558,7 @@
 					halign: 'center'
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					color: (0,0,0,1)
-					text: 'Press the File icon to open a file selector. For .star files, select the unfiltered and filtered\n.star file and press "Save." For directories, press into your folder and then press save.\nAlternatively manually enter paths in the corresponding text boxes.\nUse "Save Project" to write all parameters to a .txt file, and "Load" to fill them in when you restart Cresta.'
+					text: 'Press the "Choose" buttons to open a file selector. For .star files, select the unfiltered and filtered\n.star file and press "Save." For directories, press into your folder and then press save.\nUse "Save Project" to write all parameters to a .txt file, and "Load" to fill them in when you restart Cresta.'
 			BoxLayout:
 				orientation: 'horizontal'
 				spacing: 15
@@ -585,64 +582,56 @@
 							bold: True
 							size_hint: .6, .1
 							pos_hint: {'center_x': .5, 'center_y': .5}
-						Label:
-							text: 'Unfiltered Star File'
-							color: (0,0,0,1)
-							font_size: 25
-							size_hint_y: .075
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .95, .25
+							size_hint: .9, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								on_release: root.show_star()
-								size_hint: .1, .6
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								background_normal: 'bin/file_icon.png'
 							TextInput:
-								hint_text: 'Enter/Choose Unfiltered Star File Path'
+								text: 'Choose Unfiltered Star File Path'
 								size_hint: 1.5, .55
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: mainstar
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Unfiltered Star File'
+							on_release: root.show_star()
+							size_hint: .4, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
-							size_hint_y: .05
-						Label:
-							text: 'Filtered Star File'
-							color: (0,0,0,1)
-							font_size: 25
-							size_hint_y: .075
+							size_hint_y: .06
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .95, .25
+							size_hint: .9, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_starfilt()
-								size_hint: .1, .6
-								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
-								hint_text: 'Enter/Choose Filtered Star File Path'
+								text: 'Choose Filtered Star File Path'
 								size_hint: 1.5, .55
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: mainstarfilt
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Filtered Star File'
+							on_release: root.show_starfilt()
+							size_hint: .4, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							size_hint_y: .06
 					BoxLayout:
@@ -663,27 +652,28 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .95, .25
+							size_hint: .9, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_subtomo()
-								size_hint: .1, .55
-								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
-								hint_text: 'Enter/Choose Subtomogram Directory'
+								text: 'Choose Subtomogram Directory'
 								size_hint: 1.5, .55
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: mainsubtomo
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Subtomogram Path'
+							on_release: root.show_subtomo()
+							size_hint: .45, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							size_hint_y: .06
 					BoxLayout:
@@ -704,27 +694,28 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .95, .25
+							size_hint: .9, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_cmm()
-								size_hint: .1, .55
-								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
-								hint_text: 'Enter/Choose CMM Files Directory'
+								text: 'Choose CMM Files Directory'
 								size_hint: 1.5, .55
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: maincmm
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose CMM Files Path'
+							on_release: root.show_cmm()
+							size_hint: .45, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							size_hint_y: .06
 					BoxLayout:
@@ -745,27 +736,28 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .95, .25
+							size_hint: .9, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_wedge()
-								size_hint: .1, .55
-								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
-								hint_text: 'Enter/Choose Wedge File'
+								text: 'Choose Wedge File'
 								size_hint: 1.5, .55
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: mainwedge
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Wedge Path'
+							on_release: root.show_wedge()
+							size_hint: .3, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							size_hint_y: .06
 					BoxLayout:
@@ -777,21 +769,18 @@
 							Rectangle:
 								pos: self.pos
 								size: self.size
-						Label:
+						Label: 
 							text: 'ChimeraX path (default is SBgrid location)'
 							size_hint_y: .2
 							bold: True
 							color: (0,0,0,1)
 						TextInput:
-							hint_text: 'Enter ChimeraX path'
 							text: '/opt/sbgrid/i386-mac/chimerax/1.6.1/ChimeraX.app/Contents/bin'
 							multiline: False
 							font_size: 25
 							size_hint: .8, .25
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							id: chimera_path
-							halign: 'center'
-							background_color: (1,1,1,.7)
 						Label:
 							size_hint_y: .1
 				BoxLayout:
@@ -940,121 +929,89 @@
 							color: (0,0,0,1)
 							font: 30
 							size_hint_y: .3
-						Label:
-							text: 'Tomogram File Path'
-							color: (0, 0, 0, 1)
-							font: 5
-							size_hint_y: .1
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .95, .75
+						TextInput:
+							text: 'Choose Tomogram Path'
+							size_hint: .9, .75
+							font_size: 25
+							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_tomo()
-								size_hint: .1, .75
-								pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								hint_text: 'Enter/Choose Tomogram Path'
-								size_hint: 1.5, .75
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: tomo
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
-						Label:
-							text: 'Coords Path .coords'
-							color: (0, 0, 0, 1)
-							font: 5
-							size_hint_y: .1
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .95, .75
+							id: tomo
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Tomogram'
+							on_release: root.show_tomo()
+							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								id: tomocoordbutton
-								on_release: root.show_tomocoords()
-								size_hint: .1, .75
-								pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								hint_text: 'Enter/Choose Coords Path .coords'
-								size_hint: 1.5, .75
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: tomocoords
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
-						Label:
-							text: 'Vector Start Coords .coordsM (optional)'
-							color: (0, 0, 0, 1)
-							font: 5
-							size_hint_y: .1
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .95, .75
+						TextInput:
+							text: 'Choose Coords Path .coords'
+							size_hint: .9, .75
+							font_size: 25
+							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								id: vectorStartButton
-								on_release: root.show_startvec()
-								size_hint: .1, .75
-								pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								hint_text: 'Enter/Choose Vector Start Coords .coordsM (leave blank if not available)'
-								size_hint: 1.5, .75
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: vectorStart
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
-						Label:
-							text: 'Vector End (center) Coords .coordsC (optional)'
-							color: (0, 0, 0, 1)
-							font: 5
-							size_hint_y: .1
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .95, .75
+							id: tomocoords
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							id: tomocoordbutton
+							text: 'Choose Coords'
+							on_release: root.show_tomocoords()
+							size_hint: .3, .6
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								id: vectorEndButton
-								on_release: root.show_endvec()
-								size_hint: .1, .75
-								pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								hint_text: 'Enter/Choose Vector End (center) Coords .coordsC (leave blank if not available)'
-								size_hint: 1.5, .75
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: vectorEnd
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+						TextInput:
+							text: 'Choose Vector Start Coords .coordsM (leave blank if not available)'
+							size_hint: .9, .7
+							font_size: 25
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: vectorStart
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							id: vectorStartButton
+							text: 'Choose Start Path'
+							on_release: root.show_startvec()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						TextInput:
+							text: 'Choose Vector End (center) Coords .coordsC (leave blank if not available)'
+							size_hint: .9, .7
+							font_size: 25
+							halign: 'center'
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							id: vectorEnd
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							id: vectorEndButton
+							text: 'Choose End Path'
+							on_release: root.show_endvec()
+							size_hint: .3, .6
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						BoxLayout:
 							orientation: 'horizontal'
 							size_hint: .2, .5
@@ -1163,7 +1120,6 @@
 							TextInput:
 								text: '1'
 								multiline: False
-								input_filter: 'int'
 								color: (1,1,1,1)
 								bold: True
 								size_hint: .2, .35
@@ -1380,14 +1336,12 @@
 								TextInput:
 									text: '35'
 									size_hint: .3, .5
-									input_filter: 'float'
 									pos_hint: {'center_x': .5, 'center_y': .5}
 									multiline: False
 									id: radius
 								TextInput:
 									text: '65'
 									size_hint: .3, .5
-									input_filter: 'float'
 									pos_hint: {'center_x': .5, 'center_y': .5}
 									multiline: False
 									id: height
@@ -1404,7 +1358,6 @@
 							TextInput:
 								text: '-8'
 								size_hint: .2, .3
-								input_filter: 'float'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								multiline: False
 								id: vertical
@@ -1470,29 +1423,26 @@
 							color: (0,0,0,1)
 							font: 30
 							size_hint_y: .6
-						BoxLayout:
-							orientation: 'horizontal'
-							size_hint: .95, .75
+						TextInput:
+							text: 'Choose Mask Path (mask.mrc)'
+							size_hint: .9, .9
+							font_size: 30
+							halign: 'center'
 							pos_hint: {'center_x': .5, 'center_y': .5}
-							Button:
-								background_normal: 'bin/file_icon.png'
-								on_release: root.show_mask()
-								size_hint: .125, .75
-								pos_hint: {'center_x': .5, 'center_y': .5}
-							TextInput:
-								hint_text: 'Enter/Choose Mask Path (mask.mrc)'
-								size_hint: 1.5, .75
-								font_size: 25
-								halign: 'center'
-								pos_hint: {'center_x': .5, 'center_y': .5}
-								id: maskpath
-								multiline: False
-								readonly: False
-								cursor_blink: True
-								foreground_color: (0,0,0,1)
-								background_color: (1,1,1,.7)
-								cursor_color: (0,0,0,1)
-								selection_color: (0.1843, 0.6549, 0.8313, .5)
+							id: maskpath
+							multiline: True
+							readonly: True
+							cursor_blink: False
+							foreground_color: (0,0,.6,1)
+							background_color: (1,1,1,0)
+							cursor_color: (1,1,1,0)
+							selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Mask File'
+							on_release: root.show_mask()
+							size_hint: .35, .65
+							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label:
 							size_hint_y: 1
 						Button:
@@ -1573,7 +1523,6 @@
 							TextInput:
 								text: '2.0'
 								size_hint_x: .4
-								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
 								id: sdrange
@@ -1582,7 +1531,6 @@
 							TextInput:
 								text: '1.0'
 								size_hint_x: .4
-								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
 								id: sdshift
@@ -1605,7 +1553,6 @@
 							TextInput:
 								text: '1.1'
 								size_hint: .4, .8
-								input_filter: 'float'
 								pos_hint: {'center_x': .8, 'center_y': .5}
 								multiline: False
 								id: blurrate
@@ -1773,7 +1720,6 @@
 							TextInput:
 								text: '90'
 								size_hint: .15, .5
-								input_filter: 'float'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								multiline: False
 								id: anglerotation
@@ -1926,7 +1872,6 @@
 							text: '3'
 							multiline: False
 							id: defoc
-							input_filter: 'float'
 						Label:
 							text: ' '
 							size_hint_y: .3
@@ -1946,7 +1891,6 @@
 							text: '1.2'
 							multiline: False
 							id: snrval
-							input_filter: 'float'
 						Label:
 							text: ' '
 							size_hint_y: .3
@@ -1966,7 +1910,6 @@
 							text: '0.01'
 							multiline: False
 							id: highpass
-							input_filter: 'float'
 						Label:
 							text: ' '
 							size_hint_y: .3
@@ -2474,10 +2417,9 @@
 							text: 'CCC Threshold'
 						AnchorLayout:
 							anchor_x: 'left'
-							TextInput:
+							TextInput: 
 								text: '0'
 								size_hint: .3, .7
-								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
 								id: cccthresh
@@ -2487,10 +2429,9 @@
 							text: 'Zoom range (px)'
 						AnchorLayout:
 							anchor_x: 'left'
-							TextInput:
+							TextInput: 
 								text: '40'
 								size_hint: .3, .7
-								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
 								id: zoomrange
