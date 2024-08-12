@@ -120,7 +120,7 @@ class Tabs(TabbedPanel):
 	# create gaussian row
 	label = Label(text="Sigma")
 	label2 = Label(text=" ", size_hint_y=.8)
-	sigma = TextInput(text="5", multiline=False, size_hint_x=.12, size_hint_y=1.9, pos_hint={'center_x': .5, 'center_y': .5})
+	sigma = TextInput(text="5", multiline=False, size_hint_x=.12, size_hint_y=1.9, pos_hint={'center_x': .5, 'center_y': .5}, cursor_color=(0,0,0,1), halign='center')
 
 	# close filechooser popups
 	def dismiss_popup(self):
@@ -362,7 +362,7 @@ class Tabs(TabbedPanel):
 		if len(refpath) != 0:
 			self.ids.refPath.text = refpath + '/'
 		elif len(refpath) == 0:
-			self.ids.refPath.text = 'Choose Ref Path'
+			self.ids.refPath.hint_text = 'Enter/Choose Ref Path'
 		self.dismiss_popup()
 
 	# save project info
@@ -723,9 +723,22 @@ class Tabs(TabbedPanel):
 	# check if mrc filter is active
 	def mrcWords(self):
 		if self.ids.mrcfilter.active == True:
-			self.ids.mainmrc.foreground_color = (0,0,.6,1)
+			self.ids.mainmrc.hint_text = 'Enter/Choose Mrc Directory'
+			self.ids.mainmrc.readonly = False
+			self.ids.mainmrc.cursor_blink = True
+			self.ids.mainmrc.foreground_color = (0,0,0,1)
+			self.ids.mainmrc.background_color = (1,1,1,.7)
+			self.ids.mainmrc.cursor_color = (0,0,0,1)
+			self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, .5)
 		else:
-			self.ids.mainmrc.foreground_color = (0,0,.6,0)
+			self.ids.mainmrc.text = ''
+			self.ids.mainmrc.hint_text = ''
+			self.ids.mainmrc.readonly = True
+			self.ids.mainmrc.cursor_blink = False
+			self.ids.mainmrc.foreground_color = (0,0,0,0)
+			self.ids.mainmrc.background_color = (1,1,1,0)
+			self.ids.mainmrc.cursor_color = (0,0,0,0)
+			self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, 0)
 
 	# graph for wiener function
 	plt.ion()
@@ -1499,7 +1512,7 @@ class Tabs(TabbedPanel):
 											# ATB: calculate the size of 3D tomogram volume. Jan 24, 2024
 											TomogramSize = np.array(tomogram.data).shape
 										else:
-											print(f"Tomogram {row['rlnMicrographName']} was not found — skipping re-extraction of {subtomo}")
+											print(f"Tomogram {tomogram} was not found — skipping re-extraction of {subtomo}")
 											return
 									
 									# check if subtomogram is within tomogram bounds
@@ -1512,7 +1525,7 @@ class Tabs(TabbedPanel):
 												subby = subby * -1
 											# write the new subtomogram
 											mrcfile.new(output_file, subby, overwrite=True)
-											with mrcfile.open(output_file, 'r+') as mrc:
+											with mrcfile.open(output_file, 'r+', permissive=True) as mrc:
 												mrc.voxel_size = pixelsize[0]
 
 								# add the row to the new dataframe

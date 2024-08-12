@@ -791,6 +791,7 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							id: chimera_path
 							halign: 'center'
+							cursor_color: (0,0,0,1)
 							background_color: (1,1,1,.7)
 						Label:
 							size_hint_y: .1
@@ -816,6 +817,7 @@
 							hint_text: '/.../...'
 							multiline: False
 							size_hint: .7, .35
+							cursor_color: (0,0,0,1)
 							font_size: 22.5
 							pos_hint: {'center_x': .5, 'center_y': .5}
 						Label: 
@@ -828,6 +830,7 @@
 							id: savename
 							hint_text: 'project'
 							multiline: False
+							cursor_color: (0,0,0,1)
 							size_hint: .7, .35
 							font_size: 25
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -858,6 +861,7 @@
 						TextInput:
 							id: pullpath
 							multiline: False
+							cursor_color: (0,0,0,1)
 							hint_text: '/.../.../project.txt'
 							size_hint: .8, .35
 							pos_hint: {'center_x': .5, 'center_y': .5}
@@ -1164,6 +1168,8 @@
 								text: '1'
 								multiline: False
 								input_filter: 'int'
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								color: (1,1,1,1)
 								bold: True
 								size_hint: .2, .35
@@ -1278,6 +1284,7 @@
 					TextInput:
 						multiline: True
 						size_hint: .65, .8
+						cursor_color: (0,0,0,1)
 						id: notecoord
 				BoxLayout:
 					orientation: 'horizontal'
@@ -1380,6 +1387,8 @@
 								TextInput:
 									text: '35'
 									size_hint: .3, .5
+									cursor_color: (0,0,0,1)
+									halign: 'center'
 									input_filter: 'float'
 									pos_hint: {'center_x': .5, 'center_y': .5}
 									multiline: False
@@ -1387,6 +1396,8 @@
 								TextInput:
 									text: '65'
 									size_hint: .3, .5
+									cursor_color: (0,0,0,1)
+									halign: 'center'
 									input_filter: 'float'
 									pos_hint: {'center_x': .5, 'center_y': .5}
 									multiline: False
@@ -1405,6 +1416,8 @@
 								text: '-8'
 								size_hint: .2, .3
 								input_filter: 'float'
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								multiline: False
 								id: vertical
@@ -1417,6 +1430,8 @@
 							TextInput:
 								text: 'mask.mrc'
 								size_hint: .4, .3
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								multiline: False
 								id: maskname
@@ -1573,6 +1588,8 @@
 							TextInput:
 								text: '2.0'
 								size_hint_x: .4
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
@@ -1582,6 +1599,8 @@
 							TextInput:
 								text: '1.0'
 								size_hint_x: .4
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								input_filter: 'float'
 								pos_hint: {'center_x': .5}
 								multiline: False
@@ -1605,6 +1624,8 @@
 							TextInput:
 								text: '1.1'
 								size_hint: .4, .8
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								input_filter: 'float'
 								pos_hint: {'center_x': .8, 'center_y': .5}
 								multiline: False
@@ -1774,6 +1795,8 @@
 								text: '90'
 								size_hint: .15, .5
 								input_filter: 'float'
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								multiline: False
 								id: anglerotation
@@ -1836,14 +1859,16 @@
 						group: 'g6'
 						id: starfilter
 						state: 'down'
+						on_active: root.mrcWords()
 					Label:
 						text: 'Star File'
 						bold: True
 					Label:
 						size_hint_x: .2
-					CheckBox: 
+					CheckBox:
 						group: 'g6'
 						id: mrcfilter
+						state: 'normal'
 						on_active: root.mrcWords()
 					Label:
 						text: 'Subtomogram Directory'
@@ -1861,19 +1886,19 @@
 				size_hint_y: .1
 				pos_hint: {'center_x': .5, 'center_y': .5}
 				TextInput:
-					text: 'Choose Mrc Directory'
+					hint_text: 'Enter/Choose Mrc Directory'
 					size_hint: .75, .55
-					font_size: 30
+					font_size: 25
 					halign: 'center'
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					id: mainmrc
-					multiline: True
-					readonly: True
-					cursor_blink: False
-					foreground_color: (0,0,.6,0)
-					background_color: (1,1,1,0)
-					cursor_color: (1,1,1,0)
-					selection_color: (1,1,1,0)
+					multiline: False
+					readonly: False
+					cursor_blink: True
+					foreground_color: (0,0,0,1)
+					background_color: (1,1,1,.7)
+					cursor_color: (0,0,0,1)
+					selection_color: (0.1843, 0.6549, 0.8313, .5)
 				
 			BoxLayout:
 				canvas:
@@ -1902,7 +1927,7 @@
 						bold: True
 					Label:
 						size_hint_x: .2
-					CheckBox: 
+					CheckBox:
 						group: 'g2'
 						id: gaussianbutton
 						on_active: root.show_screen()
@@ -1924,6 +1949,8 @@
 							size_hint_x: .5
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '3'
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: defoc
 							input_filter: 'float'
@@ -1944,6 +1971,8 @@
 							size_hint_x: .5
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '1.2'
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: snrval
 							input_filter: 'float'
@@ -1965,6 +1994,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '0.01'
 							multiline: False
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							id: highpass
 							input_filter: 'float'
 						Label:
@@ -2009,6 +2040,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '300e3'
 							multiline: False
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							id: voltage
 						Label:
 							text: ' '
@@ -2028,6 +2061,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '2.7e-3'
 							multiline: False
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							id: cs
 						Label:
 							text: ' '
@@ -2047,6 +2082,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '0.07'
 							multiline: False
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							id: envelope
 						Label:
 							text: ' '
@@ -2066,6 +2103,8 @@
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							text: '0'
 							multiline: False
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							id: bfactor
 						Label:
 							text: ' '
@@ -2138,38 +2177,51 @@
 							on_release: Factory.PlotBackInfo().open()
 							size_hint: .2, .8
 							pos_hint: {'center_x': .5, 'center_y': .5}	
+						Label:
+							size_hint_y: .1
+						Label:
+							text: 'Ref Path'
+							size_hint_y: .1
 						BoxLayout:
 							orientation: 'horizontal'
-							size_hint: .9, 1
+							size_hint: .9, .8
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							Button:
+								background_normal: 'bin/file_icon.png'
+								on_release: root.show_refpath()
+								size_hint: .1, 1
+								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
-								text: 'Choose Ref Path'
+								hint_text: 'Enter/Choose Ref Path'
 								size_hint: 1.5, 1
 								font_size: 25
 								halign: 'center'
 								pos_hint: {'center_x': .5, 'center_y': .5}
 								id: refPath
-								multiline: True
-								readonly: True
-								cursor_blink: False
-								foreground_color: (0,0,.6,1)
-								background_color: (1,1,1,0)
-								cursor_color: (1,1,1,0)
-								selection_color: (1,1,1,0)
-						Button:
-							background_color: 0, 1.2, 2, .5
-							text: 'Choose Ref Path'
-							on_release: root.show_refpath()
-							size_hint: .35, .8
-							pos_hint: {'center_x': .5, 'center_y': .5}
+								multiline: False
+								readonly: False
+								cursor_blink: True
+								foreground_color: (0,0,0,1)
+								background_color: (1,1,1,.7)
+								cursor_color: (0,0,0,1)
+								selection_color: (0.1843, 0.6549, 0.8313, .5)
+						Label:
+							size_hint_y: .1
 						Label:
 							text: 'Ref Basename'
+							size_hint_y: .1
 						TextInput:
 							text: ''
-							size_hint_x: .45
+							hint_text: 'Enter Ref Basename'
+							size_hint: .4, .8
+							halign: 'center'
+							font_size: 25
+							cursor_color: (0,0,0,1)
 							pos_hint: {'center_x': .5, 'center_y': .5}
 							multiline: False
 							id: refBasename
+						Label:
+							size_hint_y: .1
 						Button:
 							background_color: 0.2, 0.6, 0.2, .55
 							text: 'Plot Back'
@@ -2218,6 +2270,8 @@
 							text: ''
 							size_hint_x: .9
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: newSubtomoName
 						Label:
@@ -2227,6 +2281,8 @@
 							text: ''
 							size_hint_x: .9
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: subCsvFile
 						Label:
@@ -2236,6 +2292,8 @@
 							text: ''
 							size_hint_x: .9
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: subRefPath
 						Label:
@@ -2245,6 +2303,8 @@
 							text: ''
 							size_hint_x: .4
 							pos_hint: {'center_x': .5, 'center_y': .5}
+							cursor_color: (0,0,0,1)
+							halign: 'center'
 							multiline: False
 							id: subRefBasename
 						Label:
@@ -2463,9 +2523,11 @@
 					Label:
 						text: 'Volume 1'
 					TextInput:
-						text: '.mrc'
+						hint_text: 'Enter Volume 1 (.mrc file)'
 						size_hint_x: .9
 						pos_hint: {'center_x': .5, 'center_y': .5}
+						cursor_color: (0,0,0,1)
+						halign: 'center'
 						multiline: False
 						id: volvol
 					BoxLayout:
@@ -2479,6 +2541,8 @@
 								size_hint: .3, .7
 								input_filter: 'float'
 								pos_hint: {'center_x': .5}
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								multiline: False
 								id: cccthresh
 					BoxLayout:
@@ -2492,6 +2556,8 @@
 								size_hint: .3, .7
 								input_filter: 'float'
 								pos_hint: {'center_x': .5}
+								cursor_color: (0,0,0,1)
+								halign: 'center'
 								multiline: False
 								id: zoomrange
 					Button:
