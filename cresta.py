@@ -1423,11 +1423,11 @@ class Tabs(TabbedPanel):
 									int(float(child.attrib['z']))
 								])
 
-								# # divide cms by angpix to get the shift in pixels
-								cms = cms / pixelsize[0]
-
 								# get the center of mass shift
-								cms = np.array(boxsize)/2 - cms
+								cms = (np.array(boxsize)/2 - cms) / pixelsize[0]
+
+								# for debugging
+								print(f'pixelsize: {pixelsize[0]}')
 
 								# calculate the new shift
 								new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
