@@ -1403,6 +1403,7 @@ class Tabs(TabbedPanel):
 
 							# get boxsize from subtomogram
 							boxsize = []
+							## fix pixel size grabbing from header ##
 							pixelsize = []
 							with counter_lock:
 								with mrcfile.open(direct + imgName, 'r+', permissive=True) as mrc:
@@ -1412,6 +1413,9 @@ class Tabs(TabbedPanel):
 									pixelsize.append(round(float(mrc.voxel_size.x), 2))
 									pixelsize.append(round(float(mrc.voxel_size.y), 2))
 									pixelsize.append(round(float(mrc.voxel_size.z), 2))
+
+							# temporary fix for pixel size
+							pixelsize = [angpix, angpix, angpix]
 
 							# iterate through each set of coordinates in the cmm file
 							for child in cmroot:
