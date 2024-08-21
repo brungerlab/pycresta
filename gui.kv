@@ -137,7 +137,6 @@
             height: 0
             multiline: False
 			size_hint_y: .05
-
         BoxLayout:
             size_hint_y: None
             height: 30
@@ -1253,7 +1252,7 @@
 						size_hint_x: .03
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .9, .05
+					size_hint: .9, .025
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					Label:
 						size_hint_y: .2
@@ -1263,7 +1262,7 @@
 						color: (0, 0, 1, 1)
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .85, .2
+					size_hint: .85, .15
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					BoxLayout:
 						orientation: 'vertical'
@@ -1317,6 +1316,28 @@
 						id: reextractOverwrite
 					Label:
 						text: 'Overwrite Files'
+						bold: True
+						color: (0,0,0,1)
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .2, .1
+					pos_hint: {'center_x': .5075, 'center_y': .5}
+					TextInput:
+						text: '256'
+						multiline: False
+						input_filter: 'float'
+						cursor_color: (0,0,0,1)
+						halign: 'center'
+						color: (1,1,1,1)
+						bold: True
+						size_hint: .25, .75
+						pos_hint: {'center_x': .5, 'center_y': .5}
+						id: newboxsize
+					Label:
+						text: ''
+						size_hint_x: .15
+					Label:
+						text: 'Subextraction Boxsize'
 						bold: True
 						color: (0,0,0,1)
 				BoxLayout:

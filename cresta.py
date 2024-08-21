@@ -1403,6 +1403,7 @@ class Tabs(TabbedPanel):
 
 							# get boxsize from subtomogram
 							boxsize = []
+							newbox = []
 							## fix pixel size grabbing from header ##
 							pixelsize = []
 							with counter_lock:
@@ -1417,6 +1418,15 @@ class Tabs(TabbedPanel):
 							# temporary fix for pixel size
 							pixelsize = [angpix, angpix, angpix]
 
+							# grabbing box size from subextraction tab
+							newbox = float(self.ids.newboxsize.text)
+							newbox = [newbox, newbox, newbox]
+
+							# CONFIRM IF BOX SIZE IS CORRECTLY GRABBED
+							print(f"Box size: {boxsize}")
+							print(f"Pixel size: {pixelsize}")
+							print(f"New box size: {newbox}")
+
 							# iterate through each set of coordinates in the cmm file
 							for child in cmroot:
 
@@ -1430,9 +1440,6 @@ class Tabs(TabbedPanel):
 								# get the center of mass shift
 								cms = (np.array(boxsize)/2 - cms) / pixelsize[0]
 
-								# for debugging
-								print(f'pixelsize: {pixelsize[0]}')
-
 								# calculate the new shift
 								new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
 
@@ -1445,9 +1452,9 @@ class Tabs(TabbedPanel):
 								z = zpos - boxsize[2]/2
 								# calculate bounds
 								bound = np.zeros(3)
-								bound[0] = z + boxsize[2] - 1
-								bound[1] = y + boxsize[1] - 1
-								bound[2] = x + boxsize[0] - 1
+								bound[0] = z + newbox[2] - 1
+								bound[1] = y + newbox[1] - 1
+								bound[2] = x + newbox[0] - 1
 								# rounding
 								bound = np.round(bound).astype(int)
 								z = np.round(z).astype(int)
@@ -1478,6 +1485,9 @@ class Tabs(TabbedPanel):
 
 								# get the incremented filename
 								subtomo = get_incremented_filename(opf, prefix)
+
+								# # remove the '_filt' suffix if it exists
+								# subtomo = subtomo.replace('_filt', '')
 
 								# set the output file path
 								output_file = os.path.join(root, subtomo)
@@ -1538,6 +1548,8 @@ class Tabs(TabbedPanel):
 											mrcfile.new(output_file, subby, overwrite=True)
 											with mrcfile.open(output_file, 'r+', permissive=True) as mrc:
 												mrc.voxel_size = pixelsize[0]
+									else:
+										print (f'Extraction with specified box size exceeds tomogram borders. Not extracted: {output_file} at center position {xpos}, {ypos}, {zpos}')
 
 								# add the row to the new dataframe
 								with counter_lock:
