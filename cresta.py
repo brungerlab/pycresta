@@ -1482,6 +1482,13 @@ class Tabs(TabbedPanel):
 								# set the output file path
 								output_file = os.path.join(root, subtomo)
 
+								# check if overwrite is selected
+								if self.ids.reextractOverwrite.active == False:
+									# check if the file already exists
+									if os.path.exists(output_file):
+										print(f"Subtomogram {output_file} already exists — skipping re-extraction of {subtomo}")
+										return
+
 								# change the imagename so that the last portion is the new subtomo
 								new_imgName = imgName.split('/')
 								new_imgName[-1] = subtomo

@@ -1263,7 +1263,7 @@
 						color: (0, 0, 1, 1)
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .85, .25
+					size_hint: .85, .2
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					BoxLayout:
 						orientation: 'vertical'
@@ -1306,6 +1306,17 @@
 						id: reextractStar
 					Label:
 						text: 'Star File Only'
+						bold: True
+						color: (0,0,0,1)
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .2, .1
+					pos_hint: {'center_x': .475, 'center_y': .5}
+					CheckBox:
+						state: 'normal'
+						id: reextractOverwrite
+					Label:
+						text: 'Overwrite Files'
 						bold: True
 						color: (0,0,0,1)
 				BoxLayout:
