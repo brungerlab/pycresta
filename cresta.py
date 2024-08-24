@@ -266,6 +266,26 @@ class Tabs(TabbedPanel):
 			self.ids.vectorEndButton.background_color = (1, 1, 1, 1)
 			self.ids.vectorEndButton.disabled = False
 
+	def updateFilterDirectory(self):
+		if self.ids.mrcfilter.active == True:
+			self.ids.mainmrc.hint_text = 'Enter/Choose Mrc Directory'
+			self.ids.mainmrc.text = ''
+			self.ids.mainmrc.readonly = False
+			self.ids.mrcfilterbutton.background_color = (1, 1, 1, 1)
+			self.ids.mrcfilterbutton.disabled = False
+		elif self.ids.starfilter.active == True:
+			self.ids.mainmrc.hint_text = 'Disabled'
+			self.ids.mainmrc.text = ''
+			self.ids.mainmrc.readonly = True
+			self.ids.mrcfilterbutton.background_color = (1, 1, 1, .5)
+			self.ids.mrcfilterbutton.disabled = True
+		else:
+			self.ids.mainmrc.hint_text = 'Pick Either Star File or Subtomogram Directory Filtering'
+			self.ids.mainmrc.text = ''
+			self.ids.mainmrc.readonly = True
+			self.ids.mrcfilterbutton.background_color = (1, 1, 1, .5)
+			self.ids.mrcfilterbutton.disabled = True
+
 	# tomogram path save
 	def show_tomo(self):
 		content = TomoFinder(tomodsave=self.tomosave, cancel=self.dismiss_popup)
@@ -720,25 +740,25 @@ class Tabs(TabbedPanel):
 		self.ids.mainstar.text = direct + tomDate + '_' + tomogName + '.star'
 		self.ids.mainsubtomo.text = direct
 	
-	# check if mrc filter is active
-	def mrcWords(self):
-		if self.ids.mrcfilter.active == True:
-			self.ids.mainmrc.hint_text = 'Enter/Choose Mrc Directory'
-			self.ids.mainmrc.readonly = False
-			self.ids.mainmrc.cursor_blink = True
-			self.ids.mainmrc.foreground_color = (0,0,0,1)
-			self.ids.mainmrc.background_color = (1,1,1,.7)
-			self.ids.mainmrc.cursor_color = (0,0,0,1)
-			self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, .5)
-		else:
-			self.ids.mainmrc.text = ''
-			self.ids.mainmrc.hint_text = ''
-			self.ids.mainmrc.readonly = True
-			self.ids.mainmrc.cursor_blink = False
-			self.ids.mainmrc.foreground_color = (0,0,0,0)
-			self.ids.mainmrc.background_color = (1,1,1,0)
-			self.ids.mainmrc.cursor_color = (0,0,0,0)
-			self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, 0)
+	# # check if mrc filter is active
+	# def mrcWords(self):
+	# 	if self.ids.mrcfilter.active == True:
+	# 		self.ids.mainmrc.hint_text = 'Enter/Choose Mrc Directory'
+	# 		self.ids.mainmrc.readonly = False
+	# 		self.ids.mainmrc.cursor_blink = True
+	# 		self.ids.mainmrc.foreground_color = (0,0,0,1)
+	# 		self.ids.mainmrc.background_color = (1,1,1,.7)
+	# 		self.ids.mainmrc.cursor_color = (0,0,0,1)
+	# 		self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, .5)
+	# 	else:
+	# 		self.ids.mainmrc.text = ''
+	# 		self.ids.mainmrc.hint_text = ''
+	# 		self.ids.mainmrc.readonly = True
+	# 		self.ids.mainmrc.cursor_blink = False
+	# 		self.ids.mainmrc.foreground_color = (0,0,0,0)
+	# 		self.ids.mainmrc.background_color = (1,1,1,0)
+	# 		self.ids.mainmrc.cursor_color = (0,0,0,0)
+	# 		self.ids.mainmrc.selection_color = (0.1843, 0.6549, 0.8313, 0)
 
 	# graph for wiener function
 	plt.ion()
@@ -1496,15 +1516,19 @@ class Tabs(TabbedPanel):
 								if self.ids.reextractOverwrite.active == False:
 									# check if the file already exists
 									if os.path.exists(output_file):
-										print(f"Subtomogram {output_file} already exists — skipping re-extraction of {subtomo}")
+										print(f"[NO OVERWRITE]: Subtomogram {output_file} already exists — skipping re-extraction of {subtomo}")
 										return
+								else:
+									# check if the file already exists
+									if os.path.exists(output_file):
+										print(f"[OVERWRITE]: Subtomogram {output_file} already exists — overwriting re-extraction of {subtomo}")
 
 								# change the imagename so that the last portion is the new subtomo
 								new_imgName = imgName.split('/')
 								new_imgName[-1] = subtomo
 								new_imgName = '/'.join(new_imgName)
 
-								# concat the new dataframe
+								# create a new row for the subtomogram
 								row = {
 									'cmmfile': filename, 
 									'rlnMicrographName': mgName, 
@@ -1520,6 +1544,9 @@ class Tabs(TabbedPanel):
 									'cmm_shiftY': cms[1], 
 									'cmm_shiftZ': cms[2], 
 								}
+
+								# initialize bound status
+								bound_status = 'unchecked'
 
 								# check if 'star file only' is unchecked
 								if self.ids.reextractStar.active == False:
@@ -1539,6 +1566,8 @@ class Tabs(TabbedPanel):
 									# check if subtomogram is within tomogram bounds
 									if (z>=0 and y>=0 and x>=0 and bound[0] + 1 <= TomogramSize[0] and bound[1] + 1 <= TomogramSize[1] and bound[2] + 1 <=TomogramSize[2]):
 										with counter_lock:
+											# signal that the subtomogram is within bounds
+											bound_status = 'valid'
 											# cut the tomogram
 											subby = tomogram.data[z:(bound[0] + 1), y:(bound[1] + 1), x:(bound[2] + 1)]
 											# invert contrast if selected
@@ -1549,20 +1578,36 @@ class Tabs(TabbedPanel):
 											with mrcfile.open(output_file, 'r+', permissive=True) as mrc:
 												mrc.voxel_size = pixelsize[0]
 									else:
-										print (f'Extraction with specified box size exceeds tomogram borders. Not extracted: {output_file} at center position {xpos}, {ypos}, {zpos}')
-
-								# add the row to the new dataframe
-								with counter_lock:
-									newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
-
-								# save the coordinates for the .coords file			
+										# signal that the subtomogram is out of bounds
+										bound_status = 'invalid'
+								
+								# get the subtomogram name
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
-								with counter_lock:
-									with open(directory + '/' + subName + '_' + current_time + '_.coords', 'a') as file_opt:
-										file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
 
-								# print extracted coordinate position
-								print(f'Re-extracted subtomogram {output_file} at center position {xpos}, {ypos}, {zpos}')
+								# add the row to the new dataframe - based on the bound status
+								with counter_lock:
+									# add the row to the new dataframe if subtomogram is within bounds
+									if bound_status == 'valid':
+										# add the row to the new dataframe
+										newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
+										# add the coordinates to the .coords file
+										with open(directory + '/' + subName + '_' + current_time + '_.coords', 'a') as file_opt:
+											file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
+										# print extracted coordinate position
+										print(f'[VALID BOUNDS] Re-extracted subtomogram {output_file} at center position {xpos}, {ypos}, {zpos}')
+									# do not add the row to the new dataframe if subtomogram is out of bounds
+									elif bound_status == 'invalid':
+										# print that the subtomogram is out of bounds
+										print (f'[INVALID BOUNDS] Extraction with specified box size exceeds tomogram borders. Not extracted: {output_file} at center position {xpos}, {ypos}, {zpos}')
+									# if bounds were not checked (e.g. star file only) then warn the user but still add the row to the new dataframe
+									else:
+										# add the row to the new dataframe
+										newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
+										# add the coordinates to the .coords file
+										with open(directory + '/' + subName + '_' + current_time + '_.coords', 'a') as file_opt:
+											file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
+										# print a warning that the subtomogram bounds were not checked
+										print(f'[UNCHECKED BOUNDS WARNING] Extraction bounds not checked for {output_file} at center position {xpos}, {ypos}, {zpos}')
 							
 							# add the boxsize to the cmm file as a comment (once per cmm file)
 							boxsize_comment = f'boxsize: {boxsize}'

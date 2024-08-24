@@ -956,7 +956,7 @@
 							Button:
 								background_normal: 'bin/file_icon.png'
 								on_release: root.show_tomo()
-								size_hint: .1, .75
+								size_hint: .1, .6
 								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
 								hint_text: 'Enter/Choose Tomogram Path'
@@ -985,7 +985,7 @@
 								background_normal: 'bin/file_icon.png'
 								id: tomocoordbutton
 								on_release: root.show_tomocoords()
-								size_hint: .1, .75
+								size_hint: .1, .6
 								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
 								hint_text: 'Enter/Choose Coords Path .coords'
@@ -1014,7 +1014,7 @@
 								background_normal: 'bin/file_icon.png'
 								id: vectorStartButton
 								on_release: root.show_startvec()
-								size_hint: .1, .75
+								size_hint: .1, .6
 								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
 								hint_text: 'Enter/Choose Vector Start Coords .coordsM (leave blank if not available)'
@@ -1043,7 +1043,7 @@
 								background_normal: 'bin/file_icon.png'
 								id: vectorEndButton
 								on_release: root.show_endvec()
-								size_hint: .1, .75
+								size_hint: .1, .6
 								pos_hint: {'center_x': .5, 'center_y': .5}
 							TextInput:
 								hint_text: 'Enter/Choose Vector End (center) Coords .coordsC (leave blank if not available)'
@@ -1868,7 +1868,7 @@
 				orientation: 'vertical'
 				size_hint_y: .125
 				pos_hint: {'center_x': .5, 'center_y': .5}
-				Label: 
+				Label:
 					text: 'Filter Subtomograms'
 					color: (0,0,0,1)
 					font_size: 35
@@ -1882,51 +1882,47 @@
 					pos_hint: {'center_x': .5, 'center_y': .5}
 			BoxLayout:
 				orientation: 'horizontal'
-				size_hint: .7, .15
-				pos_hint: {'center_x': .6, 'center_y': .5}
-				BoxLayout:
-					orientation: 'horizontal'
-					size_hint: .55, .2
-					pos_hint: {'center_x': .6, 'center_y': .5}
-					CheckBox:
-						group: 'g6'
-						id: starfilter
-						state: 'down'
-						on_active: root.mrcWords()
-					Label:
-						text: 'Star File'
-						bold: True
-					Label:
-						size_hint_x: .2
-					CheckBox:
-						group: 'g6'
-						id: mrcfilter
-						state: 'normal'
-						on_active: root.mrcWords()
-					Label:
-						text: 'Subtomogram Directory'
-						bold: True
-					Label:
-						size_hint_x: .35
-					Button:
-						text: 'Choose Mrc Path'
-						on_release: root.show_mrc()
-						background_color: 0, 1.2, 2, .5
-						size_hint: 1.4, 1.3
-						pos_hint: {'center_x': .5, 'center_y': .5}
-			BoxLayout:
-				orientation: 'vertical'
-				size_hint_y: .1
+				size_hint: .45, .1
 				pos_hint: {'center_x': .5, 'center_y': .5}
+				CheckBox:
+					group: 'g6'
+					id: starfilter
+					state: 'down'
+					on_active: root.updateFilterDirectory()
+				Label:
+					text: 'Star File'
+					bold: True
+				Label:
+					size_hint_x: .2
+				CheckBox:
+					group: 'g6'
+					id: mrcfilter
+					state: 'normal'
+					on_active: root.updateFilterDirectory()
+				Label:
+					text: 'Subtomogram Directory'
+					bold: True
+			BoxLayout:
+				orientation: 'horizontal'
+				size_hint: .75, .15
+				pos_hint: {'center_x': .5, 'center_y': .5}
+				Button:
+					background_normal: 'bin/file_icon.png'
+					id: mrcfilterbutton
+					on_release: root.show_mrc()
+					size_hint: .05, .5
+					pos_hint: {'center_x': .5, 'center_y': .5}
+					background_color: (1, 1, 1, .5)
+					disabled: True
 				TextInput:
-					hint_text: 'Enter/Choose Mrc Directory'
-					size_hint: .75, .55
+					hint_text: 'Disabled'
+					size_hint: .85, .55
 					font_size: 25
 					halign: 'center'
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					id: mainmrc
 					multiline: False
-					readonly: False
+					readonly: True
 					cursor_blink: True
 					foreground_color: (0,0,0,1)
 					background_color: (1,1,1,.7)
