@@ -385,12 +385,19 @@ class Tabs(TabbedPanel):
 			self.ids.refPath.hint_text = 'Enter/Choose Ref Path'
 		self.dismiss_popup()
 
+	# function to add a slash to the end of a path
+	def addslash(self, path):
+		if path != '':
+			if path[-1] != '/':
+				path = path + '/'
+		return path
+
 	# save project info
 	def savedata(self):
 		try:
 			self.ids['sigma'] = weakref.ref(Tabs.sigma)
-			if self.ids.save.text[-1] != '/':
-				self.ids.save.text = self.ids.save.text + '/'
+			# add slash to the end of the save path
+			self.ids.save.text = self.addslash(self.ids.save.text)
 			# create text file with saved project data and text inputs
 			save = self.ids.save.text + self.ids.savename.text + '.txt'
 			file_opt = open(save, 'w')
@@ -768,8 +775,8 @@ class Tabs(TabbedPanel):
 		try:
 			self.ids['sigma'] = weakref.ref(Tabs.sigma)
 			direct = self.ids.mainmrc.text
-			if self.ids.mainmrc.text[-1] != '/':
-				direct = self.ids.mainmrc.text + '/'
+			# add slash to the end of the save path
+			self.ids.mainmrc.text = self.addslash(self.ids.mainmrc.text)
 			wienerbutton = self.ids.wienerbutton.active
 			gaussianbutton = self.ids.gaussianbutton.active
 			angpix = float(self.ids.A1.text)
@@ -800,8 +807,16 @@ class Tabs(TabbedPanel):
 				file.writelines('Envelope:' + '\t' + self.ids.envelope.text + '\n')
 				file.writelines('BFactor:' + '\t' + self.ids.bfactor.text + '\n')
 
+			# check if at least one option is selected
 			if wienerbutton == False and gaussianbutton == False:
-				print("At least one option needs to be selected.")
+				print("At least one filter option needs to be selected.")
+				return
+
+			# check that at least one directory option is selected
+			if mrcButton == False and starButton == False:
+				print("At least one directory option needs to be selected.")
+				return
+
 			# wiener
 			if wienerbutton == True:
 				if starButton:
@@ -1101,14 +1116,10 @@ class Tabs(TabbedPanel):
 				listName = self.ids.mainstarfilt.text
 			else:
 				listName = self.ids.mainstar.text
-			# subtomo directory
-			direct = self.ids.mainsubtomo.text
-			if self.ids.mainsubtomo.text[-1] != '/':
-				direct = self.ids.mainsubtomo.text + '/'
-			# cmm directory
-			cmm_direct = self.ids.maincmm.text
-			if self.ids.maincmm.text[-1] != '/':
-				cmm_direct = self.ids.maincmm.text + '/'
+			# subtomo directory (add slash to the end of the path)
+			direct = self.addslash(self.ids.mainsubtomo.text)
+			# cmm directory (add slash to the end of the path)
+			cmm_direct = self.addslash(self.ids.maincmm.text)
 			pxsz = float(self.ids.A1.text)
 			curindex = int(self.ids.index.text)
 			self.ids.pickcoordtext.text = 'Please wait. Opening ChimeraX.'
@@ -1318,8 +1329,8 @@ class Tabs(TabbedPanel):
 		direct = self.ids.mainsubtomo.text
 		cmm_direct = self.ids.maincmm.text
 		angpix = float(self.ids.A1.text)
-		if self.ids.mainsubtomo.text[-1] != '/':
-				direct = self.ids.mainsubtomo.text + '/'
+		# add slash to the end of the save path
+		self.ids.mainsubtomo.text = self.addslash(self.ids.mainsubtomo.text)
 
 		# set directory path
 		directory = cmm_direct
@@ -1721,10 +1732,8 @@ class Tabs(TabbedPanel):
 	def subtraction(self):
 		mask = self.ids.maskpath.text
 		starf = self.ids.mainstar.text
-		if self.ids.mainsubtomo.text[-1] != '/':
-			direc = self.ids.mainsubtomo.text + '/'
-		else:
-			direc = self.ids.mainsubtomo.text
+		# add slash to the end of the save path
+		direc = self.addslash(self.ids.mainsubtomo.text)
 		pxsz = float(self.ids.A1.text)
 		filter = self.ids.filterbackground.active
 		grow = float(self.ids.blurrate.text)
@@ -1846,10 +1855,8 @@ class Tabs(TabbedPanel):
 	# rotate by star file
 	def rotate(self):
 		starf = self.ids.mainstar.text
-		if self.ids.mainsubtomo.text[-1] != '/':
-			dir = self.ids.mainsubtomo.text + '/'
-		else:
-			dir = self.ids.mainsubtomo.text
+		# add slash to the end of the path
+		dir = self.addslash(self.ids.mainsubtomo.text)
 		boxsize = float(self.ids.px1.text)
 		pxsz = float(self.ids.A1.text)
 		shifton = self.ids.applyTranslations.active
@@ -1867,10 +1874,8 @@ class Tabs(TabbedPanel):
 	def manualrotate(self):
 		self.ids.noaxis.text = " "
 		starf = self.ids.mainstar.text
-		if self.ids.mainsubtomo.text[-1] != '/':
-			dir = self.ids.mainsubtomo.text + '/'
-		else:
-			dir = self.ids.mainsubtomo.text
+		# add slash to the end of the path
+		dir = self.addslash(self.ids.mainsubtomo.text)
 		boxsize = float(self.ids.px1.text)
 		pxsz = float(self.ids.A1.text)
 		shifton = False
@@ -2241,10 +2246,8 @@ class Tabs(TabbedPanel):
 	def plotBack(self):
 		subtomoDirect = self.ids.mainsubtomo.text
 		starf = self.ids.mainstar.text
-		if self.ids.refPath.text[-1] != '/':
-			classPath = self.ids.refPath.text + '/'
-		else:
-			classPath = self.ids.refPath.text
+		# add slash to the end of the reference path
+		classPath = self.addslash(self.ids.refPath.text)
 		classBasename = self.ids.refBasename.text
 		angpix = float(self.ids.A1.text)
 		bxsz = float(self.ids.px1.text)
@@ -2355,10 +2358,8 @@ class Tabs(TabbedPanel):
 		newSubtomo = self.ids.newSubtomoName.text
 		csvFile = self.ids.subCsvFile.text
 		chimeraDir = self.ids.chimera_path.text
-		if self.ids.subRefPath.text[-1] != '/':
-			classPath = self.ids.subRefPath.text + '/'
-		else:
-			classPath = self.ids.subRefPath.text
+		# add slash to the end of the reference path
+		classPath = self.addslash(self.ids.subRefPath.text)
 		classBasename = self.ids.subRefBasename.text
 
 		# get the models in the class that match basename
