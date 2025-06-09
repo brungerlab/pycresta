@@ -137,7 +137,11 @@ class Tabs(TabbedPanel):
 		starfpath = filename.strip()
 		if len(starfpath) != 0:
 			if starfpath.endswith('.star') == False:
+<<<<<<< Local Changes
+				self.ids.mainstar.hint_text = 'Not a ".star" file — Enter/Choose Unfiltered Star File Path'
+=======
 				self.ids.mainstar.hint_text = 'Not a ".star" file - Enter/Choose Unfiltered Star File Path'
+>>>>>>> External Changes
 			else:
 				self.ids.mainstar.text = starfpath
 				self.ids.mainsubtomo.text = "/".join(self.ids.mainstar.text.split("/")[:-1]) + '/'
