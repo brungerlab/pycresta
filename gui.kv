@@ -508,7 +508,7 @@
 	size_hint: 1, 1
 	pos_hint: {'center_x': .5, 'center_y': .5}
 	do_default_tab: False
-
+#Master key setup
 	TabbedPanelItem:
 		text: 'Master Key'
 		BoxLayout:
@@ -532,16 +532,19 @@
 					text: 'Px size (A)'
 				Label:
 					text: 'Threads/CPU Count'
+				#This is the boxsize input (ID = px1)
 				TextInput:
 					id: px1
 					input_filter: 'float'
 					text: '256'
 					multiline: False
+				#Pixelsize input (ID = A1)
 				TextInput:
 					id: A1
 					input_filter: 'float'
 					text: '2.62'
 					multiline: False
+				#Multithreading input (ID = CPU)
 				TextInput:
 					id: CPU
 					input_filter: 'int'
@@ -770,6 +773,48 @@
 							size_hint_y: .06
 					BoxLayout:
 						orientation: 'vertical'
+						size_hint_y: .3
+						canvas:
+							Color:
+								rgba: 1, 1, 1, .6
+							Rectangle:
+								pos: self.pos
+								size: self.size
+						Label:
+							text: 'Cmm directory'
+							color: (0,0,0,1)
+							font_size: 30
+							bold: True
+							size_hint: .6, .1
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						BoxLayout:
+							orientation: 'horizontal'
+							size_hint: .9, .25
+							pos_hint: {'center_x': .5, 'center_y': .5}
+							TextInput:
+								text: 'Choose Cmm Directory'
+								size_hint: 1.5, .55
+								font_size: 25
+								halign: 'center'
+								pos_hint: {'center_x': .5, 'center_y': .5}
+								id: mainsubtomo
+								multiline: True
+								readonly: True
+								cursor_blink: False
+								foreground_color: (0,0,.6,1)
+								background_color: (1,1,1,0)
+								cursor_color: (1,1,1,0)
+								selection_color: (1,1,1,0)
+						Button:
+							background_color: 0, 1.2, 2, .5
+							text: 'Choose Cmm Path'
+							on_release: root.show_subtomo()
+							size_hint: .45, .12
+							pos_hint: {'center_x': .5, 'center_y': .5}
+						Label:
+							size_hint_y: .06
+					BoxLayout:
+						orientation: 'vertical'
 						size_hint_y: .35
 						canvas:
 							Color:
@@ -875,7 +920,7 @@
 							background_color: 0.2, 0.6, 0.2, .55
 						Label:
 							size_hint_y: .1
-
+#Extraction gui
 	TabbedPanelItem:
 		text: 'Extraction'
 		BoxLayout:
@@ -1082,7 +1127,7 @@
 					Label:
 						size_hint_y: .025
 
-
+#Sub-extraction/re-extraction gui
 	TabbedPanelItem:
 		text: 'Sub-Extraction'
 		BoxLayout:
@@ -1308,37 +1353,31 @@
 						text: 'Star File Only'
 						bold: True
 						color: (0,0,0,1)
+				#JL added 8/20/2024 added checkbox to continue extraction with ID = reextractCont
 				BoxLayout:
 					orientation: 'horizontal'
 					size_hint: .2, .1
 					pos_hint: {'center_x': .475, 'center_y': .5}
 					CheckBox:
-						state: 'normal'
-						id: reextractOverwrite
+						state: 'down'
+						id: reextractCont
 					Label:
 						text: 'Overwrite Files'
 						bold: True
 						color: (0,0,0,1)
+				#JL added 8/20/2024 added text box for reextraction boxsize change with ID = newboxsize
 				BoxLayout:
 					orientation: 'horizontal'
-					size_hint: .2, .1
-					pos_hint: {'center_x': .5075, 'center_y': .5}
+					size_hint: .25, .1
+					pos_hint: {'center_x': .5, 'centery_y': .5}
 					TextInput:
+						id: newboxsize
+						size_hint_x: .2
+						input_filter: 'float'
 						text: '256'
 						multiline: False
-						input_filter: 'float'
-						cursor_color: (0,0,0,1)
-						halign: 'center'
-						color: (1,1,1,1)
-						bold: True
-						size_hint: .25, .75
-						pos_hint: {'center_x': .5, 'center_y': .5}
-						id: newboxsize
 					Label:
-						text: ''
-						size_hint_x: .15
-					Label:
-						text: 'Subextraction Boxsize'
+						text: 'Sub-Extraction Boxsize'
 						bold: True
 						color: (0,0,0,1)
 				BoxLayout:
@@ -1882,13 +1921,17 @@
 					pos_hint: {'center_x': .5, 'center_y': .5}
 			BoxLayout:
 				orientation: 'horizontal'
-				size_hint: .45, .1
-				pos_hint: {'center_x': .5, 'center_y': .5}
+				size_hint: .7, .15
+				pos_hint: {'center_x': .6, 'center_y': .5}
+				BoxLayout:
+					orientation: 'horizontal'
+					size_hint: .55, .2
+					pos_hint: {'center_x': .6, 'center_y': .5}
 				CheckBox:
 					group: 'g6'
 					id: starfilter
 					state: 'down'
-					on_active: root.updateFilterDirectory()
+					on_active: root.updateFilterDirectory() #I have root.mrcWords()
 				Label:
 					text: 'Star File'
 					bold: True
@@ -1898,31 +1941,31 @@
 					group: 'g6'
 					id: mrcfilter
 					state: 'normal'
-					on_active: root.updateFilterDirectory()
+					on_active: root.updateFilterDirectory() #root.mrcWords()
 				Label:
 					text: 'Subtomogram Directory'
 					bold: True
-			BoxLayout:
-				orientation: 'horizontal'
-				size_hint: .75, .15
-				pos_hint: {'center_x': .5, 'center_y': .5}
+				Label:
+					size_hint_x: .35
 				Button:
-					background_normal: 'bin/file_icon.png'
-					id: mrcfilterbutton
+					text: 'Choose Mrc Path'
 					on_release: root.show_mrc()
-					size_hint: .05, .5
+					background_color: 0, 1.2, 2, .5
+					size_hint: 1.4, 1.3
 					pos_hint: {'center_x': .5, 'center_y': .5}
-					background_color: (1, 1, 1, .5)
-					disabled: True
+			BoxLayout:
+				orientation: 'vertical'
+				size_hint_y: .1
+				pos_hint: {'center_x': .5, 'center_y': .5}
 				TextInput:
-					hint_text: 'Disabled'
-					size_hint: .85, .55
+					hint_text: 'Enter/Choose Mrc Directory'
+					size_hint: .75, .55
 					font_size: 25
 					halign: 'center'
 					pos_hint: {'center_x': .5, 'center_y': .5}
 					id: mainmrc
 					multiline: False
-					readonly: True
+					readonly: False
 					cursor_blink: True
 					foreground_color: (0,0,0,1)
 					background_color: (1,1,1,.7)

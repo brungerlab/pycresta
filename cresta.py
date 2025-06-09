@@ -447,7 +447,7 @@ class Tabs(TabbedPanel):
 		except IndexError:
 			print('Enter a project directory and name')
 
-	# load existing project information
+	# load existing project information from a project file
 	def pulldata(self):
 		try:
 			self.ids['sigma'] = weakref.ref(Tabs.sigma)
@@ -565,7 +565,7 @@ class Tabs(TabbedPanel):
 			text = Label(text="Please select a filter")
 			self.ids.gaussian_row.add_widget(text)
 	
-	# tomogram extraction
+	# tomogram extraction. Here a tomogram may be extracted from a text file containing 3 column coordinates. Additional files containing other points may optionally be used to generate rotation vectors. Files need to match in length
 	def extract(self):
 		# Recursive Batch Extraction
 		if self.ids.tomoFolder.active:
@@ -1325,7 +1325,7 @@ class Tabs(TabbedPanel):
 		self.ids.notesave.text = 'Saved'
 		print('Saved to ' + direct + file_path)
 		return
-
+#This IS THE SUB-EXTRACTION/RE-EXTRACTION PORTION
 	# re-extraction from picked coordinates
 	def reextraction(self):
 		# initialize variables
@@ -1333,8 +1333,8 @@ class Tabs(TabbedPanel):
 		direct = self.ids.mainsubtomo.text
 		cmm_direct = self.ids.maincmm.text
 		angpix = float(self.ids.A1.text)
-		# add slash to the end of the save path
-		self.ids.mainsubtomo.text = self.addslash(self.ids.mainsubtomo.text)
+		if self.ids.mainsubtomo.text[-1] != '/':
+				direct = self.ids.mainstubomo.tex + '/'
 
 		# set directory path
 		directory = cmm_direct
@@ -1436,9 +1436,12 @@ class Tabs(TabbedPanel):
 							tree = ET.parse(cmmfile)
 							cmroot = tree.getroot()
 
-							# get boxsize from subtomogram
+							# get boxsize from subtomogram 
 							boxsize = []
 							newbox = []
+							# Get boxsize from master key [NEED TO MODIFY THIS TO ADD A TEXT BOX THAT ALLOWS THE EXTRACTION TO BE PERFORMED WITH A DEFINED BOXSIZE WITHIN THIS TAB, PREFILLED WITH MASTERKEY VALUE]
+							newbox = float(self.ids.newboxsize.text)
+							newbox = [newbox, newbox, newbox]
 							## fix pixel size grabbing from header ##
 							pixelsize = []
 							with counter_lock:
@@ -1450,7 +1453,7 @@ class Tabs(TabbedPanel):
 									pixelsize.append(round(float(mrc.voxel_size.y), 2))
 									pixelsize.append(round(float(mrc.voxel_size.z), 2))
 
-							# temporary fix for pixel size
+							# temporary fix for pixel size [CURRENTLY PIXELSIZE IS NOT CORRECTLY WRITEEN TO MRC JL 8/20/2024]
 							pixelsize = [angpix, angpix, angpix]
 
 							# grabbing box size from subextraction tab
@@ -1475,6 +1478,8 @@ class Tabs(TabbedPanel):
 								# get the center of mass shift
 								cms = (np.array(boxsize)/2 - cms) / pixelsize[0]
 
+								# FOR DEBUGGING
+								print(f'boxsize: {newbox[0]}')
 								# calculate the new shift
 								new_shift = [round(e) - int(cms[c]) for c,e in enumerate(opXYZ)]
 
@@ -1595,6 +1600,7 @@ class Tabs(TabbedPanel):
 									else:
 										# signal that the subtomogram is out of bounds
 										bound_status = 'invalid'
+										print ('Extraction with specified box size exceeds tomogram borders. Not extracted: ' + name + ' at center position ', xposarray[i],yposarray[i],zposarray[i])
 								
 								# get the subtomogram name
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
