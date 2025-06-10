@@ -1476,7 +1476,7 @@ class Tabs(TabbedPanel):
 								])
 
 								# get the center of mass shift
-								cms = (np.array(boxsize)/2 - cms) / pixelsize[0]
+								cms = (np.array(boxsize)/2 - cms) #/ pixelsize[0] 12_13_2024 JL
 
 								# FOR DEBUGGING
 								print(f'boxsize: {newbox[0]}')
@@ -1487,14 +1487,14 @@ class Tabs(TabbedPanel):
 								xpos = int(new_shift[0])
 								ypos = int(new_shift[1])
 								zpos = int(new_shift[2])
-								x = xpos - boxsize[0]/2
-								y = ypos - boxsize[1]/2
-								z = zpos - boxsize[2]/2
+								x = newbox[0]/2 - xpos
+								y = newbox[1]/2 - ypos
+								z = newbox[2]/2 - zpos
 								# calculate bounds
 								bound = np.zeros(3)
-								bound[0] = z + newbox[2] - 1
-								bound[1] = y + newbox[1] - 1
-								bound[2] = x + newbox[0] - 1
+								bound[0] = z + (boxsize[2] - newbox[2]) - 1
+								bound[1] = y + (boxsize[1] - newbox[1]) - 1
+								bound[2] = x + (boxsize[0] - newbox[0]) - 1
 								# rounding
 								bound = np.round(bound).astype(int)
 								z = np.round(z).astype(int)
@@ -1504,9 +1504,15 @@ class Tabs(TabbedPanel):
 								# set the output subtomogram name using the original subtomogram name with the counter
 								def get_incremented_filename(opf, prefix):
 									with counter_lock:
+										#Check if prefix exists in the global counter
+										if prefix not in global_counter:
+											global_counter_[prefix] = 1
+											print(f"Initialized counter for {prefix}")
+										#increment the global counter
 										current_count = global_counter[prefix]
-										global_counter[prefix] += 1
+										print(f"Current counter for prefix '{prefix}'")
 										counter_str = str(current_count).zfill(6)
+										global_counter[prefix += 1]
 									
 									# replace the last six digits while preserving preceding digits
 									def replace_last_six_digits(match):
@@ -1517,7 +1523,9 @@ class Tabs(TabbedPanel):
 									return subtomo
 
 								# extract the prefix of the filename (before the last 6 digits)
-								prefix_match = re.match(r'(.+?)(\d{6})(?=\D*$)', opf)
+								# Changed 1/13/2025
+								combined_prefix = os.path.join(opd, opf)
+								prefix_match - re.match(r'(.+?)(\d{6})(?=\D*$)', combined_prefix)
 								if prefix_match:
 									prefix = prefix_match.group(1)
 								else:
@@ -1611,8 +1619,8 @@ class Tabs(TabbedPanel):
 									if bound_status == 'valid':
 										# add the row to the new dataframe
 										newDF['data'] = pd.concat([newDF['data'], pd.DataFrame([row])])
-										# add the coordinates to the .coords file
-										with open(directory + '/' + subName + '_' + current_time + '_.coords', 'a') as file_opt:
+										# add the coordinates to the .coords file #Changed 1/22/2025
+										with open(root + '/' + subName + '_' + current_time + '_.coords', 'a') as file_opt:
 											file_opt.writelines(f'{xpos} {ypos} {zpos}\n')
 										# print extracted coordinate position
 										print(f'[VALID BOUNDS] Re-extracted subtomogram {output_file} at center position {xpos}, {ypos}, {zpos}')
