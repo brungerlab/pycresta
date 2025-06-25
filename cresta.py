@@ -137,11 +137,7 @@ class Tabs(TabbedPanel):
 		starfpath = filename.strip()
 		if len(starfpath) != 0:
 			if starfpath.endswith('.star') == False:
-<<<<<<< Local Changes
 				self.ids.mainstar.hint_text = 'Not a ".star" file — Enter/Choose Unfiltered Star File Path'
-=======
-				self.ids.mainstar.hint_text = 'Not a ".star" file - Enter/Choose Unfiltered Star File Path'
->>>>>>> External Changes
 			else:
 				self.ids.mainstar.text = starfpath
 				self.ids.mainsubtomo.text = "/".join(self.ids.mainstar.text.split("/")[:-1]) + '/'
@@ -1508,11 +1504,12 @@ class Tabs(TabbedPanel):
 										if prefix not in global_counter:
 											global_counter_[prefix] = 1
 											print(f"Initialized counter for {prefix}")
+										
 										#increment the global counter
 										current_count = global_counter[prefix]
 										print(f"Current counter for prefix '{prefix}'")
 										counter_str = str(current_count).zfill(6)
-										global_counter[prefix += 1]
+										global_counter[prefix] += 1
 									
 									# replace the last six digits while preserving preceding digits
 									def replace_last_six_digits(match):
