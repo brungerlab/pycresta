@@ -1502,7 +1502,7 @@ class Tabs(TabbedPanel):
 									with counter_lock:
 										#Check if prefix exists in the global counter
 										if prefix not in global_counter:
-											global_counter_[prefix] = 1
+											global_counter[prefix] = 1
 											print(f"Initialized counter for {prefix}")
 										
 										#increment the global counter
@@ -1522,7 +1522,7 @@ class Tabs(TabbedPanel):
 								# extract the prefix of the filename (before the last 6 digits)
 								# Changed 1/13/2025
 								combined_prefix = os.path.join(opd, opf)
-								prefix_match - re.match(r'(.+?)(\d{6})(?=\D*$)', combined_prefix)
+								prefix_match = re.match(r'(.+?)(\d{6})(?=\D*$)', combined_prefix)
 								if prefix_match:
 									prefix = prefix_match.group(1)
 								else:
@@ -1605,8 +1605,8 @@ class Tabs(TabbedPanel):
 									else:
 										# signal that the subtomogram is out of bounds
 										bound_status = 'invalid'
-										print ('Extraction with specified box size exceeds tomogram borders. Not extracted: ' + name + ' at center position ', xposarray[i],yposarray[i],zposarray[i])
-								
+										print(f'Extraction with specified box size exceeds tomogram borders. Not extracted: {subtomo} at center position {xpos[i]}, {ypos[i]}, {zpos[i]}')
+
 								# get the subtomogram name
 								subName = row['rlnMicrographName'].split('/')[-1].replace('.mrc','')
 
@@ -1624,7 +1624,7 @@ class Tabs(TabbedPanel):
 									# do not add the row to the new dataframe if subtomogram is out of bounds
 									elif bound_status == 'invalid':
 										# print that the subtomogram is out of bounds
-										print (f'[INVALID BOUNDS] Extraction with specified box size exceeds tomogram borders. Not extracted: {output_file} at center position {xpos}, {ypos}, {zpos}')
+										print(f'[INVALID BOUNDS] Extraction with specified box size exceeds tomogram borders. Not extracted: {output_file} at center position {xpos}, {ypos}, {zpos}')
 									# if bounds were not checked (e.g. star file only) then warn the user but still add the row to the new dataframe
 									else:
 										# add the row to the new dataframe
