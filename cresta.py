@@ -271,20 +271,23 @@ class Tabs(TabbedPanel):
 			self.ids.mainmrc.hint_text = 'Enter/Choose Mrc Directory'
 			self.ids.mainmrc.text = ''
 			self.ids.mainmrc.readonly = False
-			self.ids.mrcfilterbutton.background_color = (1, 1, 1, 1)
-			self.ids.mrcfilterbutton.disabled = False
+			self.ids.mainmrc.cursor_blink = True
+			self.ids.mrcfilter.background_color = (1, 1, 1, 1)
+			# self.ids.mrcfilter.disabled = False
 		elif self.ids.starfilter.active == True:
 			self.ids.mainmrc.hint_text = 'Disabled'
 			self.ids.mainmrc.text = ''
 			self.ids.mainmrc.readonly = True
-			self.ids.mrcfilterbutton.background_color = (1, 1, 1, .5)
-			self.ids.mrcfilterbutton.disabled = True
+			self.ids.mainmrc.cursor_blink = False
+			self.ids.mrcfilter.background_color = (1, 1, 1, .5)
+			# self.ids.mrcfilter.disabled = True
 		else:
 			self.ids.mainmrc.hint_text = 'Pick Either Star File or Subtomogram Directory Filtering'
 			self.ids.mainmrc.text = ''
 			self.ids.mainmrc.readonly = True
-			self.ids.mrcfilterbutton.background_color = (1, 1, 1, .5)
-			self.ids.mrcfilterbutton.disabled = True
+			self.ids.mainmrc.cursor_blink = False
+			self.ids.mrcfilter.background_color = (1, 1, 1, .5)
+			# self.ids.mrcfilter.disabled = True
 
 	# tomogram path save
 	def show_tomo(self):
