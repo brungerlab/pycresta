@@ -778,8 +778,8 @@ class Tabs(TabbedPanel):
 		try:
 			self.ids['sigma'] = weakref.ref(Tabs.sigma)
 			direct = self.ids.mainmrc.text
-			# add slash to the end of the save path
-			self.ids.mainmrc.text = self.addslash(self.ids.mainmrc.text)
+			if self.ids.mainmrc.text:
+				direct = Path(self.ids.mainmrc.text) #formerly self.ids.mainmrc.text = self.addslash(self.ids.mainmrc.text) (sept_3_2025) 
 			wienerbutton = self.ids.wienerbutton.active
 			gaussianbutton = self.ids.gaussianbutton.active
 			angpix = float(self.ids.A1.text)
