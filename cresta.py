@@ -24,6 +24,7 @@ import starfile
 from scipy.spatial.transform import Rotation as R
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+from pathlib import Path
 
 #import tom.py
 import tom
@@ -899,12 +900,12 @@ class Tabs(TabbedPanel):
 
 				elif mrcButton:
 					# create folder
-					filterout = direct + 'filtered/'
+					filterout = direct / 'filtered/'
 					if os.path.exists(filterout) == False:
 						os.mkdir(filterout)
 					
 					# create project text file
-					save = direct + 'filtered/wienerSave.txt'
+					save = direct / 'filtered/wienerSave.txt'
 					file_opt = open(save, 'w')
 					file_opt.writelines('MrcPath:' + '\t' + self.ids.mainmrc.text + '\n')
 					saveTxt(file_opt)
