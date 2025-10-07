@@ -1832,13 +1832,13 @@ class Tabs(TabbedPanel):
 					with mrcfile.open(newMask, 'r+') as mrc:
 						mrc.voxel_size = angpix
 				self.ids.maskwarning.text = ''
-			except ValueError:
+			except Exception as e:
 				self.ids.maskwarning.text = 'Filename already exists'
 				
 				print(f"All masks created in {mask_output_dir}")
 				self.ids.maskwarning.text = f'Created {len(df_maskCSV)} masks successfully'
 				
-			except ValueError:
+			except Exception as e:
 				self.ids.maskwarning.text = f'Error: {str(e)}'
 				traceback.print_exc()
 				
