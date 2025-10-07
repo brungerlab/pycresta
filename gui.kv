@@ -1412,6 +1412,7 @@
 						pos: self.pos
 						size: self.size
 				spacing: 0, 18
+				#Original make mask button section
 				BoxLayout:
 					orientation: 'vertical'
 					Label:
@@ -1524,6 +1525,83 @@
 								size_hint_y: .3
 					Label:
 						size_hint_y: .05
+				# New mask from CSV section
+				BoxLayout:
+					orientation: 'vertical'
+					size_hint_y: 1.2
+					Label:
+						size_hint_y: .05
+					BoxLayout:
+						canvas:
+							Color:
+								rgba: .5, .5, .5, .4
+							Rectangle:
+								pos: self.pos
+								size: self.size
+							orientation: 'vertical'
+							spacing: 10
+							size_hit: .9, 1
+							pos_hint: {'center_x': .5}
+							
+							Label:
+								text: 'Create masks from CSV'
+								color: (0,0,0,1)
+								font_size: 30
+								bold: True
+								size_hint_y: .4
+							
+							Label:
+								text: 'CSV with columns: filename, min_avg_gap_10_40_px, Tomo_dataset'
+								color: (0,0,0,1)
+								font_size: 18
+								size_hint_y: .3
+							
+							BoxLayout:
+								orientation: 'horizontal'
+								szie_hint: .95, .6
+								pos_hint: {'center_x': .5}
+								spacing: 10
+								
+							Label:
+								text: 'CSV Path:'
+								size_hint_x:.2
+							
+							TextInput:
+								id: csv_mask_path
+								hint_text: 'Enter/Choose CSV with particle heights and datasets'
+								multiline: False
+								size_hint_x: .65
+								cursor_color: (0.0.0.1)
+								background_color: (1,1,1,.7)
+								
+							Button:
+								background_normal: 'bin/file_icon.png'
+								on_release: root.browse_csv_for_masks()
+								size_hint_x: .1
+							
+							Label:
+								text: 'Uses Radius and Vertical translation from Manual section above'
+								color: (.6,0,6,1)
+								font_size: 16
+								size_hint_y: .3
+							
+							Button: 
+								background_color: 0, 0, 1, .7
+								text: 'Create Masks from CSV'
+								on_release: root.create_cylinder_masks_from_csv_with_output()
+								size_hint: .4, .6
+								pos_hint: {'center_x': .5}
+							
+							Label: 
+								text: ''
+								color: (0.0,.6,1)
+								font_size: 18
+								size_hint_y: .3
+								id: csv_mask_status
+						
+						Label:
+							size_hint_y: .05
+				# 3D Signal Subtraction section
 				BoxLayout:
 					orientation: 'horizontal'
 					size_hint_y: 1.4

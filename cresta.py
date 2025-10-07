@@ -1747,6 +1747,103 @@ class Tabs(TabbedPanel):
 
 		return
 
+	#CSV file browser
+	def browse_csv_for_masks(self):
+		content = LoadDialog(load=self.load_csv_for_masks, cancel=self.dismiss_popup)
+		#Filter to show only CSV files
+		content.ids.filechooser.filters = ['*.csv']
+		self._popup = Popup(title="Load CSV File for Mask Creation",
+			content=content,
+			size_hint=(0.9, 0.9))
+		self._popup.open()
+		
+	# Create mask from CSV
+	def load_csv_for_mask_creation(csv_path):
+		df_maskCSV = pd.read_csv(csv_path)
+		required_cols = ['filename', 'min_avg_gap_10_40_px', 'Tomo_dataset'] #Need to Tomo_dataset to CSV during generation, ex: 201810XX_MPI 
+		additional_cols = [col for col in required_cols if col not in df_maskCSV.columns]
+		
+		if missing_cols:
+			raise ValueError(f"CSV appears to me missing one of the required columns: {missing_cols}")
+		
+		print(f"Loaded {len(df)} particles from CSV")
+		return df_maskCSV
+		
+	def create_cylinder_mask_fromCSV(self):
+		try:
+			#Get CSV path from GUI
+			csv_path = self.ids.csv_mask_path.text.strip() #needs to be added as input to the gui
+			
+			if not csv_path:
+				self.ids.maskwarning.text = 'Plase specify CSV path, if you did, check it again'
+				return
+			
+			#load the CSV
+			df_maskCSV = load_csv_for_mask_creation(csv_path)
+			
+			#Get parameters from the GUI
+			direct = self.ids.mainsubtomo.text
+			box = int(self.ids.px1.text)
+			angpix = float(self.ids.A1.text)
+			rad = float(self.ids.radius.text)
+			vertshift = float(self.ids.vertical.text)
+			maskmrc = self.ids.maskname.text
+			masktype = self.ids.spinner.text
+			
+			#Temp warning only works for cylinder at the moment
+			if masktype != 'Cylinder':
+				self.ids.maskwarning.text = 'CSV mask creation currently only works with Cylinder type'
+				return
+			
+			#Create output directory if it doesn't exist
+			mask_output_dir = os.path.join(direct, 'csv_masks')
+			os.makedirs(mask_output_dir, exist_ok=True)
+			
+			print(f"Creating {len(df_maskCSV)} cylinder masks in {mask_output_dir}")
+			
+			#Loop through each row in CSV and create a mask. 
+			for idx, row in df_maskCSV.iterrows():
+				filename = row['filename']
+				height = float(row['min_avg_gap_10_40_px'])
+				dataset = row['Tomo_dataset']
+				
+				#Create dataset-specific subdirectory
+				dataset_mask_dir = os.path.join(mask_output_dir, tomo_dataset)
+				os.makedirs(dataset_mask_dir, exist_ok=True)
+				
+				#Create cylinder mask using tom toolbox
+				if masktype == 'Cylinder': #Redundant, but leave so in future can expand to sphere
+					curve = 9649
+					cylinder = tom.cylindermask(np.ones([box, box, box], np.float32), rad, 1, [round(box/2), round(box/2)])
+					sph_top = (tom.spheremask(np.ones([box, box, box], np.float32), curve, [box, box, box], 1, [round(box/2),round(box/2),round(box/2)+vertshift-round(height/2)-curve])-1) * -1
+					sph_bot = (tom.spheremask(np.ones([box, box, box], np.float32), curve, [box, box, box], 1, [round(box/2),round(box/2),round(box/2)+vertshift+round(height/2)+curve])-1) * -1
+					mask_final = cylinder * sph_top * sph_bot
+
+					mask_final = mask_final.astype('float32')
+					
+					#Create mask filename based on the particle name
+					base_name = os.path.splittext(os.path.basename(filename))[0]
+					mask_filename = f"{base_name}_mask.mrc"
+					newMask = os.path.join(dataset_mask_dir, mask_filename)
+					
+					#Save mask
+					print(f"Writing mask {idx+1}/{len(df_maskCSV)}: {tomo_dataset}/{mask_filename} (height={height:.2f})")
+					mrcfile.new(newMask, mask_final) #could add overwrite here.
+					with mrcfile.open(newMask, 'r+') as mrc:
+						mrc.voxel_size = angpix
+				self.ids.maskwarning.text = ''
+			except ValueError:
+				self.ids.maskwarning.text = 'Filename already exists'
+				
+				print(f"All masks created in {mask_output_dir}")
+				self.ids.maskwarning.text = f'Created {len(df_maskCSV)} masks successfully'
+				
+			except ValueError:
+				self.ids.maskwarning.text = f'Error: {str(e)}'
+				traceback.print_exc()
+				
+			return
+
 	# 3d signal subtraction
 	def subtraction(self):
 		mask = self.ids.maskpath.text
